@@ -8,6 +8,14 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { TeamSwitcher } from "./team-switcher";
+import { NavMain } from "./nav-main";
+import {
+  RocketIcon,
+  ChartBarIcon,
+  HouseSimpleIcon,
+} from "@phosphor-icons/react";
+import { SidebarOptInForm } from "./sidebar-opt-in-form";
 // This is sample data.
 const data = {
   user: {
@@ -17,31 +25,33 @@ const data = {
   },
   teams: [
     {
-      name: "Acme Inc",
-      // logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      // logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      // logo: Command,
-      plan: "Free",
+      name: "Billdee",
+
+      plan: "Jatupod Seefood Seefood SeefoodSeefood ",
     },
   ],
   navMain: [
     {
+      title: "หน้าแรก",
+      url: "/",
+      icon: HouseSimpleIcon,
+      isActive: true,
+    },
+    {
+      title: "รายงาน",
+      url: "#",
+      icon: ChartBarIcon,
+      isActive: false,
+    },
+    {
       title: "Playground",
       url: "#",
-      // icon: SquareTerminal,
-      isActive: true,
+      icon: RocketIcon,
+      isActive: false,
       items: [
         {
           title: "History",
-          url: "#",
+          url: "/playground/history",
         },
         {
           title: "Starred",
@@ -53,101 +63,92 @@ const data = {
         },
       ],
     },
-    {
-      title: "Models",
-      url: "#",
-      // icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      // icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      // icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      // icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      // icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
+
+    // {
+    //   title: "Models",
+    //   url: "#",
+    //   // icon: Bot,
+    //   items: [
+    //     {
+    //       title: "Genesis",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Explorer",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Quantum",
+    //       url: "#",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Documentation",
+    //   url: "#",
+    //   // icon: BookOpen,
+    //   items: [
+    //     {
+    //       title: "Introduction",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Get Started",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Tutorials",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Changelog",
+    //       url: "#",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Settings",
+    //   url: "#",
+    //   // icon: Settings2,
+    //   items: [
+    //     {
+    //       title: "General",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Team",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Billing",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Limits",
+    //       url: "#",
+    //     },
+    //   ],
+    // },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offExamples" {...props}>
-      <SidebarHeader>{/* <TeamSwitcher teams={data.teams} /> */}</SidebarHeader>
-      <SidebarContent>
-        {/* <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} /> */}
+      <SidebarHeader>
+        <TeamSwitcher teams={data.teams} />{" "}
+      </SidebarHeader>
+      <SidebarContent className="w-full">
+        <NavMain items={data.navMain} />
+        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
       {/* <SidebarRail /> */}
+      <SidebarFooter>
+        <div className="p-1">
+          <SidebarOptInForm />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -84,7 +84,6 @@ const LoginComponent = () => {
               className="flex flex-col items-center gap-2 font-medium"
             >
               <div className="flex size-20 items-center justify-center rounded-md">
-                {/* <GalleryVerticalEnd className="size-6" /> */}
                 <svg
                   width="96"
                   height="68"
