@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+      {/* <div className="grid auto-rows-min gap-4 md:grid-cols-3">
         <div className="bg-white aspect-video rounded-xl" />
         <div className="bg-white aspect-video rounded-xl" />
         <div className="bg-white aspect-video rounded-xl" />
@@ -53,7 +53,7 @@ export default function Page() {
         <div className="bg-white aspect-video rounded-xl" />
         <div className="bg-white aspect-video rounded-xl" />
         <div className="bg-white aspect-video rounded-xl" />
-      </div>
+      </div> */}
     </div>
   );
 }
