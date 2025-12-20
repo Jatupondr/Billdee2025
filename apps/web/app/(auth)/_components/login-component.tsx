@@ -222,15 +222,14 @@ const LoginComponent = () => {
                             </div>
                           </InputGroupAddon>
                         </InputGroup>
-
-                        <FieldDescription className="text-right">
-                          <a href="#" className="text-sm ">
-                            ลืมรหัสผ่าน?
-                          </a>
-                        </FieldDescription>
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
                         )}
+                        <FieldDescription className="text-right">
+                          <a href="/forgot" className="text-sm ">
+                            ลืมรหัสผ่าน?
+                          </a>
+                        </FieldDescription>
                       </Field>
                     );
                   }}
