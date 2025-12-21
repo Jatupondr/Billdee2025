@@ -20,7 +20,7 @@ export default function MainLayout({
           </div>
 
           {/* Main Content */}
-          <main className="flex flex-1 flex-col bg-[#f4f6f9] dark:bg-[#1a1a1a]">
+          <main className=" flex-1  bg-[#f4f6f9] dark:bg-[#1a1a1a]">
             <div className="p-6">{children}</div>
           </main>
         </SidebarInset>

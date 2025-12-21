@@ -1,5 +1,7 @@
 import { ComponentExample } from "@/components/component-example";
+
 import type { Metadata } from "next";
+import Main from "./_components/main";
 
 export const metadata: Metadata = {
   title: {
@@ -39,21 +41,10 @@ export const metadata: Metadata = {
 };
 export default function Page() {
   return (
-    <div>
-      {/* <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-        <div className="bg-white aspect-video rounded-xl" />
-      </div> */}
-    </div>
+    <>
+      <div className="flex justify-center items-center  min-h-[calc(100vh-60px)] ">
+        <Main />
+      </div>
+    </>
   );
 }

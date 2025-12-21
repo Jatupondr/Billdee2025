@@ -41,8 +41,8 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground px-2 mb-2">
-        Dashboard
+      <SidebarGroupLabel className="text-sx font-normal text-[#f4f6f9] tracking-wider mb-0.5">
+        เมนูหลัก
       </SidebarGroupLabel>
 
       <SidebarGroupContent>
