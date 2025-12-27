@@ -40,24 +40,21 @@ const data = {
       icon: HouseSimpleIcon,
       isActive: true,
     },
-    {
-      title: "รายงาน",
-      url: "#",
-      icon: ChartBarIcon,
-      isActive: false,
-    },
+
     {
       title: "ออกบิล",
       url: "/bill",
       icon: ReceiptIcon,
       isActive: false,
     },
+
     {
-      title: "ขายสินค้า",
-      url: "#",
-      icon: CashRegisterIcon,
+      title: "ตั่งค่าระบบ",
+      url: "/settings",
+      icon: ReceiptIcon,
       isActive: false,
     },
+
     {
       title: "Playground",
       url: "#",

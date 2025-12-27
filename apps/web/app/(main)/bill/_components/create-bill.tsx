@@ -88,22 +88,22 @@ const CreateBill = () => {
     "ร้าน E",
   ] as const;
 
-  const ListTable = ["ลำดับ", "ชื่อรายการ", "จำนวน", "ราคา"] as const;
+  const ListTable = ["ลำดับ", "ชื่อรายการ", "จำนวน", "ต้นทุน", "ราคา"] as const;
 
   return (
     <>
       <Card className="p-4 shadow-md border border-border/50 ">
         <CardHeader>
           <CardTitle className="text-2xl tracking-widest">
-            สร้างบิลใหม่
+            สร้างบิลใหม่ #RE202500001
           </CardTitle>
           <CardDescription className="tracking-wider">
             หากพบปัญหาในการใช้งาน กรุณาติดต่อฝ่ายสนับสนุน
           </CardDescription>
           <CardAction>
-            <Button variant="link" className="tracking-wider cursor-pointer">
-              เลขที่บิล RE202500001
-            </Button>
+            {/* <Button variant="link" className="tracking-wider cursor-pointer">
+              เลขที่บิล
+            </Button> */}
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -174,21 +174,14 @@ const CreateBill = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="mb-2 tracking-widest"
+                className="mb-2 tracking-widest cursor-pointer"
               >
                 เพิ่มสินค้า
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="mb-2 tracking-widest"
-              >
-                เคลียร์สินค้า
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mb-2 tracking-widest"
+                className="mb-2 tracking-widest cursor-pointer"
               >
                 รายการสินค้า
               </Button>
@@ -212,13 +205,15 @@ const CreateBill = () => {
                   <TableCell className="font-normal w-20 text-center text-base">
                     1
                   </TableCell>
-                  <TableCell className="font-medium text-base flex flex-col justify-start">
-                    <p> Wireless Mouse</p>
-                    <div className="text-sm font-normal text-primary/70 mt-1 cursor-copy">
-                      หมายเหตุ:
+                  <TableCell className="font-medium text-base">
+                    <div className="flex flex-col justify-start min-w-0">
+                      <p> Wireless Mouse</p>
+                      <div className="text-sm font-normal text-primary/70 mt-1 cursor-copy">
+                        หมายเหตุ:
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-28">
                     <Input
                       type="number"
                       defaultValue="1"
@@ -226,8 +221,16 @@ const CreateBill = () => {
                       min="0"
                     />
                   </TableCell>
-                  <TableCell className="">
-                    <div className="flex items-center  gap-2">
+                  <TableCell className="w-28">
+                    <Input
+                      type="number"
+                      defaultValue="1"
+                      className="h-10 w-20"
+                      min="0"
+                    />
+                  </TableCell>
+                  <TableCell className="w-80">
+                    <div className="flex items-center gap-2">
                       <Input
                         type="number"
                         defaultValue="299"
@@ -253,7 +256,7 @@ const CreateBill = () => {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={3}>Total</TableCell>
+                  <TableCell colSpan={4}>Total</TableCell>
                   <TableCell className="text-right">$2,500.00</TableCell>
                 </TableRow>
               </TableFooter>
