@@ -40,11 +40,17 @@ const data = {
       icon: HouseSimpleIcon,
       isActive: true,
     },
-
     {
       title: "ออกบิล",
       url: "/bill",
       icon: ReceiptIcon,
+      isActive: false,
+    },
+
+    {
+      title: "สินค้า",
+      url: "/products",
+      icon: CashRegisterIcon,
       isActive: false,
     },
 
@@ -56,7 +62,7 @@ const data = {
     },
 
     {
-      title: "Playground",
+      title: "ลูกค้าและซับพลายเออร์",
       url: "#",
       icon: RocketIcon,
       isActive: false,

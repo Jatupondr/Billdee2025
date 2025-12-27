@@ -16,13 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -33,7 +27,11 @@ import {
   CreditCardIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 const SiteHeader = () => {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const menuContent = (
     <>
       <DropdownMenuGroup className="">
@@ -51,12 +49,25 @@ const SiteHeader = () => {
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive" className="cursor-pointer">
+      <DropdownMenuItem
+        variant="destructive"
+        className="cursor-pointer"
+        onClick={() => {
+          authClient.signOut({
+            fetchOptions: {
+              onSuccess: () => {
+                router.push("/login");
+              },
+            },
+          });
+        }}
+      >
         <SignOutIcon />
         Sign Out
       </DropdownMenuItem>
     </>
   );
+
   const menuLa = (
     <>
       <DropdownMenuGroup className="">
@@ -95,7 +106,7 @@ const SiteHeader = () => {
         </div>
 
         <div className="flex justify-center items-center gap-2">
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger
               render={
                 <Button
@@ -127,27 +138,8 @@ const SiteHeader = () => {
             >
               {menuLa}
             </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className=" cursor-pointer size-9 justify-center px-0"
-                >
-                  <BellIcon className="size-6" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent
-              align="end"
-              side="top"
-              className="w-(--anchor-width) min-w-56"
-            >
-              {menuContent}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
+
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -157,15 +149,19 @@ const SiteHeader = () => {
                 >
                   <Avatar>
                     <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="Shadcn"
+                      src={
+                        session?.user?.image || "https://via.placeholder.com/40"
+                      }
+                      alt={session?.user?.name || "dd"}
                     />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">shadcn</span>
+                    <span className="truncate font-semibold">
+                      {session?.user?.name || "-"}
+                    </span>
                     <span className="text-muted-foreground truncate text-xs">
-                      shadcn@example.com
+                      {session?.user?.email || "-"}
                     </span>
                   </div>
                   <CaretUpDownIcon className="text-muted-foreground ml-auto" />

@@ -26,6 +26,7 @@ import {
   SignInIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export const formSchema = v.object({
   email: v.pipe(
@@ -57,23 +58,67 @@ const LoginComponent = () => {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        toast("You submitted the following values:", {
-          description: (
-            <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-              <code>{JSON.stringify(value, null, 2)}</code>
-            </pre>
-          ),
-          position: "bottom-right",
-          classNames: {
-            content: "flex flex-col gap-2",
+        authClient.signIn.email(
+          {
+            email: value.email.trim(),
+            password: value.password.trim(),
+            callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}`,
+            rememberMe: true,
           },
-          style: {
-            "--border-radius": "calc(var(--radius)  + 4px)",
-          } as React.CSSProperties,
-        });
+          {
+            onSuccess: (data) => {
+              console.log("Login successful:", data);
+
+              if (data) {
+                toast.success("เข้าสู่ระบบสำเร็จ", {
+                  description: "ยินดีต้อนรับเข้าสู่ระบบ",
+                });
+              }
+            },
+            onError: (error) => {
+              toast.error(error.error.message || error.error.statusText, {
+                description: "กรุณาลองใหม่อีกครั้ง",
+              });
+            },
+          }
+        );
+        //   description: (
+        //     <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
+        //       <code>{JSON.stringify(value, null, 2)}</code>
+        //     </pre>
+        //   ),
+        //   position: "bottom-right",
+        //   classNames: {
+        //     content: "flex flex-col gap-2",
+        //   },
+        //   style: {
+        //     "--border-radius": "calc(var(--radius)  + 4px)",
+        //   } as React.CSSProperties,
+        // });
       },
     },
   });
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await authClient.signIn.social(
+        {
+          provider: "google",
+          callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}`,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Successfully signed in with Google");
+          },
+          onError: (error) => {
+            toast.error(error.error.message || "Failed to sign in with Google");
+          },
+        }
+      );
+    } catch (error) {
+      toast.error("An error occurred during sign-in");
+    }
+  };
   return (
     <>
       <div className={cn("flex flex-col gap-6")}>
@@ -254,6 +299,7 @@ const LoginComponent = () => {
           <FieldSeparator>หรือ</FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-1">
             <Button
+              onClick={handleGoogleSignIn}
               variant="outline"
               type="button"
               className="active:scale-95 duration-300 cursor-pointer py-3 px-2 h-11 w-full flex justify-center gap-2"

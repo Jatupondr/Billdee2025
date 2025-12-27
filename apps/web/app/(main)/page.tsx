@@ -42,9 +42,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <>
-      <div className="flex justify-center items-center  min-h-[calc(100vh-60px)] ">
-        <Main />
-      </div>
+      <Main />
     </>
   );
 }

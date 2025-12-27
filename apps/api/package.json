@@ -6,7 +6,11 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@elysiajs/cors": "^1.4.0",
+    "better-auth": "^1.4.9",
+    "cors": "^2.8.5",
+    "elysia": "latest",
+    "mongoose": "^9.0.2"
   },
   "devDependencies": {
     "bun-types": "latest"
