@@ -25,6 +25,7 @@ const sessionSchema = new Schema(
     ipAddress: { type: String },
     userAgent: { type: String },
     userId: { type: String, ref: "User", required: true },
+    activeOrganizationId: { type: String, ref: "Organization" },
   },
   { collection: "session" }
 );
@@ -60,9 +61,66 @@ const verificationSchema = new Schema(
   { collection: "verification" }
 );
 
+const OrganizationSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      lowercase: true,
+      trim: true,
+    },
+    logo: {
+      type: String,
+      default: null,
+    },
+    metadata: {
+      type: Schema.Types.Mixed, // รองรับ object / json ได้
+      default: null,
+    },
+  },
+
+  {
+    collection: "organization",
+    timestamps: true,
+  }
+);
+
+const memberSchema = new Schema(
+  {
+    userId: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["owner", "member"],
+      default: "member",
+    },
+  },
+  {
+    collection: "member",
+    timestamps: true,
+  }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
 const Verification = model("Verification", verificationSchema);
+const Organization = model("Organization", OrganizationSchema);
+const Member = model("Member", memberSchema);
 
-export { User, Session, Account, Verification };
+export { User, Session, Account, Verification, Organization, Member };

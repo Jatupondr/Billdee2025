@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { client } from "./db";
-import { createAuthMiddleware, openAPI } from "better-auth/plugins";
+import { openAPI, organization } from "better-auth/plugins";
+
 export const auth = betterAuth({
   database: mongodbAdapter(client),
   basePath: "/api/auth",
@@ -30,5 +31,5 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
   },
-  plugins: [openAPI()],
+  plugins: [openAPI(), organization()],
 });

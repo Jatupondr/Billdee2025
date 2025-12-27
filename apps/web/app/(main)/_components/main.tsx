@@ -10,20 +10,31 @@ import {
 } from "@/components/ui/empty";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const Main = () => {
   const router = useRouter();
-  const orgid = true;
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+
   useEffect(() => {
-    if (!orgid) {
+    if (!sessionPending && !isPending && !activeOrg) {
       router.push("/organization");
     }
-  }, [orgid]);
+  }, [activeOrg, isPending, sessionPending, router]);
   return (
     <>
-      {orgid ? (
+      {isPending || sessionPending ? (
+        <div className="flex justify-center items-center min-h-[calc(100vh-60px)]">
+          <p>Loading...</p>
+        </div>
+      ) : activeOrg ? (
         <>
-          <div className="text-center">Main Component Content</div>
+          <div className="text-center">
+            <h2>Main Component Content</h2>
+            <p>Organization: {activeOrg.name}</p>
+            <p>Organization ID: {activeOrg.id}</p>
+          </div>
         </>
       ) : (
         <>

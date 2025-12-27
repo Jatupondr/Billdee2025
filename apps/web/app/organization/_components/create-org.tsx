@@ -8,38 +8,34 @@ import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 export const formSchema = v.object({
   fullName: v.pipe(
     v.string("กรุณากรอกชื่อร้านค้า"),
     v.nonEmpty("กรุณากรอกชื่อร้านค้า"),
     v.maxLength(255, "ชื่อร้านค้าต้องไม่เกิน 255 ตัวอักษร")
   ),
-  address: v.pipe(
-    v.string("กรุณากรอกที่อยู่ร้านค้า"),
-    v.nonEmpty("กรุณากรอกที่อยู่ร้านค้า"),
-    v.maxLength(500, "ที่อยู่ร้านค้าต้องไม่เกิน 500 ตัวอักษร")
-  ),
-  city: v.pipe(v.string(), v.maxLength(1, "ชื่อเมืองต้องไม่เกิน 100 ตัวอักษร")),
-  state: v.pipe(
-    v.string(),
-    v.maxLength(1, "ชื่อจังหวัดต้องไม่เกิน 100 ตัวอักษร")
-  ),
-  postalCode: v.pipe(
-    v.string(),
-    v.maxLength(5, "รหัสไปรษณีย์ต้องไม่เกิน 5 ตัวอักษร")
+  slug: v.pipe(
+    v.string("กรุณากรอกชื่อโดเมนร้านค้า"),
+    v.nonEmpty("กรุณากรอกชื่อโดเมนร้านค้า"),
+    v.regex(
+      /^[a-zA-Z-]+$/,
+      "ชื่อโดเมนร้านค้าต้องเป็นภาษาอังกฤษและขีด (-) เท่านั้น"
+    ),
+    v.maxLength(100, "ชื่อโดเมนร้านค้าต้องไม่เกิน 100 ตัวอักษร")
   ),
 });
 
 type formOrgData = v.InferOutput<typeof formSchema>;
 const defaultValues: formOrgData = {
   fullName: "",
-  address: "",
-  city: "",
-  state: "",
-  postalCode: "",
+  slug: "",
 };
 
 const CreateOrg = () => {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const formCreateOrg = useForm({
     defaultValues: defaultValues,
     validationLogic: revalidateLogic(),
@@ -48,27 +44,45 @@ const CreateOrg = () => {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        toast("You submitted the following values:", {
-          description: (
-            <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-              <code>{JSON.stringify(value, null, 2)}</code>
-            </pre>
-          ),
-          position: "bottom-right",
-          classNames: {
-            content: "flex flex-col gap-2",
+        await authClient.organization.create(
+          {
+            name: value.fullName, // required
+            slug: value.slug, // required
+            logo: "",
+            // metadata,
+            userId: session?.user.id,
           },
-          style: {
-            "--border-radius": "calc(var(--radius)  + 4px)",
-          } as React.CSSProperties,
-        });
+          {
+            onSuccess: () => {
+              toast.success("สร้างร้านค้าสำเร็จ");
+              router.push("/");
+            },
+            onError: (error) => {
+              toast.error(error.error.message);
+            },
+          }
+        );
+        // toast("You submitted the following values:", {
+        //   description: (
+        //     <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
+        //       <code>{JSON.stringify(value, null, 2)}</code>
+        //     </pre>
+        //   ),
+        //   position: "bottom-right",
+        //   classNames: {
+        //     content: "flex flex-col gap-2",
+        //   },
+        //   style: {
+        //     "--border-radius": "calc(var(--radius)  + 4px)",
+        //   } as React.CSSProperties,
+        // });
       },
     },
   });
   return (
     <>
       <div className="flex items-center justify-center p-10">
-        <div className="sm:mx-auto sm:max-w-2xl">
+        <div className="w-full sm:mx-auto sm:max-w-4xl">
           <h3 className="text-2xl font-semibold text-foreground dark:text-foreground">
             สร้างร้านค้าของคุณ
           </h3>
@@ -116,120 +130,29 @@ const CreateOrg = () => {
                 />
               </div>
 
-              {/* Address Field */}
+              {/* Slug Field */}
               <div className="col-span-full">
                 <formCreateOrg.Field
-                  name="address"
+                  name="slug"
                   children={(field) => {
                     const isInvalid =
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field className="gap-2" data-invalid={isInvalid}>
                         <FieldLabel htmlFor={field.name}>
-                          ที่อยู่ร้านค้า
+                          ชื่อโดเมนร้านค้า
                         </FieldLabel>
-                        <Textarea
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          placeholder="ที่อยู่ร้านค้าของคุณ"
-                          className="min-h-25"
-                        />
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    );
-                  }}
-                />
-              </div>
-
-              {/* City Field */}
-              <div className="col-span-full sm:col-span-2">
-                <formCreateOrg.Field
-                  name="city"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field className="gap-2" data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>เมือง</FieldLabel>
-                        <Input
-                          type="text"
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          autoComplete="address-level2"
-                          placeholder="เมือง"
-                        />
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    );
-                  }}
-                />
-              </div>
-
-              {/* State Field */}
-              <div className="col-span-full sm:col-span-2">
-                <formCreateOrg.Field
-                  name="state"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field className="gap-2" data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>จังหวัด</FieldLabel>
-                        <Input
-                          type="text"
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          autoComplete="address-level1"
-                          placeholder="จังหวัด"
-                        />
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    );
-                  }}
-                />
-              </div>
-
-              {/* Postal Code Field */}
-              <div className="col-span-full sm:col-span-2">
-                <formCreateOrg.Field
-                  name="postalCode"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field className="gap-2" data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          รหัสไปรษณีย์
-                        </FieldLabel>
-                        <Input
-                          type="text"
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          autoComplete="postal-code"
-                          placeholder="รหัสไปรษณีย์"
-                        />
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            placeholder="my-store"
+                          />
+                        </InputGroup>
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
                         )}

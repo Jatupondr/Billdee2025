@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { SidebarMenu, useSidebar } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
 
 export function TeamSwitcher({
   teams,
@@ -15,7 +16,7 @@ export function TeamSwitcher({
 }) {
   const { isMobile } = useSidebar();
   const [activeTeam, setActiveTeam] = React.useState(teams[0]);
-
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   if (!activeTeam) {
     return null;
   }
@@ -54,7 +55,7 @@ export function TeamSwitcher({
             {activeTeam.name}
           </span>
           <span className="text-sm text-white/70 truncate leading-tight max-w-40">
-            {activeTeam.plan}
+            {activeOrg?.name}
           </span>
         </div>
       </div>
