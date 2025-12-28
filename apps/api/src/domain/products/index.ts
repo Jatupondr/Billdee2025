@@ -16,6 +16,7 @@ export const product = new Elysia({ prefix: "/products" }).post(
         message: "Product created successfully",
       };
     } catch (error) {
+      console.error(error);
       set.status = 500;
       throw new Error("Internal Server Error");
     }
@@ -24,7 +25,7 @@ export const product = new Elysia({ prefix: "/products" }).post(
     body: ProductModel.productCreateDto,
 
     response: {
-      201: BaseResponse.success(ProductModel.productResponseDto),
+      201: BaseResponse.create,
       400: BaseResponse.badRequest,
       403: BaseResponse.forbidden,
       401: BaseResponse.unauthorized,

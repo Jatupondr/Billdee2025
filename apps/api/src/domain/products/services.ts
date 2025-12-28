@@ -14,7 +14,7 @@ export abstract class productService {
       //   throw new NotFoundError("Organization not found");
       // }
 
-      return await Product.create({
+      const product = await Product.create({
         name: dto.name,
         description: dto.description,
         price: dto.price,
@@ -23,7 +23,7 @@ export abstract class productService {
         userId: dto.userId,
       });
 
-      return "Create product service";
+      return product;
     } catch (error) {
       throw error;
     }

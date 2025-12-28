@@ -24,6 +24,11 @@ export namespace BaseResponse {
       meta: metaSchema,
     });
 
+  export const create = t.Object({
+    message: t.String({ default: "Success" }),
+    data: t.Any(),
+  });
+
   export const successMessage = t.Object({
     message: t.String(),
   });

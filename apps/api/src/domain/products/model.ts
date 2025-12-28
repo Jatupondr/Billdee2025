@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { paginationBase } from "../../../share/pagination-base";
+import { Types } from "mongoose";
 export namespace ProductModel {
   export const productCreateDto = t.Object({
     name: t.String({ minLength: 1, error: "Name product is required" }),
@@ -29,8 +30,8 @@ export namespace ProductModel {
     cost: t.Number(),
     userId: t.String(),
     organizationId: t.String(),
-    createdAt: t.String(),
-    updatedAt: t.String(),
+    createdAt: t.Date(),
+    updatedAt: t.Date(),
     __v: t.Number(),
   });
 
