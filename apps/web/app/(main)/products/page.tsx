@@ -1,10 +1,9 @@
-import React from "react";
-import Products from "./_components/products";
+import ListProduct from "./_components/product";
 
 const Page = () => {
   return (
     <>
-      <Products />
+      <ListProduct />
     </>
   );
 };

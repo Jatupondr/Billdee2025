@@ -7,10 +7,13 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/openapi": "^1.4.13",
+    "@elysiajs/server-timing": "^1.4.0",
     "better-auth": "^1.4.9",
     "cors": "^2.8.5",
     "elysia": "latest",
-    "mongoose": "^9.0.2"
+    "mongoose": "^9.0.2",
+    "valibot": "^1.2.0"
   },
   "devDependencies": {
     "bun-types": "latest"

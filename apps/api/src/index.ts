@@ -1,8 +1,15 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
+import { serverTiming } from "@elysiajs/server-timing";
+import { openapi } from "@elysiajs/openapi";
 import { auth } from "../lib/auth";
+import { betterAuth } from "./plugins/better-auth";
+import { product } from "./domain/products";
 
-const app = new Elysia()
+const app = new Elysia({
+  prefix: "/api",
+  normalize: true,
+})
   .onError(({ error, code, status }) => {
     if (code === "NOT_FOUND")
       return status(404, { success: false, message: error.message });
@@ -23,14 +30,40 @@ const app = new Elysia()
       ],
     })
   )
-  .all("/api/auth/*", async (context) => {
-    const { request, status } = context;
-    if (["POST", "GET"].includes(request.method)) {
-      return auth.handler(request);
+  .mount(auth.handler)
+  .use(
+    openapi({
+      path: "docs",
+      documentation: {
+        // components: await OpenAPI.components,
+        // paths: await OpenAPI.getPaths(),
+        info: {
+          title: "billdee API",
+          version: "1.0.0",
+          description:
+            "billdee API v2 is a RESTful API for the billdee project.",
+        },
+      },
+    })
+  )
+  .use(serverTiming())
+  .all(
+    "/api/auth/*",
+    async (context) => {
+      const { request, status } = context;
+      if (["POST", "GET"].includes(request.method)) {
+        return auth.handler(request);
+      }
+      return status(405);
+    },
+    {
+      detail: {
+        hide: true,
+      },
     }
-    return status(405);
-  })
-  .get("/", () => "Hello Elysia")
+  )
+  // .get("/", () => "Hello Elysia")
+  .use(product)
   .listen(3001);
 
 console.log(
