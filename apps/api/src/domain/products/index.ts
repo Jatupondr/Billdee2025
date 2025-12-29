@@ -45,6 +45,7 @@ export const product = new Elysia({ prefix: "/products" })
     async (c) => {
       const { query, set } = c;
       try {
+        set.status = 200;
         const response = await productService.findAll(query);
         return {
           rows: response?.data,

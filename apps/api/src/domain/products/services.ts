@@ -1,4 +1,4 @@
-import { NotFoundError } from "elysia";
+import { status } from "elysia";
 import mongoose from "mongoose";
 
 import { ProductModel } from "./model";
@@ -65,6 +65,16 @@ export abstract class productService {
           totalPages: Math.ceil(total / limit),
         },
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async findById(id: string) {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw status(400, "id is invalid not ObjectId");
+      }
     } catch (error) {
       throw error;
     }
