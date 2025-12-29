@@ -4,69 +4,74 @@ import { ProductModel } from "./model";
 import { BaseResponse } from "../../utils/respone";
 import { productService } from "./services";
 
-export const product = new Elysia({ prefix: "/products" }).post(
-  "/",
-  async (c) => {
-    const { body, set } = c;
-    try {
-      const response = await productService.create(body);
-      set.status = 201;
-      return {
-        data: response,
-        message: "Product created successfully",
-      };
-    } catch (error) {
-      console.error(error);
-      set.status = 500;
-      throw new Error("Internal Server Error");
-    }
-  },
-  {
-    body: ProductModel.productCreateDto,
+export const product = new Elysia({ prefix: "/products" })
+  .post(
+    "/",
+    async (c) => {
+      const { body, set } = c;
+      try {
+        const response = await productService.create(body);
+        set.status = 201;
+        return {
+          data: response,
+          message: "Product created successfully",
+        };
+      } catch (error) {
+        console.error(error);
+        set.status = 500;
+        throw new Error("Internal Server Error");
+      }
+    },
+    {
+      body: ProductModel.productCreateDto,
 
-    response: {
-      201: BaseResponse.create,
-      400: BaseResponse.badRequest,
-      403: BaseResponse.forbidden,
-      401: BaseResponse.unauthorized,
-      500: BaseResponse.internalServerError,
+      response: {
+        201: BaseResponse.create,
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Product"],
+        summary: "Create a new product",
+        description: "Create a new product with the provided details",
+      },
+      auth: true,
+    }
+  )
+  .get(
+    "/",
+    async (c) => {
+      const { query, set } = c;
+      try {
+        const response = await productService.findAll(query);
+        return {
+          rows: response?.data,
+          meta: response?.pagination,
+          message: "Products retrieved successfully",
+        };
+      } catch (error) {
+        throw error;
+      }
     },
-    detail: {
-      tags: ["Product"],
-      summary: "Create a new product",
-      description: "Create a new product with the provided details",
-    },
-    auth: true,
-  }
-);
-// .get(
-//   "/",
-//   async (c) => {
-//     const { query, set } = c;
-//     try {
-//       const response = await productService.findAll(query);
-//       return response;
-//     } catch (error) {
-//       throw error;
-//     }
-//   },
-//   {
-//     query: ProductModel.productQueryWithPagination,
-//     response: {
-//       200: BaseResponse.list(ProductModel.productResponseDto),
-//       400: BaseResponse.badRequest,
-//       403: BaseResponse.forbidden,
-//       401: BaseResponse.unauthorized,
-//       500: BaseResponse.internalServerError,
-//     },
-//     detail: {
-//       tags: ["Product"],
-//       summary: "list of products",
-//       description: "list of products with optional filtering and pagination",
-//     },
-//     auth: true,
-//   }
-// )
+    {
+      query: ProductModel.productQueryWithPagination,
+      response: {
+        // 200: BaseResponse.list(ProductModel.productResponseDto),
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Product"],
+        summary: "list of products",
+        description: "list of products with optional filtering and pagination",
+      },
+      auth: true,
+    }
+  );
 // .get(
 //   "/:id",
 //   async (c) => {
