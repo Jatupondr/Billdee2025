@@ -16,7 +16,6 @@ import {
   PencilIcon,
   PlusCircleIcon,
   TrashIcon,
-  Trash,
 } from "@phosphor-icons/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -26,14 +25,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
 import api from "@/hooks/axios";
 import { authClient } from "@/lib/auth-client";
+import CreateProductModal from "./create-product-modal";
+import EditProductModal from "./edit-product-modal";
+import ViewProductModal from "./view-product-modal";
+import DeleteProductDialog from "./delete-product-dialog";
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
-  price: string;
-  cost: string;
-  recommended: string;
+  price: number;
+  cost: number;
+  description: string;
+  recommended: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 const ListProduct = () => {
@@ -42,6 +47,14 @@ const ListProduct = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+
+  // Modal states
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   console.log(activeOrg);
 
   const getProducts = async (
@@ -71,7 +84,7 @@ const ListProduct = () => {
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {row.original.price || "-"}
+          ฿{Number(row.original.price).toLocaleString() || "-"}
         </span>
       ),
     },
@@ -81,7 +94,7 @@ const ListProduct = () => {
       size: 150,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {row.original.cost || "-"}
+          ฿{Number(row.original.cost).toLocaleString() || "-"}
         </span>
       ),
     },
@@ -91,7 +104,7 @@ const ListProduct = () => {
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {row.original.recommended || "-"}
+          {row.original.recommended ? "✓" : "-"}
         </span>
       ),
     },
@@ -106,29 +119,42 @@ const ListProduct = () => {
       ),
     },
     {
-      header: "action",
+      header: "จัดการ",
       accessorKey: "",
-      size: 100,
+      size: 150,
       cell: ({ row }) => (
-        <div className="">
+        <div className="flex gap-2">
           <Button
             size="icon"
+            variant="outline"
             className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+            onClick={() => {
+              setSelectedProduct(row.original);
+              setViewModalOpen(true);
+            }}
           >
-            <EyeIcon size={36} weight="bold" />
+            <EyeIcon size={20} weight="bold" />
           </Button>
           <Button
             size="icon"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]  ml-2 hover:text-white text-black"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]/90 text-black"
+            onClick={() => {
+              setSelectedProduct(row.original);
+              setEditModalOpen(true);
+            }}
           >
-            <PencilIcon size={36} weight="bold" />
+            <PencilIcon size={20} weight="bold" />
           </Button>
 
           <Button
             size="icon"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600 ml-2"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90"
+            onClick={() => {
+              setSelectedProduct(row.original);
+              setDeleteDialogOpen(true);
+            }}
           >
-            <TrashIcon size={36} weight="bold" />
+            <TrashIcon size={20} weight="bold" />
           </Button>
         </div>
       ),
@@ -154,6 +180,7 @@ const ListProduct = () => {
               <Button
                 size="lg"
                 className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+                onClick={() => setCreateModalOpen(true)}
               >
                 <PlusCircleIcon size={36} weight="bold" />
                 เพิ่มสินค้าใหม่
@@ -162,9 +189,7 @@ const ListProduct = () => {
                 placeholder="ค้นหาสินค้า"
                 className="max-w-xs"
                 value={search}
-                onChange={(e) =>
-                  setSearch((e.target as HTMLInputElement).value)
-                }
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
 
@@ -199,6 +224,27 @@ const ListProduct = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modals and Dialogs */}
+      <CreateProductModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+      />
+      <EditProductModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        product={selectedProduct}
+      />
+      <ViewProductModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        product={selectedProduct}
+      />
+      <DeleteProductDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        product={selectedProduct}
+      />
     </>
   );
 };
