@@ -1,8 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+
 import {
   Select,
   SelectContent,
@@ -12,13 +18,75 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { authClient } from "@/lib/auth-client";
+import { useForm, revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import * as v from "valibot";
+
+export const formSchema = v.object({
+  name: v.pipe(
+    v.string(""),
+    v.maxLength(255, "Name must be at most 255 characters.")
+  ),
+  slug: v.pipe(
+    v.string(""),
+    v.maxLength(255, "Slug must be at most 255 characters.")
+  ),
+});
+
+type orgData = v.InferOutput<typeof formSchema>;
+const defaultValues: orgData = {
+  name: "",
+  slug: "",
+};
 
 export default function ShopInfo() {
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+  console.log("organizations", activeOrg);
+
+  const form = useForm({
+    defaultValues: defaultValues,
+    validationLogic: revalidateLogic(),
+
+    validators: {
+      onDynamic: formSchema,
+      onSubmit: formSchema,
+      onSubmitAsync: async ({ value }) => {
+        alert("Submitted value: " + JSON.stringify(value, null, 2));
+        //   description: (
+        //     <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
+        //       <code>{JSON.stringify(value, null, 2)}</code>
+        //     </pre>
+        //   ),
+        //   position: "bottom-right",
+        //   classNames: {
+        //     content: "flex flex-col gap-2",
+        //   },
+        //   style: {
+        //     "--border-radius": "calc(var(--radius)  + 4px)",
+        //   } as React.CSSProperties,
+        // });
+      },
+    },
+  });
+  useEffect(() => {
+    if (activeOrg) {
+      form.setFieldValue("name", activeOrg.name);
+      form.setFieldValue("slug", activeOrg.slug);
+    }
+  }, [activeOrg]);
+
   const router = useRouter();
   return (
     <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-black flex-col rounded-2xl shadow-xl border border-border/50 ">
-      <form>
+      <form
+        id="form-organization"
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
+      >
         {/* <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
             <h2 className="font-semibold text-foreground dark:text-foreground">
@@ -108,31 +176,91 @@ export default function ShopInfo() {
           <div className="sm:max-w-3xl md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
               <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="workspace-name">
-                    Workspace name
-                  </FieldLabel>
-                  <Input
-                    type="text"
-                    id="workspace-name"
-                    name="workspace-name"
-                    placeholder="Test workspace"
-                  />
-                </Field>
+                <form.Field
+                  name="name"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>
+                          ชื่อร้านค้า
+                        </FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="ชื่อร้านค้าของคุณ"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
               </div>
               <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="visibility">Visibility</FieldLabel>
-                  <Select name="visibility" defaultValue="private">
-                    <SelectTrigger id="visibility">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <form.Field
+                  name="slug"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>slug</FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            disabled
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="slug"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+                        {/* description */}
+                        <FieldDescription>
+                          Slug จะถูกสร้างขึ้นโดยอัตโนมัติจากชื่อร้านค้า
+                        </FieldDescription>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
               </div>
               <div className="col-span-full">
                 <Field className="gap-2">
@@ -372,6 +500,7 @@ export default function ShopInfo() {
           <Button
             type="submit"
             size="lg"
+            form="form-organization"
             className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
           >
             บันทึกข้อมูล
