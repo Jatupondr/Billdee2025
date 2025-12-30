@@ -44,6 +44,7 @@ export abstract class productService {
           ],
         }),
         ...(organizationId && { organizationId }),
+        isDeleted: false,
       };
 
       const [products, total] = await Promise.all([
@@ -75,6 +76,52 @@ export abstract class productService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
+      const product = await Product.findById(id, { isDeleted: false }).lean();
+      if (!product) {
+        throw status(404, "Product not found");
+      }
+      return product;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async update(id: string, dto: ProductModel.productUpdateDto) {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw status(400, "id is invalid not ObjectId");
+      }
+      const updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        {
+          ...dto,
+        },
+        { new: true }
+      ).lean();
+      if (!updatedProduct) {
+        throw status(404, "Product not found");
+      }
+      return updatedProduct;
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async delete(id: string) {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw status(400, "id is invalid not ObjectId");
+      }
+      const deletedProduct = await Product.findByIdAndUpdate(
+        id,
+        {
+          isDeleted: true,
+        },
+        { new: true }
+      ).lean();
+      if (!deletedProduct) {
+        throw status(404, "Product not found");
+      }
+      return deletedProduct;
     } catch (error) {
       throw error;
     }

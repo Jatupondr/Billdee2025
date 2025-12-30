@@ -10,17 +10,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlusCircleIcon } from "@phosphor-icons/react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  EyeIcon,
+  PencilIcon,
+  PlusCircleIcon,
+  TrashIcon,
+  Trash,
+} from "@phosphor-icons/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+import { useDebounce } from "@/hooks/use-debounce";
+import api from "@/hooks/axios";
+import { authClient } from "@/lib/auth-client";
 
 interface Product {
   id: string;
   name: string;
   price: string;
-  costPrice: string;
+  cost: string;
   recommended: string;
   createdAt: string;
 }
@@ -28,6 +39,21 @@ interface Product {
 const ListProduct = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+  console.log(activeOrg);
+
+  const getProducts = async (
+    page: number,
+    pageSize: number,
+    search: string
+  ) => {
+    const response = await api.get(
+      `/products?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`
+    );
+    return response.data;
+  };
   const columns: ColumnDef<Product>[] = [
     {
       header: "ชื่อสินค้า",
@@ -55,7 +81,7 @@ const ListProduct = () => {
       size: 150,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {row.original.costPrice || "-"}
+          {row.original.cost || "-"}
         </span>
       ),
     },
@@ -84,20 +110,35 @@ const ListProduct = () => {
       accessorKey: "",
       size: 100,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 hover:underline cursor-pointer"></span>
+        <div className="">
+          <Button
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+          >
+            <EyeIcon size={36} weight="bold" />
+          </Button>
+          <Button
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]  ml-2 hover:text-white text-black"
+          >
+            <PencilIcon size={36} weight="bold" />
+          </Button>
+
+          <Button
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600 ml-2"
+          >
+            <TrashIcon size={36} weight="bold" />
+          </Button>
+        </div>
       ),
     },
   ];
-  const data: Product[] = [
-    {
-      id: "1",
-      name: " กุ้งขาวทะเลทะเลสด",
-      price: "100",
-      costPrice: "80",
-      recommended: "Yes",
-      createdAt: "2024-01-01",
-    },
-  ];
+
+  const { data: productsData, isLoading } = useQuery<any>({
+    queryKey: ["products", debouncedSearch, page, pageSize],
+    queryFn: () => getProducts(page, pageSize, debouncedSearch),
+  });
   return (
     <>
       <div className="flex justify-center items-center min-w-full ">
@@ -118,27 +159,43 @@ const ListProduct = () => {
                 เพิ่มสินค้าใหม่
               </Button>
               <Input
-                value={""}
-                onChange={() => {}}
                 placeholder="ค้นหาสินค้า"
                 className="max-w-xs"
+                value={search}
+                onChange={(e) =>
+                  setSearch((e.target as HTMLInputElement).value)
+                }
               />
             </div>
 
-            <div className="w-full overflow-x-auto">
-              <DataTable columns={columns} data={data} />
-            </div>
-            <Paginations
-              totalItems={0}
-              itemsPerPage={10}
-              currentPage={1}
-              onPageChange={(page) => {
-                setPage(page);
-              }}
-              onItemsPerPageChange={(limit) => {
-                setPageSize(limit);
-              }}
-            />
+            {isLoading ? (
+              <div className="w-full space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <>
+                <div className="w-full overflow-x-auto">
+                  <DataTable
+                    columns={columns}
+                    data={productsData?.rows || []}
+                  />
+                </div>
+                <Paginations
+                  totalItems={productsData?.meta?.total || 0}
+                  itemsPerPage={productsData?.meta?.limit || 10}
+                  currentPage={productsData?.meta?.page || 1}
+                  onPageChange={(page) => {
+                    setPage(page);
+                  }}
+                  onItemsPerPageChange={(limit) => {
+                    setPageSize(limit);
+                  }}
+                />
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

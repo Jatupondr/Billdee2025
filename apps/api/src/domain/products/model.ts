@@ -23,13 +23,14 @@ export namespace ProductModel {
   });
 
   export const productResponseDto = t.Object({
-    _id: t.String(),
+    _id: t.Any(),
     name: t.String(),
     description: t.Nullable(t.String()),
     price: t.Number(),
     cost: t.Number(),
-    userId: t.String(),
-    organizationId: t.String(),
+    userId: t.Any(),
+    status: t.Boolean(),
+    organizationId: t.Any(),
     createdAt: t.Date(),
     updatedAt: t.Date(),
     __v: t.Number(),

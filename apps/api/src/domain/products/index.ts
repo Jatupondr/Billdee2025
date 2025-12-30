@@ -72,97 +72,97 @@ export const product = new Elysia({ prefix: "/products" })
       },
       auth: true,
     }
+  )
+  .get(
+    "/:id",
+    async (c) => {
+      const { params, set } = c;
+      try {
+        const response = await productService.findById(params.id);
+        return {
+          data: response,
+          message: "Product found successfully",
+        };
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      params: BaseResponse.ParamsId,
+      response: {
+        200: BaseResponse.success(ProductModel.productResponseDto),
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Product"],
+        summary: "get a product by id",
+        description: "get a product by id",
+      },
+      auth: true,
+    }
+  )
+  .patch(
+    "/:id",
+    async (c) => {
+      const { params, body, set } = c;
+      try {
+        const response = await productService.update(params.id, body);
+        set.status = 200;
+        return {
+          data: response,
+          message: "Product updated successfully",
+        };
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      params: BaseResponse.ParamsId,
+      body: ProductModel.productUpdateDto,
+      response: {
+        200: BaseResponse.success(ProductModel.productResponseDto),
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Product"],
+        summary: "update a product by id",
+        description: "update a product by id",
+      },
+      auth: true,
+    }
+  )
+  .delete(
+    "/:id/delete",
+    async (c) => {
+      const { params, set } = c;
+      try {
+        const response = await productService.delete(params.id);
+        set.status = 200;
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      params: BaseResponse.ParamsId,
+      response: {
+        // 200: BaseResponse.noContent,
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Product"],
+        summary: "delete a pr by id",
+        description: "delete a product by id",
+      },
+      auth: true,
+    }
   );
-// .get(
-//   "/:id",
-//   async (c) => {
-//     const { params, set } = c;
-//     try {
-//       const response = await productService.findById(params.id);
-//       return {
-//         data: response,
-//         message: "Product found successfully",
-//       };
-//     } catch (error) {
-//       throw error;
-//     }
-//   },
-//   {
-//     params: BaseResponse.ParamsId,
-//     response: {
-//       // 200: BaseResponse.success(ProductModel.productResponseDto),
-//       400: BaseResponse.badRequest,
-//       403: BaseResponse.forbidden,
-//       401: BaseResponse.unauthorized,
-//       500: BaseResponse.internalServerError,
-//     },
-//     detail: {
-//       tags: ["Product"],
-//       summary: "get a product by id",
-//       description: "get a product by id",
-//     },
-//     auth: true,
-//   }
-// )
-// .patch(
-//   "/:id",
-//   async (c) => {
-//     const { params, body, set } = c;
-//     try {
-//       const response = await productService.update(params.id, body);
-//       set.status = 200;
-//       return {
-//         data: response,
-//         message: "Product updated successfully",
-//       };
-//     } catch (error) {
-//       throw error;
-//     }
-//   },
-//   {
-//     params: BaseResponse.ParamsId,
-//     body: ProductModel.productUpdateDto,
-//     response: {
-//       200: BaseResponse.success(ProductModel.productResponseDto),
-//       400: BaseResponse.badRequest,
-//       403: BaseResponse.forbidden,
-//       401: BaseResponse.unauthorized,
-//       500: BaseResponse.internalServerError,
-//     },
-//     detail: {
-//       tags: ["Product"],
-//       summary: "update a product by id",
-//       description: "update a product by id",
-//     },
-//     auth: true,
-//   }
-// )
-// .delete(
-//   "/:id/delete",
-//   async (c) => {
-//     const { params, set } = c;
-//     try {
-//       const response = await productService.delete(params.id);
-//       set.status = 200;
-//       return response;
-//     } catch (error) {
-//       throw error;
-//     }
-//   },
-//   {
-//     params: BaseResponse.ParamsId,
-//     response: {
-//       200: BaseResponse.noContent,
-//       400: BaseResponse.badRequest,
-//       403: BaseResponse.forbidden,
-//       401: BaseResponse.unauthorized,
-//       500: BaseResponse.internalServerError,
-//     },
-//     detail: {
-//       tags: ["Product"],
-//       summary: "delete a pr by id",
-//       description: "delete a product by id",
-//     },
-//     auth: true,
-//   }
-// )
