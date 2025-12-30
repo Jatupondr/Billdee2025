@@ -28,10 +28,25 @@ import {
   SignOutIcon,
 } from "@phosphor-icons/react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 const SiteHeader = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
+
+  // Create breadcrumb items from pathname
+  const pathSegments = pathname.split("/").filter((segment) => segment !== "");
+
+  // Create breadcrumb paths
+  const breadcrumbItems = pathSegments.map((segment, index) => {
+    const path = `/${pathSegments.slice(0, index + 1).join("/")}`;
+    const label = segment
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+    return { path, label };
+  });
+
   const menuContent = (
     <>
       <DropdownMenuGroup className="">
@@ -93,14 +108,22 @@ const SiteHeader = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Building Your Application
-                </BreadcrumbLink>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-              </BreadcrumbItem>
+              {breadcrumbItems.map((item, index) => (
+                <React.Fragment key={item.path}>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    {index === breadcrumbItems.length - 1 ? (
+                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink href={item.path}>
+                        {item.label}
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
+              ))}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
