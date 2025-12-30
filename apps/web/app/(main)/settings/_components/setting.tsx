@@ -1,12 +1,23 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShopInfo from "./shop-info";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const Setting = () => {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "shop-info");
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
   return (
     <>
       <div>
-        <Tabs defaultValue="shop-info">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList variant="line" className="cursor-pointer">
             <TabsTrigger className="cursor-pointer text-lg" value="shop-info">
               ข้อมูลร้านค้า

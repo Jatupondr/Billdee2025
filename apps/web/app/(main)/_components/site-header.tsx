@@ -50,15 +50,24 @@ const SiteHeader = () => {
   const menuContent = (
     <>
       <DropdownMenuGroup className="">
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+        <DropdownMenuItem
+          className="cursor-pointer flex items-center gap-2"
+          onClick={() => router.push("/settings?tab=users-info")}
+        >
           <CheckCircleIcon />
           Account
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+        <DropdownMenuItem
+          className="cursor-pointer flex items-center gap-2"
+          onClick={() => router.push("/settings?tab=subscription-info")}
+        >
           <CreditCardIcon />
           Billing
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+        <DropdownMenuItem
+          className="cursor-pointer flex items-center gap-2"
+          onClick={() => router.push("/settings?tab=password-info")}
+        >
           <BellIcon />
           Notifications
         </DropdownMenuItem>
