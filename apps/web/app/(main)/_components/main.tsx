@@ -15,13 +15,30 @@ import { authClient } from "@/lib/auth-client";
 const Main = () => {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = authClient.useSession();
-  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
 
+  const { data: organizations } = authClient.useListOrganizations();
+
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   useEffect(() => {
-    if (!sessionPending && !isPending && !activeOrg) {
-      router.push("/organization");
-    }
-  }, [activeOrg, isPending, sessionPending, router]);
+    const setActiveOrganization = async () => {
+      if (
+        !sessionPending &&
+        !isPending &&
+        organizations &&
+        organizations.length > 0 &&
+        !activeOrg
+      ) {
+        const dd = await authClient.organization.setActive({
+          organizationId: organizations[0].id,
+          organizationSlug: organizations[0].slug,
+        });
+        if (!dd) {
+          router.push("/organization");
+        }
+      }
+    };
+    setActiveOrganization();
+  }, [activeOrg, isPending, sessionPending, router, organizations]);
   return (
     <>
       {isPending || sessionPending ? (
@@ -41,15 +58,16 @@ const Main = () => {
           <div className="flex justify-center items-center  min-h-[calc(100vh-60px)] ">
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>No results found</EmptyTitle>
+                <EmptyTitle>ไม่พบร้านค้า</EmptyTitle>
                 <EmptyDescription>
-                  No results found for your search. Try adjusting your search
-                  terms.
+                  คลิกที่ปุ่มด้านล่างเพื่อสร้างร้านค้าใหม่
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button>Try again</Button>
-                <Button
+                <Button onClick={() => router.push("/organization")}>
+                  สร้างร้านค้าใหม่
+                </Button>
+                {/* <Button
                   variant="link"
                   className="text-muted-foreground"
                   nativeButton={false}
@@ -58,7 +76,7 @@ const Main = () => {
                       Learn more <ArrowUpRightIcon />
                     </a>
                   }
-                />
+                /> */}
               </EmptyContent>
             </Empty>
           </div>

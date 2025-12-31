@@ -84,6 +84,58 @@ const OrganizationSchema = new Schema(
       type: Schema.Types.Mixed, // รองรับ object / json ได้
       default: null,
     },
+    phone: {
+      type: String,
+      default: null,
+    },
+    taxId: {
+      type: String,
+      default: null,
+    },
+    email: {
+      type: String,
+      default: null,
+    },
+    note: {
+      type: String,
+      default: null,
+    },
+    address: {
+      type: String,
+      default: null,
+    },
+    province: {
+      type: String,
+      default: null,
+    },
+    district: {
+      type: String,
+      default: null,
+    },
+    subDistrict: {
+      type: String,
+      default: null,
+    },
+    postalCode: {
+      type: String,
+      default: null,
+    },
+    account_no: {
+      type: String,
+      default: null,
+    },
+    account_name: {
+      type: String,
+      default: null,
+    },
+    prompt_pay: {
+      type: String,
+      default: null,
+    },
+    bank_name: {
+      type: String,
+      default: null,
+    },
   },
 
   {

@@ -31,5 +31,81 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
   },
-  plugins: [openAPI(), organization()],
+  plugins: [
+    openAPI(),
+    organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            phone: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            taxId: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            email: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            note: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            address: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            province: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            district: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            subDistrict: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            postalCode: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            account_no: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+
+            account_name: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            prompt_pay: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            bank_name: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+          },
+        },
+      },
+    }),
+  ],
 });

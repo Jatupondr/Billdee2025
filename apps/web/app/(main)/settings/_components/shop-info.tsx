@@ -22,6 +22,7 @@ import { authClient } from "@/lib/auth-client";
 import { useForm, revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { toast } from "sonner";
 import * as v from "valibot";
 
 export const formSchema = v.object({
@@ -118,20 +119,42 @@ export default function ShopInfo() {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        alert("Submitted value: " + JSON.stringify(value, null, 2));
-        //   description: (
-        //     <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-        //       <code>{JSON.stringify(value, null, 2)}</code>
-        //     </pre>
-        //   ),
-        //   position: "bottom-right",
-        //   classNames: {
-        //     content: "flex flex-col gap-2",
-        //   },
-        //   style: {
-        //     "--border-radius": "calc(var(--radius)  + 4px)",
-        //   } as React.CSSProperties,
-        // });
+        await authClient.organization.update(
+          {
+            data: {
+              name: value.name,
+              slug: value.slug,
+              phone: value.phone,
+              taxId: value.taxId,
+              email: value.email,
+              note: value.note,
+              address: value.address,
+              province: value.province,
+              district: value.district,
+              subDistrict: value.subDistrict,
+              postalCode: value.postalCode,
+              account_no: value.account_no,
+              account_name: value.account_name,
+              prompt_pay: value.prompt_pay,
+              bank_name: value.bank_name,
+            },
+            organizationId: activeOrg?.id || "",
+          },
+          {
+            onSuccess: (data) => {
+              if (data) {
+                toast.success("สำเร็จ", {
+                  description: "แก้ไขข้อมูลร้านค้าสำเร็จ",
+                });
+              }
+            },
+            onError: (error) => {
+              toast.error(error.error.message || error.error.statusText, {
+                description: "กรุณาลองใหม่อีกครั้ง",
+              });
+            },
+          }
+        );
       },
     },
   });
@@ -139,6 +162,19 @@ export default function ShopInfo() {
     if (activeOrg) {
       form.setFieldValue("name", activeOrg.name);
       form.setFieldValue("slug", activeOrg.slug);
+      form.setFieldValue("phone", activeOrg.phone || "");
+      form.setFieldValue("taxId", activeOrg.taxId || "");
+      form.setFieldValue("email", activeOrg.email || "");
+      form.setFieldValue("note", activeOrg.note || "");
+      form.setFieldValue("address", activeOrg.address || "");
+      form.setFieldValue("province", activeOrg.province || "");
+      form.setFieldValue("district", activeOrg.district || "");
+      form.setFieldValue("subDistrict", activeOrg.subDistrict || "");
+      form.setFieldValue("postalCode", activeOrg.postalCode || "");
+      form.setFieldValue("account_no", activeOrg.account_no || "");
+      form.setFieldValue("account_name", activeOrg.account_name || "");
+      form.setFieldValue("prompt_pay", activeOrg.prompt_pay || "");
+      form.setFieldValue("bank_name", activeOrg.bank_name || "");
     }
   }, [activeOrg]);
 
@@ -152,83 +188,6 @@ export default function ShopInfo() {
           form.handleSubmit();
         }}
       >
-        {/* <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-          <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground">
-              Personal information
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground dark:text-muted-foreground">
-              Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
-            </p>
-          </div>
-          <div className="sm:max-w-3xl md:col-span-2">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
-              <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="first-name">First name</FieldLabel>
-                  <Input
-                    type="text"
-                    id="first-name"
-                    name="first-name"
-                    autoComplete="given-name"
-                    placeholder="Emma"
-                  />
-                </Field>
-              </div>
-              <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="last-name">Last name</FieldLabel>
-                  <Input
-                    type="text"
-                    id="last-name"
-                    name="last-name"
-                    autoComplete="family-name"
-                    placeholder="Crown"
-                  />
-                </Field>
-              </div>
-              <div className="col-span-full">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    autoComplete="email"
-                    placeholder="emma@company.com"
-                  />
-                </Field>
-              </div>
-              <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="birthyear">Birth year</FieldLabel>
-                  <Input
-                    type="number"
-                    id="birthyear"
-                    name="year"
-                    placeholder="1990"
-                  />
-                </Field>
-              </div>
-              <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="role">Role</FieldLabel>
-                  <Input
-                    type="text"
-                    id="role"
-                    name="role"
-                    placeholder="Senior Manager"
-                    disabled
-                  />
-                  <FieldDescription>
-                    Roles can only be changed by system admin.
-                  </FieldDescription>
-                </Field>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Separator className="my-8" /> */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
             <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
@@ -265,13 +224,6 @@ export default function ShopInfo() {
                             }
                             placeholder="ชื่อร้านค้าของคุณ"
                           />
-                          {/* <InputGroupAddon>
-                            <EnvelopeSimpleIcon
-                              size={32}
-                              className="size-5 dark:text-gray-100"
-                            />
-
-                          </InputGroupAddon> */}
                         </InputGroup>
 
                         {isInvalid && (
@@ -306,15 +258,8 @@ export default function ShopInfo() {
                             }
                             placeholder="slug"
                           />
-                          {/* <InputGroupAddon>
-                            <EnvelopeSimpleIcon
-                              size={32}
-                              className="size-5 dark:text-gray-100"
-                            />
-
-                          </InputGroupAddon> */}
                         </InputGroup>
-                        {/* description */}
+
                         <FieldDescription>
                           Slug จะถูกสร้างขึ้นโดยอัตโนมัติจากชื่อร้านค้า
                         </FieldDescription>
@@ -401,6 +346,41 @@ export default function ShopInfo() {
                             />
 
                           </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full sm:col-span-3">
+                <form.Field
+                  name="email"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>
+                          อีเมลร้านค้า
+                        </FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="อีเมลร้านค้า"
+                          />
                         </InputGroup>
 
                         {isInvalid && (
@@ -568,13 +548,6 @@ export default function ShopInfo() {
                             }
                             placeholder="อำเภอ"
                           />
-                          {/* <InputGroupAddon>
-                            <EnvelopeSimpleIcon
-                              size={32}
-                              className="size-5 dark:text-gray-100"
-                            />
-
-                          </InputGroupAddon> */}
                         </InputGroup>
 
                         {isInvalid && (
@@ -660,68 +633,8 @@ export default function ShopInfo() {
                   }}
                 />
               </div>
-              {/* <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="visibility">Visibility</FieldLabel>
-                  <Select name="visibility" defaultValue="private">
-                    <SelectTrigger id="visibility">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div> */}
             </div>
           </div>
-          {/* <div className="sm:max-w-3xl md:col-span-2">
-            <fieldset>
-              <legend className="text-sm font-medium text-foreground dark:text-foreground">
-                Newsletter
-              </legend>
-              <FieldDescription
-                id="newsletter-description"
-                className="mt-2 leading-6"
-              >
-                Change how often you want to receive updates from our
-                newsletter.
-              </FieldDescription>
-              <RadioGroup defaultValue="never" className="mt-6">
-                <div className="flex items-center gap-x-3">
-                  <RadioGroupItem
-                    id="every-week"
-                    value="every-week"
-                    aria-describedby="newsletter-description"
-                  />
-                  <FieldLabel htmlFor="every-week" className="font-normal">
-                    Every week
-                  </FieldLabel>
-                </div>
-                <div className="flex items-center gap-x-3">
-                  <RadioGroupItem
-                    id="every-month"
-                    value="every-month"
-                    aria-describedby="newsletter-description"
-                  />
-                  <FieldLabel htmlFor="every-month" className="font-normal">
-                    Every month
-                  </FieldLabel>
-                </div>
-                <div className="flex items-center gap-x-3">
-                  <RadioGroupItem
-                    id="never"
-                    value="never"
-                    aria-describedby="newsletter-description"
-                  />
-                  <FieldLabel htmlFor="never" className="font-normal">
-                    Never
-                  </FieldLabel>
-                </div>
-              </RadioGroup>
-            </fieldset>
-          </div> */}
         </div>
         <Separator className="my-8" />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
@@ -799,7 +712,7 @@ export default function ShopInfo() {
               </div>
               <div className="col-span-full sm:col-span-3">
                 <form.Field
-                  name="account_no"
+                  name="account_name"
                   children={(field) => {
                     const isInvalid =
                       field.state.meta.isTouched && !field.state.meta.isValid;
@@ -834,7 +747,7 @@ export default function ShopInfo() {
               </div>
               <div className="col-span-full sm:col-span-3">
                 <form.Field
-                  name="account_no"
+                  name="prompt_pay"
                   children={(field) => {
                     const isInvalid =
                       field.state.meta.isTouched && !field.state.meta.isValid;
@@ -859,6 +772,10 @@ export default function ShopInfo() {
                           />
                         </InputGroup>
 
+                        <FieldDescription>
+                          qrcode จะแสดงในหน้าใบแจ้งหนี้/หรือใบเสร็จรับเงิน
+                        </FieldDescription>
+
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
                         )}
@@ -869,52 +786,6 @@ export default function ShopInfo() {
               </div>
             </div>
           </div>
-          {/* <div className="sm:max-w-3xl md:col-span-2">
-            <fieldset>
-              <legend className="text-sm font-medium text-foreground dark:text-foreground">
-                Newsletter
-              </legend>
-              <FieldDescription
-                id="newsletter-description"
-                className="mt-2 leading-6"
-              >
-                Change how often you want to receive updates from our
-                newsletter.
-              </FieldDescription>
-              <RadioGroup defaultValue="never" className="mt-6">
-                <div className="flex items-center gap-x-3">
-                  <RadioGroupItem
-                    id="every-week"
-                    value="every-week"
-                    aria-describedby="newsletter-description"
-                  />
-                  <FieldLabel htmlFor="every-week" className="font-normal">
-                    Every week
-                  </FieldLabel>
-                </div>
-                <div className="flex items-center gap-x-3">
-                  <RadioGroupItem
-                    id="every-month"
-                    value="every-month"
-                    aria-describedby="newsletter-description"
-                  />
-                  <FieldLabel htmlFor="every-month" className="font-normal">
-                    Every month
-                  </FieldLabel>
-                </div>
-                <div className="flex items-center gap-x-3">
-                  <RadioGroupItem
-                    id="never"
-                    value="never"
-                    aria-describedby="newsletter-description"
-                  />
-                  <FieldLabel htmlFor="never" className="font-normal">
-                    Never
-                  </FieldLabel>
-                </div>
-              </RadioGroup>
-            </fieldset>
-          </div> */}
         </div>
         <Separator className="my-4" />
         <div className="flex items-center justify-end space-x-2">

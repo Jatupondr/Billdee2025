@@ -9,6 +9,9 @@ import {
   StorefrontIcon,
   UserCircleIcon,
 } from "@phosphor-icons/react";
+import UserInfo from "./user-info";
+import PasswordInfo from "./password-info";
+import SubscriptionInfo from "./subscription-info";
 
 const Setting = () => {
   const searchParams = useSearchParams();
@@ -62,11 +65,15 @@ const Setting = () => {
             <TabsContent value="shop-info">
               <ShopInfo />
             </TabsContent>
-            <TabsContent value="password">
-              Update your password to keep your account secure.
+            <TabsContent value="users-info">
+              <UserInfo />
             </TabsContent>
-            <TabsContent value="notifications">
-              Configure how you receive notifications and alerts.
+            <TabsContent value="password-info">
+              <PasswordInfo />
+            </TabsContent>
+
+            <TabsContent value="subscription-info">
+              <SubscriptionInfo />
             </TabsContent>
           </div>
         </Tabs>
