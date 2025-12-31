@@ -268,6 +268,38 @@ export default function UserInfo() {
           </div>
         </div>
         <Separator className="my-4" />
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+          <div>
+            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+              ลบบัญชีผู้ใช้
+            </h2>
+          </div>
+          <div className="sm:max-w-3xl md:col-span-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
+              <div className="col-span-full space-y-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  className="whitespace-nowrap bg-destructive hover:bg-red-700  cursor-pointer active:scale-95 duration-200 ease-in-out"
+                  // onClick={() => {
+                  //   alert("ส่งอีเมลยืนยันไปยัง " + session?.user?.email);
+                  // }}
+                >
+                  ลบบัญชีผู้ใช้
+                </Button>
+                <p className="text-sm text-zinc-600  ">
+                  <span className="text-destructive tracking-wide font-medium leading-6">
+                    *
+                  </span>{" "}
+                  หากลบบัญชีผู้ใช้แล้ว
+                  ข้อมูลทั้งหมดจะถูกลบอย่างถาวรและไม่สามารถกู้คืนได้ รวมทั้ง
+                  ข้อมูลร้านค้าและข้อมูลที่เกี่ยวข้องทั้งหมดด้วย
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Separator className="my-4" />
         <div className="flex items-center justify-end space-x-2">
           <Button
             type="button"
