@@ -33,12 +33,52 @@ export const formSchema = v.object({
     v.string(""),
     v.maxLength(255, "Slug must be at most 255 characters.")
   ),
+  phone: v.pipe(
+    v.string(""),
+    v.maxLength(20, "Phone number must be at most 20 characters.")
+  ),
+  taxId: v.pipe(
+    v.string(""),
+    v.maxLength(50, "Tax ID must be at most 50 characters.")
+  ),
+  email: v.pipe(
+    v.string(""),
+    v.maxLength(255, "Email must be at most 255 characters.")
+  ),
+  address: v.pipe(
+    v.string(""),
+    v.maxLength(500, "Address must be at most 500 characters.")
+  ),
+  province: v.pipe(
+    v.string(""),
+    v.maxLength(100, "Province must be at most 100 characters.")
+  ),
+  district: v.pipe(
+    v.string(""),
+    v.maxLength(100, "District must be at most 100 characters.")
+  ),
+  subDistrict: v.pipe(
+    v.string(""),
+    v.maxLength(100, "Sub-district must be at most 100 characters.")
+  ),
+  postalCode: v.pipe(
+    v.string(""),
+    v.maxLength(20, "Postal code must be at most 20 characters.")
+  ),
 });
 
 type orgData = v.InferOutput<typeof formSchema>;
 const defaultValues: orgData = {
   name: "",
   slug: "",
+  phone: "",
+  taxId: "",
+  email: "",
+  address: "",
+  province: "",
+  district: "",
+  subDistrict: "",
+  postalCode: "",
 };
 
 export default function ShopInfo() {
@@ -262,6 +302,90 @@ export default function ShopInfo() {
                   }}
                 />
               </div>
+              <div className="col-span-full sm:col-span-3">
+                <form.Field
+                  name="phone"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>
+                          เบอร์โทรศัพท์ร้านค้า
+                        </FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="เบอร์โทรศัพท์ร้านค้า"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full sm:col-span-3">
+                <form.Field
+                  name="taxId"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>
+                          เลขประจำตัวผู้เสียภาษี
+                        </FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="เลขประจำตัวผู้เสียภาษี"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
               <div className="col-span-full">
                 <Field className="gap-2">
                   <FieldLabel htmlFor="workspace-description">
@@ -292,20 +416,210 @@ export default function ShopInfo() {
           </div>
           <div className="sm:max-w-3xl md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
+              <div className="col-span-full">
+                <form.Field
+                  name="address"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>
+                          ที่อยู่ร้านค้า
+                        </FieldLabel>
+
+                        <Textarea
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid
+                          }
+                          placeholder="ที่อยู่ร้านค้า"
+                        />
+
+                        {isInvalid ? (
+                          <FieldError errors={field.state.meta.errors} />
+                        ) : (
+                          <>
+                            <FieldDescription>
+                              หมายเหตุ:
+                              ที่อยู่จะไม่แสดงผลภายนอกแต่จะแสดงในเอกสารต่างๆ
+                            </FieldDescription>
+                          </>
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+
               <div className="col-span-full sm:col-span-3">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="workspace-name">
-                    Workspace name
-                  </FieldLabel>
-                  <Input
-                    type="text"
-                    id="workspace-name"
-                    name="workspace-name"
-                    placeholder="Test workspace"
-                  />
-                </Field>
+                <form.Field
+                  name="province"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>จังหวัด</FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="จังหวัด"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
               </div>
               <div className="col-span-full sm:col-span-3">
+                <form.Field
+                  name="district"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>อำเภอ</FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="อำเภอ"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full sm:col-span-3">
+                <form.Field
+                  name="subDistrict"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>ตำบล</FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="ตำบล"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full sm:col-span-3">
+                <form.Field
+                  name="postalCode"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name}>
+                          รหัสไปรษณีย์
+                        </FieldLabel>
+
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid
+                            }
+                            placeholder="รหัสไปรษณีย์"
+                          />
+                          {/* <InputGroupAddon>
+                            <EnvelopeSimpleIcon
+                              size={32}
+                              className="size-5 dark:text-gray-100"
+                            />
+
+                          </InputGroupAddon> */}
+                        </InputGroup>
+
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              {/* <div className="col-span-full sm:col-span-3">
                 <Field className="gap-2">
                   <FieldLabel htmlFor="visibility">Visibility</FieldLabel>
                   <Select name="visibility" defaultValue="private">
@@ -318,22 +632,7 @@ export default function ShopInfo() {
                     </SelectContent>
                   </Select>
                 </Field>
-              </div>
-              <div className="col-span-full">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="workspace-description">
-                    Workspace description
-                  </FieldLabel>
-                  <Textarea
-                    id="workspace-description"
-                    name="workspace-description"
-                    rows={4}
-                  />
-                  <FieldDescription>
-                    Note: description provided will not be displayed externally.
-                  </FieldDescription>
-                </Field>
-              </div>
+              </div> */}
             </div>
           </div>
           {/* <div className="sm:max-w-3xl md:col-span-2">
