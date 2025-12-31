@@ -4,12 +4,9 @@ import ShopInfo from "./shop-info";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  AppWindowIcon,
-  LockKey,
   LockKeyIcon,
   MoneyWavyIcon,
   StorefrontIcon,
-  UserCircle,
   UserCircleIcon,
 } from "@phosphor-icons/react";
 
