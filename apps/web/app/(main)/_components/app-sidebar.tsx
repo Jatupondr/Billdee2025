@@ -69,11 +69,11 @@ const data = {
       items: [
         {
           title: "ลูกค้า",
-          url: "/playground/history",
+          url: "/cas/customer",
         },
         {
           title: "ซับพลายเออร์",
-          url: "#",
+          url: "/cas/supplier",
         },
       ],
     },
