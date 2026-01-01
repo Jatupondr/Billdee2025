@@ -68,15 +68,11 @@ const data = {
       isActive: false,
       items: [
         {
-          title: "History",
+          title: "ลูกค้า",
           url: "/playground/history",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
+          title: "ซับพลายเออร์",
           url: "#",
         },
       ],

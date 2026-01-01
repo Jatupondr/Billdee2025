@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
-  BellIcon,
   CaretUpDownIcon,
   CheckCircleIcon,
   CreditCardIcon,
+  GearSixIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
 import { authClient } from "@/lib/auth-client";
@@ -55,21 +55,21 @@ const SiteHeader = () => {
           onClick={() => router.push("/settings?tab=users-info")}
         >
           <CheckCircleIcon />
-          Account
+          บัญชีผู้ใช้
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2"
           onClick={() => router.push("/settings?tab=subscription-info")}
         >
           <CreditCardIcon />
-          Billing
+          การชำระเงินและแผน
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2"
           onClick={() => router.push("/settings?tab=password-info")}
         >
-          <BellIcon />
-          Notifications
+          <GearSixIcon />
+          แก้ไขรหัสผ่าน
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />

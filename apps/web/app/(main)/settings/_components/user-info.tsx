@@ -271,6 +271,38 @@ export default function UserInfo() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
             <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+              เชื่อมต่อบัญชีโซเชียลมีเดีย
+            </h2>
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+              รายละเอียดเกี่ยวกับสถานะเชื่อมต่อบัญชีโซเชียลมีเดียของคุณ
+            </p>
+          </div>
+          <div className="sm:max-w-3xl md:col-span-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
+              <div className="col-span-full">
+                <p className="text-base">เชื่อมต่อผ่าน: Google</p>
+                <Button
+                  variant="destructive"
+                  className="whitespace-nowrap mt-1 cursor-pointer active:scale-95 duration-200 ease-in-out"
+                >
+                  ยกเลิกการเชื่อมต่อ
+                </Button>
+
+                <p className="text-sm text-zinc-600  ">
+                  <span className="text-destructive tracking-wide font-medium leading-6">
+                    *
+                  </span>{" "}
+                  หากยกเลิกการเชื่อมต่อบัญชีโซเชียลมีเดียแล้ว
+                  คุณจะไม่สามารถใช้บัญชีโซเชียลมีเดียนี้ในการเข้าสู่ระบบได้
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Separator className="my-4" />
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+          <div>
+            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
               ลบบัญชีผู้ใช้
             </h2>
           </div>
@@ -280,7 +312,8 @@ export default function UserInfo() {
                 <Button
                   type="button"
                   size="sm"
-                  className="whitespace-nowrap bg-destructive hover:bg-red-700  cursor-pointer active:scale-95 duration-200 ease-in-out"
+                  variant="destructive"
+                  className="whitespace-nowrap   cursor-pointer active:scale-95 duration-200 ease-in-out"
                   // onClick={() => {
                   //   alert("ส่งอีเมลยืนยันไปยัง " + session?.user?.email);
                   // }}
@@ -316,7 +349,7 @@ export default function UserInfo() {
             form="form-organization"
             className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
           >
-            บันทึกข้อมูล
+            อัพเดทข้อมูล
           </Button>
         </div>
       </form>
