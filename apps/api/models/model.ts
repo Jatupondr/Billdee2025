@@ -205,6 +205,61 @@ const productSchema = new Schema(
   }
 );
 
+const customerSchemaq = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+
+    address: {
+      type: String,
+    },
+
+    province: {
+      type: String,
+    },
+    district: {
+      type: String,
+    },
+    subDistrict: {
+      type: String,
+    },
+    postalCode: {
+      type: String,
+    },
+
+    phone: {
+      type: String,
+    },
+
+    typeCustomer: {
+      type: String,
+      enum: ["customer", "supplier"],
+      default: "customer",
+    },
+
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    collection: "customer",
+    timestamps: true,
+  }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -212,5 +267,15 @@ const Verification = model("Verification", verificationSchema);
 const Organization = model("Organization", OrganizationSchema);
 const Member = model("Member", memberSchema);
 const Product = model("Product", productSchema);
+const Customer = model("Customer", customerSchemaq);
 
-export { User, Session, Account, Verification, Organization, Member, Product };
+export {
+  User,
+  Session,
+  Account,
+  Verification,
+  Organization,
+  Member,
+  Product,
+  Customer,
+};

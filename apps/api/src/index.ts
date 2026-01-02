@@ -5,6 +5,7 @@ import { openapi } from "@elysiajs/openapi";
 import { auth } from "../lib/auth";
 import { betterAuth } from "./plugins/better-auth";
 import { product } from "./domain/products";
+import { customer } from "./domain/customers";
 
 const app = new Elysia({
   prefix: "/api",
@@ -64,6 +65,7 @@ const app = new Elysia({
   )
   // .get("/", () => "Hello Elysia")
   .use(product)
+  .use(customer)
   .listen(3001);
 
 console.log(

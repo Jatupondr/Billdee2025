@@ -55,8 +55,6 @@ const ListProduct = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  console.log(activeOrg);
-
   const getProducts = async (
     page: number,
     pageSize: number,
