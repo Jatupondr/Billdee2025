@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,9 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 // import { SidebarInput } from "@/components/ui/sidebar";
 
 export function SidebarOptInForm() {
+  const router = useRouter();
+
   return (
     <Card className="gap-2 py-4 shadow-none">
       <CardHeader className="px-4">
@@ -25,6 +29,7 @@ export function SidebarOptInForm() {
             <Button
               className="bg-sidebar-primary tracking-widest text-sidebar-primary-foreground w-full shadow-none cursor-pointer hover:bg-sidebar-primary/90"
               size="sm"
+              onClick={() => router.push("/settings?tab=subscription-info")}
             >
               อัปเกรดเป็น Pro
             </Button>

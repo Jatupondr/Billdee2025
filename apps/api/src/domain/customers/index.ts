@@ -124,7 +124,7 @@ export const customer = new Elysia({ prefix: "/customers" })
       params: BaseResponse.ParamsId,
       body: CustomerModel.customerUpdateDto,
       response: {
-        200: BaseResponse.success(CustomerModel.customerResponseDto),
+        // 200: BaseResponse.success(CustomerModel.customerResponseDto),
         400: BaseResponse.badRequest,
         403: BaseResponse.forbidden,
         401: BaseResponse.unauthorized,

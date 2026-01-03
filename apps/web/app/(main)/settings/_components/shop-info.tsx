@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import * as v from "valibot";
+import { THAI_BANKS } from "./thbank";
 
 export const formSchema = v.object({
   name: v.pipe(
@@ -692,13 +693,30 @@ export default function ShopInfo() {
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
                         <FieldLabel htmlFor={field.name}>ธนาคาร</FieldLabel>
-                        <Select name="bank_name" defaultValue="kbank">
-                          <SelectTrigger id="bank_name">
+                        <Select
+                          name="bank_name"
+                          key={`bankName-${field.state.value || ""}`}
+                          value={field.state.value || undefined}
+                          onValueChange={(value: any) => {
+                            field.handleChange(value);
+                          }}
+                        >
+                          <SelectTrigger
+                            id={field.name}
+                            aria-invalid={isInvalid}
+                            className="w-full"
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="kbank">kbank</SelectItem>
-                            <SelectItem value="scb">scb</SelectItem>
+                            {THAI_BANKS.map((bank: any) => (
+                              <SelectItem
+                                key={bank.code}
+                                value={bank.name.toString()}
+                              >
+                                {bank.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
 

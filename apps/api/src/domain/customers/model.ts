@@ -39,7 +39,7 @@ export namespace CustomerModel {
     organizationId: t.Optional(t.String({ minLength: 1 })),
     userId: t.Optional(t.String({ minLength: 1 })),
 
-    updatedBy: t.String({ minLength: 1 }),
+    // updatedBy: t.String({ minLength: 1 }),
   });
 
   export const customerResponseDto = t.Object({

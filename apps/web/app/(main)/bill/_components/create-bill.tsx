@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import React from "react";
+import React, { useState } from "react";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import {
@@ -39,7 +39,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { TrashSimpleIcon } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/hooks/axios";
+import { useDebounce } from "@/hooks/use-debounce";
+import { authClient } from "@/lib/auth-client";
+import { Switch } from "@/components/ui/switch";
 
 export const billSchema = v.object({
   name_customer: v.pipe(
@@ -47,21 +53,79 @@ export const billSchema = v.object({
     v.nonEmpty("กรุณาเลอกหรือตั้งค่าลูกค้า"),
     v.maxLength(255, "อีเมลยาวเกินไป")
   ),
+  products: v.optional(
+    v.array(
+      v.object({
+        id: v.optional(v.string()),
+        name: v.string(),
+        quantity: v.number(),
+        cost: v.number(),
+        price: v.number(),
+        note: v.optional(v.string()),
+      })
+    ),
+    []
+  ),
+  discountPercent: v.optional(v.number(), 0),
+  taxPercent: v.optional(v.number(), 7),
+  includeVat: v.optional(v.boolean(), false),
+  billNote: v.optional(v.string(), ""),
 });
 
 type billData = v.InferOutput<typeof billSchema>;
 const defaultValues: billData = {
   name_customer: "",
+  products: [
+    {
+      id: "",
+      name: "",
+      quantity: 1,
+      cost: 0,
+      price: 0,
+      note: "",
+    },
+  ],
+  discountPercent: 0,
+  taxPercent: 7,
+  includeVat: false,
+  billNote: "",
 };
 
 const CreateBill = () => {
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const [searchProduct, setSearchProduct] = useState("");
+  const debouncedSearchProduct = useDebounce(searchProduct, 500);
+
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+  const getCustomers = async (search: string) => {
+    const response = await api.get(
+      `/customers?page=1&pageSize=50&search=${search}&organizationId=${activeOrg?.id}&typeCustomer=customer`
+    );
+    return response.data;
+  };
+  const { data: customersData, isLoading } = useQuery<any>({
+    queryKey: ["customers", debouncedSearch],
+    queryFn: () => getCustomers(debouncedSearch),
+  });
+
+  const getProducts = async (search: string) => {
+    const response = await api.get(
+      `/products?page=1&pageSize=50&search=${search}&organizationId=${activeOrg?.id}`
+    );
+    return response.data;
+  };
+
+  const { data: productsData, isLoading: isLoadingProducts } = useQuery<any>({
+    queryKey: ["products", debouncedSearchProduct],
+    queryFn: () => getProducts(debouncedSearchProduct),
+    enabled: !!activeOrg?.id,
+  });
   const form = useForm({
     defaultValues: defaultValues,
     validationLogic: revalidateLogic(),
 
     validators: {
-      onDynamic: billSchema,
-      onSubmit: billSchema,
       onSubmitAsync: async ({ value }) => {
         toast("You submitted the following values:", {
           description: (
@@ -80,15 +144,50 @@ const CreateBill = () => {
       },
     },
   });
-  const frameworks = [
-    "ร้าน A",
-    "ร้าน B",
-    "ร้าน C",
-    "ร้าน D",
-    "ร้าน E",
+  const customerData = customersData?.rows.map((item: any) => item.name) ?? [];
+  const productData =
+    productsData?.rows.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price ?? 0,
+      cost: item.cost ?? 0,
+    })) ?? [];
+
+  const ListTable = [
+    "ลำดับ",
+    "ชื่อรายการ",
+    "จำนวน",
+    "ต้นทุน",
+    "ราคา",
+    "ราคารวม",
   ] as const;
 
-  const ListTable = ["ลำดับ", "ชื่อรายการ", "จำนวน", "ต้นทุน", "ราคา"] as const;
+  const addProduct = () => {
+    const currentProducts = form.getFieldValue("products") || [];
+    form.setFieldValue("products", [
+      ...currentProducts,
+      {
+        id: "",
+        name: "",
+        quantity: 1,
+        cost: 0,
+        price: 0,
+        note: "",
+      },
+    ]);
+  };
+
+  const removeProduct = (index: number) => {
+    const currentProducts = form.getFieldValue("products") || [];
+    if (currentProducts.length <= 1) {
+      toast.error("ไม่สามารถลบได้ ต้องมีอย่างน้อย 1 รายการ");
+      return;
+    }
+    form.setFieldValue(
+      "products",
+      currentProducts.filter((_: any, i: number) => i !== index)
+    );
+  };
 
   return (
     <>
@@ -128,7 +227,7 @@ const CreateBill = () => {
                           <FieldLabel htmlFor={field.name}>ลูกค้า</FieldLabel>
 
                           <Combobox
-                            items={frameworks}
+                            items={customerData}
                             onValueChange={(value: any) => {
                               field.handleChange(value);
                             }}
@@ -140,6 +239,7 @@ const CreateBill = () => {
                               onBlur={field.handleBlur}
                               onChange={(e) => {
                                 field.handleChange(e.target.value);
+                                setSearch(e.target.value);
                               }}
                               aria-invalid={
                                 field.state.meta.isTouched &&
@@ -170,20 +270,77 @@ const CreateBill = () => {
               </FieldGroup>
             </FieldSet>
 
+            {/* แสดงรายละเอียดลูกค้า */}
+            <form.Subscribe selector={(state) => state.values.name_customer}>
+              {(customerName) => {
+                if (!customerName) return null;
+
+                const selectedCustomer = customersData?.rows.find(
+                  (c: any) => c.name === customerName
+                );
+
+                if (!selectedCustomer) return null;
+
+                return (
+                  <Card className="border border-border/50 bg-accent/20 w-1/2">
+                    <CardContent>
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              ชื่อลูกค้า:
+                            </span>
+                            <span className="text-base font-semibold">
+                              {selectedCustomer.name}
+                            </span>
+                          </div>
+                          {selectedCustomer.email && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-muted-foreground">
+                                อีเมล:
+                              </span>
+                              <span className="text-sm">
+                                {selectedCustomer.email}
+                              </span>
+                            </div>
+                          )}
+                          {selectedCustomer.phone && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-muted-foreground">
+                                เบอร์โทร:
+                              </span>
+                              <span className="text-sm">
+                                {selectedCustomer.phone}
+                              </span>
+                            </div>
+                          )}
+                          {selectedCustomer.address && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-muted-foreground">
+                                ที่อยู่:
+                              </span>
+                              <span className="text-sm">
+                                {selectedCustomer.address}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }}
+            </form.Subscribe>
+
             <div className="flex gap-2">
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 className="mb-2 tracking-widest cursor-pointer"
+                onClick={addProduct}
               >
                 เพิ่มสินค้า
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mb-2 tracking-widest cursor-pointer"
-              >
-                รายการสินค้า
               </Button>
             </div>
 
@@ -201,78 +358,331 @@ const CreateBill = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell className="font-normal w-20 text-center text-base">
-                    1
-                  </TableCell>
-                  <TableCell className="font-medium text-base">
-                    <div className="flex flex-col justify-start min-w-0">
-                      <p> Wireless Mouse</p>
-                      <div className="text-sm font-normal text-primary/70 mt-1 cursor-copy">
-                        หมายเหตุ:
+                <form.Field name="products" mode="array">
+                  {(field) => (
+                    <>
+                      {field.state.value && field.state.value.length > 0 ? (
+                        field.state.value.map((product: any, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-normal w-20 text-center text-base">
+                              {index + 1}
+                            </TableCell>
+                            <form.Field name={`products[${index}].name`}>
+                              {(nameField) => (
+                                <TableCell className="font-medium text-base">
+                                  <div className="flex flex-col justify-start min-w-0">
+                                    <Combobox
+                                      items={productData.map(
+                                        (p: any) => p.name
+                                      )}
+                                      value={nameField.state.value}
+                                      onValueChange={(value: any) => {
+                                        nameField.handleChange(value);
+                                        const selectedProduct =
+                                          productData.find(
+                                            (p: any) => p.name === value
+                                          );
+                                        if (selectedProduct) {
+                                          form.setFieldValue(
+                                            `products[${index}].id`,
+                                            selectedProduct.id
+                                          );
+                                          form.setFieldValue(
+                                            `products[${index}].price`,
+                                            selectedProduct.price
+                                          );
+                                          form.setFieldValue(
+                                            `products[${index}].cost`,
+                                            selectedProduct.cost
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <ComboboxInput
+                                        value={nameField.state.value}
+                                        placeholder="เลือกหรือค้นหาสินค้า"
+                                        onChange={(e) => {
+                                          nameField.handleChange(
+                                            e.target.value
+                                          );
+                                          setSearchProduct(e.target.value);
+                                        }}
+                                        className="h-9"
+                                      />
+                                      <ComboboxContent>
+                                        <ComboboxEmpty>
+                                          ไม่พบสินค้า
+                                        </ComboboxEmpty>
+                                        <ComboboxList>
+                                          {(item) => (
+                                            <ComboboxItem
+                                              key={item}
+                                              value={item}
+                                            >
+                                              {item}
+                                            </ComboboxItem>
+                                          )}
+                                        </ComboboxList>
+                                      </ComboboxContent>
+                                    </Combobox>
+                                    {/* <form.Field
+                                      name={`products[${index}].note`}
+                                    >
+                                      {(noteField) => (
+                                        <Input
+                                          value={noteField.state.value || ""}
+                                          onChange={(e) =>
+                                            noteField.handleChange(
+                                              e.target.value
+                                            )
+                                          }
+                                          placeholder="หมายเหตุ"
+                                          className="text-sm font-normal text-primary/70 mt-1 h-7 border-0 px-0 focus-visible:ring-0"
+                                        />
+                                      )}
+                                    </form.Field> */}
+                                  </div>
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].quantity`}>
+                              {(qtyField) => (
+                                <TableCell className="w-28">
+                                  <Input
+                                    type="number"
+                                    value={qtyField.state.value}
+                                    onChange={(e) =>
+                                      qtyField.handleChange(
+                                        Number(e.target.value)
+                                      )
+                                    }
+                                    className="h-10 w-20"
+                                    min="0"
+                                  />
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].cost`}>
+                              {(costField) => (
+                                <TableCell className="w-28">
+                                  <Input
+                                    type="number"
+                                    value={costField.state.value}
+                                    onChange={(e) =>
+                                      costField.handleChange(
+                                        Number(e.target.value)
+                                      )
+                                    }
+                                    className="h-10 w-20"
+                                    min="0"
+                                  />
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].price`}>
+                              {(priceField) => (
+                                <TableCell className="w-60">
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="number"
+                                      value={priceField.state.value}
+                                      onChange={(e) =>
+                                        priceField.handleChange(
+                                          Number(e.target.value)
+                                        )
+                                      }
+                                      min="0"
+                                      className="h-9 w-32"
+                                    />
+                                  </div>
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].price`}>
+                              {(totalField) => (
+                                <form.Field
+                                  name={`products[${index}].quantity`}
+                                >
+                                  {(qtyFieldTotal) => (
+                                    <TableCell className="w-32 text-right flex items-center justify-end gap-2">
+                                      <span className="text-base font-medium">
+                                        {(
+                                          (totalField.state.value || 0) *
+                                          (qtyFieldTotal.state.value || 0)
+                                        ).toFixed(2)}
+                                      </span>
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => removeProduct(index)}
+                                        disabled={field.state.value.length <= 1}
+                                        className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                                      >
+                                        <TrashSimpleIcon
+                                          size={18}
+                                          weight="duotone"
+                                          color="white"
+                                          className="text-red-400"
+                                        />
+                                      </Button>
+                                    </TableCell>
+                                  )}
+                                </form.Field>
+                              )}
+                            </form.Field>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={7}
+                            className="text-center text-muted-foreground"
+                          >
+                            ไม่มีสินค้า กดปุ่ม "เพิ่มสินค้า" เพื่อเริ่มต้น
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  )}
+                </form.Field>
+              </TableBody>
+            </Table>
+
+            {/* หมายเหตุ */}
+
+            {/* สรุปยอด */}
+            <form.Subscribe
+              selector={(state) => ({
+                products: state.values.products || [],
+                discountPercent: state.values.discountPercent || 0,
+                taxPercent: state.values.taxPercent || 7,
+                includeVat: state.values.includeVat || false,
+              })}
+            >
+              {({ products, discountPercent, taxPercent, includeVat }) => {
+                const subtotal = products.reduce(
+                  (sum: number, item: any) =>
+                    sum + (item.price || 0) * (item.quantity || 0),
+                  0
+                );
+                const discountAmount = (subtotal * discountPercent) / 100;
+                const afterDiscount = subtotal - discountAmount;
+                const taxAmount = includeVat
+                  ? (afterDiscount * taxPercent) / 100
+                  : 0;
+                const total = afterDiscount + taxAmount;
+
+                return (
+                  <div className="flex justify-between mt-4">
+                    <div className="space-y-1">
+                      <div className=" grid grid-cols-1">
+                        <form.Field name="billNote">
+                          {(field) => (
+                            <Field>
+                              <FieldLabel htmlFor="billNote">
+                                หมายเหตุ
+                              </FieldLabel>
+                              <Textarea
+                                id="billNote"
+                                value={field.state.value || ""}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"
+                                className="min-h-25 resize-none w-full"
+                              />
+                            </Field>
+                          )}
+                        </form.Field>
+                      </div>
+                      <p className="tracking-widest text-sm">
+                        - ตรวจสอบความถูกต้องก่อนยืนยันออกบิล
+                      </p>
+                      <p className="tracking-widest text-sm">
+                        - ราคายังไม่รวมภาษีมูลค่าเพิ่ม (ถ้ามี)
+                      </p>
+                    </div>
+                    <div className="w-96 space-y-3 border rounded-lg p-4 bg-accent/30">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm tracking-wider">
+                          ยอดรวมก่อนส่วนลด
+                        </span>
+                        <span className="text-base font-medium">
+                          {subtotal.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center gap-4">
+                        <span className="text-sm tracking-wider">
+                          ส่วนลด (%)
+                        </span>
+                        <form.Field name="discountPercent">
+                          {(field) => (
+                            <Input
+                              type="number"
+                              value={field.state.value || 0}
+                              onChange={(e) =>
+                                field.handleChange(Number(e.target.value))
+                              }
+                              className="h-9 w-24 text-right"
+                              min="0"
+                              max="100"
+                              step="0.01"
+                            />
+                          )}
+                        </form.Field>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm tracking-wider">
+                          จำนวนส่วนลด
+                        </span>
+                        <span className="text-base font-medium">
+                          {discountAmount.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center gap-4">
+                        <span className="text-sm tracking-wider">
+                          ภาษีมูลค่าเพิ่ม (7%)
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-medium">
+                            {taxAmount.toFixed(2)}
+                          </span>
+                          <form.Field name="includeVat">
+                            {(field) => (
+                              <Switch
+                                checked={field.state.value}
+                                onCheckedChange={(checked) =>
+                                  field.handleChange(checked)
+                                }
+                              />
+                            )}
+                          </form.Field>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-3 flex justify-between items-center">
+                        <span className="text-base font-semibold tracking-wider">
+                          รวมสุทธิ
+                        </span>
+                        <span className="text-xl font-normal">
+                          {total.toFixed(2)}
+                        </span>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell className="w-28">
-                    <Input
-                      type="number"
-                      defaultValue="1"
-                      className="h-10 w-20"
-                      min="0"
-                    />
-                  </TableCell>
-                  <TableCell className="w-28">
-                    <Input
-                      type="number"
-                      defaultValue="1"
-                      className="h-10 w-20"
-                      min="0"
-                    />
-                  </TableCell>
-                  <TableCell className="w-80">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        defaultValue="299"
-                        min="0"
-                        className="h-9 w-60"
-                      />
-
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150"
-                      >
-                        <TrashSimpleIcon
-                          size={18}
-                          weight="duotone"
-                          color="white"
-                          className="text-red-400"
-                        />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={4}>Total</TableCell>
-                  <TableCell className="text-right">$2,500.00</TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
+                  </div>
+                );
+              }}
+            </form.Subscribe>
           </form>
         </CardContent>
         <CardAction className="justify-end">
-          <p className="tracking-widest text-sm">
-            - ตรวจสอบความถูกต้องก่อนยืนยันออกบิล
-          </p>
-          <p className="tracking-widest text-sm">
-            - ราคายังไม่รวมภาษีมูลค่าเพิ่ม (ถ้ามี)
-          </p>
-          {/* <Button type="submit" form="form-create-bill">
+          <Button type="submit" form="form-create-bill">
             สร้างบิล
-          </Button> */}
+          </Button>
         </CardAction>
         {/* <CardFooter className="pt-0 border-t border-t-border/50">
 
