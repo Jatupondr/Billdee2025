@@ -1,9 +1,10 @@
 import React from "react";
+import Bill from "./_components/bill";
 
 const page = () => {
   return (
     <>
-      <a href="/bill/create">สร้างบิลใหม่</a>
+      <Bill />
     </>
   );
 };

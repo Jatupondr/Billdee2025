@@ -1,0 +1,214 @@
+"use client";
+import { DataTable } from "@/components/data-table";
+import Paginations from "@/components/pagination";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  EyeIcon,
+  PencilIcon,
+  PlusCircleIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
+import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/use-debounce";
+import { authClient } from "@/lib/auth-client";
+import api from "@/hooks/axios";
+import { useRouter } from "next/navigation";
+
+interface Bill {
+  _id: string;
+  billNumber: string;
+  name_customer: string;
+  total: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const Bill = () => {
+  const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+
+  const getBills = async (page: number, pageSize: number, search: string) => {
+    const response = await api.get(
+      `/bills?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`
+    );
+    return response.data;
+  };
+
+  const columns: ColumnDef<Bill>[] = [
+    {
+      header: "เลขที่บิล",
+      accessorKey: "billNumber",
+      size: 120,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1 hover:underline cursor-pointer">
+          {row.original.billNumber || "-"}
+        </span>
+      ),
+    },
+    {
+      header: "ชื่อลูกค้า",
+      accessorKey: "customerName",
+      size: 150,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1 tracking-wider">
+          {row.original.name_customer || "-"}
+        </span>
+      ),
+    },
+    {
+      header: "ยอดรวม",
+      accessorKey: "totalAmount",
+      size: 100,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1">
+          {row.original.total?.toLocaleString("th-TH", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) || "0.00"}{" "}
+          ฿
+        </span>
+      ),
+    },
+    {
+      header: "สถานะ",
+      accessorKey: "status",
+      size: 100,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1">
+          {row.original.status || "-"}
+        </span>
+      ),
+    },
+    {
+      header: "วันที่สร้าง",
+      accessorKey: "createdAt",
+      size: 120,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1">
+          {format(new Date(row.original.createdAt), "dd/MM/yyyy") || "-"}
+        </span>
+      ),
+    },
+    {
+      header: "จัดการ",
+      accessorKey: "",
+      size: 150,
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          {/* <Button
+            size="icon"
+            variant="outline"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+            onClick={() => {
+              router.push(`/bill/${row.original._id}`);
+            }}
+          >
+            <EyeIcon size={20} weight="bold" />
+          </Button> */}
+          {/* <Button
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]/90 text-black"
+            onClick={() => {
+              router.push(`/bill/edit/${row.original._id}`);
+            }}
+          >
+            <PencilIcon size={20} weight="bold" />
+          </Button> */}
+          <Button
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90"
+            onClick={() => {
+              // Handle delete
+              console.log("Delete bill:", row.original._id);
+            }}
+          >
+            <TrashIcon size={20} weight="bold" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const { data: billsData, isLoading } = useQuery<any>({
+    queryKey: ["bills", debouncedSearch, page, pageSize],
+    queryFn: () => getBills(page, pageSize, debouncedSearch),
+  });
+
+  return (
+    <>
+      <div className="flex justify-center items-center min-w-full">
+        <Card className="shadow-2xl rounded-2xl w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl tracking-widest">บิล</CardTitle>
+            <CardDescription className="text-base tracking-wider">
+              รายการบิลทั้งหมดในระบบ
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 w-full">
+            <div className="flex justify-between items-center">
+              <Button
+                size="lg"
+                className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+                onClick={() => router.push("/bill/create")}
+              >
+                <PlusCircleIcon size={36} weight="bold" />
+                สร้างบิลใหม่
+              </Button>
+              <Input
+                placeholder="ค้นหาบิล ชื่อลูกค้า เลขที่บิล"
+                className="max-w-xs"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {isLoading ? (
+              <div className="w-full space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <>
+                <div className="w-full overflow-x-auto">
+                  <DataTable columns={columns} data={billsData?.rows || []} />
+                </div>
+                <Paginations
+                  totalItems={billsData?.meta?.total || 0}
+                  itemsPerPage={billsData?.meta?.limit || 10}
+                  currentPage={billsData?.meta?.page || 1}
+                  onPageChange={(page) => {
+                    setPage(page);
+                  }}
+                  onItemsPerPageChange={(limit) => {
+                    setPageSize(limit);
+                  }}
+                />
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  );
+};
+
+export default Bill;

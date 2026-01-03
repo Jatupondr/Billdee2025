@@ -39,11 +39,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { TrashSimpleIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/hooks/axios";
 import { useDebounce } from "@/hooks/use-debounce";
 import { authClient } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
+import { useRouter } from "next/navigation";
 
 export const billSchema = v.object({
   name_customer: v.pipe(
@@ -106,6 +107,8 @@ const defaultValues: billData = {
 };
 
 const CreateBill = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [searchProduct, setSearchProduct] = useState("");
@@ -135,6 +138,27 @@ const CreateBill = () => {
     queryFn: () => getProducts(debouncedSearchProduct),
     enabled: !!activeOrg?.id,
   });
+
+  const createBillMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.post("/bills", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bills"] });
+      toast.success("สร้างบิลสำเร็จ", {
+        position: "bottom-right",
+      });
+      router.push("/bill");
+    },
+    onError: (error: any) => {
+      toast.error("เกิดข้อผิดพลาด", {
+        description: error?.response?.data?.message || "ไม่สามารถสร้างบิลได้",
+        position: "bottom-right",
+      });
+    },
+  });
+
   const form = useForm({
     defaultValues: defaultValues,
     validationLogic: revalidateLogic(),
@@ -154,16 +178,34 @@ const CreateBill = () => {
         const totalAmount = afterDiscount + taxAmount;
 
         const formattedData = {
-          ...value,
-          total: subtotal,
+          name_customer: value.name_customer,
+          phone_customer: value.phone_customer,
+          address_customer: value.address_customer,
+          customerId: value.customerId,
+          products: (value.products || []).map((product: any, idx: number) => ({
+            no: product.no || idx + 1,
+            productId: product.productId || undefined,
+            name: product.name,
+            quantity: product.quantity,
+            cost: product.cost,
+            price: product.price,
+            total: product.total,
+            note: product.note || "",
+          })),
+          discountPercent: value.discountPercent || 0,
+          taxPercent: value.taxPercent || 7,
+          includeVat: value.includeVat || false,
+
+          total: totalAmount,
           discount: discountAmount,
           vat: taxAmount,
-          grandTotal: totalAmount,
+          note: value.billNote || "",
           organizationId: activeOrg?.id,
           userId: session?.user.id,
         };
+        console.log(formattedData);
 
-        console.log("formattedData", formattedData);
+        createBillMutation.mutate(formattedData);
       },
     },
   });
@@ -196,7 +238,7 @@ const CreateBill = () => {
     form.setFieldValue("products", [
       ...currentProducts,
       {
-        no: 1,
+        no: currentProducts.length + 1,
         name: "",
         quantity: 1,
         cost: 0,
@@ -230,11 +272,19 @@ const CreateBill = () => {
             หากพบปัญหาในการใช้งาน กรุณาติดต่อฝ่ายสนับสนุน
           </CardDescription>
           <CardAction className="space-x-2">
-            <Button type="button" variant="outline" form="form-create-bill">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/bill")}
+            >
               ย้อนกลับ
             </Button>
-            <Button type="submit" form="form-create-bill">
-              สร้างบิล
+            <Button
+              type="submit"
+              form="form-create-bill"
+              disabled={createBillMutation.isPending}
+            >
+              {createBillMutation.isPending ? "กำลังสร้าง..." : "สร้างบิล"}
             </Button>
           </CardAction>
         </CardHeader>
@@ -435,7 +485,7 @@ const CreateBill = () => {
                                         if (selectedProduct) {
                                           form.setFieldValue(
                                             `products[${index}].no`,
-                                            selectedProduct.id
+                                            index + 1
                                           );
                                           form.setFieldValue(
                                             `products[${index}].price`,

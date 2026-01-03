@@ -273,7 +273,7 @@ const billSchemaq = new Schema(
     address_customer: {
       type: String,
     },
-    prducts: [
+    products: [
       {
         no: {
           type: Number,
@@ -295,11 +295,9 @@ const billSchemaq = new Schema(
         },
         price: {
           type: Number,
-          required: true,
         },
         note: {
           type: String,
-          required: true,
         },
 
         total: {
