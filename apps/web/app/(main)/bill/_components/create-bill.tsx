@@ -31,9 +31,7 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -53,15 +51,20 @@ export const billSchema = v.object({
     v.nonEmpty("กรุณาเลอกหรือตั้งค่าลูกค้า"),
     v.maxLength(255, "อีเมลยาวเกินไป")
   ),
+  customerId: v.optional(v.string()),
+  phone_customer: v.string(),
+  address_customer: v.string(),
+
   products: v.optional(
     v.array(
       v.object({
-        id: v.optional(v.string()),
+        no: v.optional(v.number()),
         name: v.string(),
         quantity: v.number(),
         cost: v.number(),
         price: v.number(),
         note: v.optional(v.string()),
+        total: v.optional(v.number()),
       })
     ),
     []
@@ -70,25 +73,36 @@ export const billSchema = v.object({
   taxPercent: v.optional(v.number(), 7),
   includeVat: v.optional(v.boolean(), false),
   billNote: v.optional(v.string(), ""),
+  total: v.optional(v.number(), 0),
+  discount: v.optional(v.number(), 0),
+  vat: v.optional(v.number(), 0),
 });
 
 type billData = v.InferOutput<typeof billSchema>;
 const defaultValues: billData = {
   name_customer: "",
+  customerId: "",
+  phone_customer: "",
+  address_customer: "",
+
   products: [
     {
-      id: "",
+      no: 1,
       name: "",
       quantity: 1,
       cost: 0,
       price: 0,
       note: "",
+      total: 0,
     },
   ],
   discountPercent: 0,
   taxPercent: 7,
   includeVat: false,
   billNote: "",
+  total: 0,
+  discount: 0,
+  vat: 0,
 };
 
 const CreateBill = () => {
@@ -96,7 +110,7 @@ const CreateBill = () => {
   const debouncedSearch = useDebounce(search, 500);
   const [searchProduct, setSearchProduct] = useState("");
   const debouncedSearchProduct = useDebounce(searchProduct, 500);
-
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   const getCustomers = async (search: string) => {
     const response = await api.get(
@@ -127,20 +141,29 @@ const CreateBill = () => {
 
     validators: {
       onSubmitAsync: async ({ value }) => {
-        toast("You submitted the following values:", {
-          description: (
-            <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-              <code>{JSON.stringify(value, null, 2)}</code>
-            </pre>
-          ),
-          position: "bottom-right",
-          classNames: {
-            content: "flex flex-col gap-2",
-          },
-          style: {
-            "--border-radius": "calc(var(--radius)  + 4px)",
-          } as React.CSSProperties,
-        });
+        // คำนวณค่าต่างๆ ก่อน submit
+        const subtotal = (value.products || []).reduce(
+          (sum: number, item: any) => sum + (item.total || 0),
+          0
+        );
+        const discountAmount = (subtotal * (value.discountPercent || 0)) / 100;
+        const afterDiscount = subtotal - discountAmount;
+        const taxAmount = value.includeVat
+          ? (afterDiscount * (value.taxPercent || 7)) / 100
+          : 0;
+        const totalAmount = afterDiscount + taxAmount;
+
+        const formattedData = {
+          ...value,
+          total: subtotal,
+          discount: discountAmount,
+          vat: taxAmount,
+          grandTotal: totalAmount,
+          organizationId: activeOrg?.id,
+          userId: session?.user.id,
+        };
+
+        console.log("formattedData", formattedData);
       },
     },
   });
@@ -163,16 +186,23 @@ const CreateBill = () => {
   ] as const;
 
   const addProduct = () => {
+    // เกิด 12 รายการ ไม่ได้ โชว์ toast
+
     const currentProducts = form.getFieldValue("products") || [];
+    if (currentProducts.length >= 12) {
+      toast.error("ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ");
+      return;
+    }
     form.setFieldValue("products", [
       ...currentProducts,
       {
-        id: "",
+        no: 1,
         name: "",
         quantity: 1,
         cost: 0,
         price: 0,
         note: "",
+        total: 0,
       },
     ]);
   };
@@ -199,10 +229,13 @@ const CreateBill = () => {
           <CardDescription className="tracking-wider">
             หากพบปัญหาในการใช้งาน กรุณาติดต่อฝ่ายสนับสนุน
           </CardDescription>
-          <CardAction>
-            {/* <Button variant="link" className="tracking-wider cursor-pointer">
-              เลขที่บิล
-            </Button> */}
+          <CardAction className="space-x-2">
+            <Button type="button" variant="outline" form="form-create-bill">
+              ย้อนกลับ
+            </Button>
+            <Button type="submit" form="form-create-bill">
+              สร้างบิล
+            </Button>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -230,6 +263,23 @@ const CreateBill = () => {
                             items={customerData}
                             onValueChange={(value: any) => {
                               field.handleChange(value);
+                              const selectedCustomer = customersData?.rows.find(
+                                (c: any) => c.name === value
+                              );
+                              if (selectedCustomer) {
+                                form.setFieldValue(
+                                  "customerId",
+                                  selectedCustomer._id || ""
+                                );
+                                form.setFieldValue(
+                                  "phone_customer",
+                                  selectedCustomer.phone || ""
+                                );
+                                form.setFieldValue(
+                                  "address_customer",
+                                  selectedCustomer.address || ""
+                                );
+                              }
                             }}
                           >
                             <ComboboxInput
@@ -384,7 +434,7 @@ const CreateBill = () => {
                                           );
                                         if (selectedProduct) {
                                           form.setFieldValue(
-                                            `products[${index}].id`,
+                                            `products[${index}].no`,
                                             selectedProduct.id
                                           );
                                           form.setFieldValue(
@@ -394,6 +444,14 @@ const CreateBill = () => {
                                           form.setFieldValue(
                                             `products[${index}].cost`,
                                             selectedProduct.cost
+                                          );
+                                          const currentQty =
+                                            form.getFieldValue(
+                                              `products[${index}].quantity`
+                                            ) || 0;
+                                          form.setFieldValue(
+                                            `products[${index}].total`,
+                                            selectedProduct.price * currentQty
                                           );
                                         }
                                       }}
@@ -451,11 +509,18 @@ const CreateBill = () => {
                                   <Input
                                     type="number"
                                     value={qtyField.state.value}
-                                    onChange={(e) =>
-                                      qtyField.handleChange(
-                                        Number(e.target.value)
-                                      )
-                                    }
+                                    onChange={(e) => {
+                                      const newQty = Number(e.target.value);
+                                      qtyField.handleChange(newQty);
+                                      const currentPrice =
+                                        form.getFieldValue(
+                                          `products[${index}].price`
+                                        ) || 0;
+                                      form.setFieldValue(
+                                        `products[${index}].total`,
+                                        currentPrice * newQty
+                                      );
+                                    }}
                                     className="h-10 w-20"
                                     min="0"
                                   />
@@ -486,11 +551,18 @@ const CreateBill = () => {
                                     <Input
                                       type="number"
                                       value={priceField.state.value}
-                                      onChange={(e) =>
-                                        priceField.handleChange(
-                                          Number(e.target.value)
-                                        )
-                                      }
+                                      onChange={(e) => {
+                                        const newPrice = Number(e.target.value);
+                                        priceField.handleChange(newPrice);
+                                        const currentQty =
+                                          form.getFieldValue(
+                                            `products[${index}].quantity`
+                                          ) || 0;
+                                        form.setFieldValue(
+                                          `products[${index}].total`,
+                                          newPrice * currentQty
+                                        );
+                                      }}
                                       min="0"
                                       className="h-9 w-32"
                                     />
@@ -498,37 +570,28 @@ const CreateBill = () => {
                                 </TableCell>
                               )}
                             </form.Field>
-                            <form.Field name={`products[${index}].price`}>
+                            <form.Field name={`products[${index}].total`}>
                               {(totalField) => (
-                                <form.Field
-                                  name={`products[${index}].quantity`}
-                                >
-                                  {(qtyFieldTotal) => (
-                                    <TableCell className="w-32 text-right flex items-center justify-end gap-2">
-                                      <span className="text-base font-medium">
-                                        {(
-                                          (totalField.state.value || 0) *
-                                          (qtyFieldTotal.state.value || 0)
-                                        ).toFixed(2)}
-                                      </span>
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => removeProduct(index)}
-                                        disabled={field.state.value.length <= 1}
-                                        className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
-                                      >
-                                        <TrashSimpleIcon
-                                          size={18}
-                                          weight="duotone"
-                                          color="white"
-                                          className="text-red-400"
-                                        />
-                                      </Button>
-                                    </TableCell>
-                                  )}
-                                </form.Field>
+                                <TableCell className="w-32 text-right flex items-center justify-end gap-2">
+                                  <span className="text-base font-medium">
+                                    {(totalField.state.value || 0).toFixed(2)}
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => removeProduct(index)}
+                                    disabled={field.state.value.length <= 1}
+                                    className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                                  >
+                                    <TrashSimpleIcon
+                                      size={18}
+                                      weight="duotone"
+                                      color="white"
+                                      className="text-red-400"
+                                    />
+                                  </Button>
+                                </TableCell>
                               )}
                             </form.Field>
                           </TableRow>
@@ -562,8 +625,7 @@ const CreateBill = () => {
             >
               {({ products, discountPercent, taxPercent, includeVat }) => {
                 const subtotal = products.reduce(
-                  (sum: number, item: any) =>
-                    sum + (item.price || 0) * (item.quantity || 0),
+                  (sum: number, item: any) => sum + (item.total || 0),
                   0
                 );
                 const discountAmount = (subtotal * discountPercent) / 100;
@@ -679,14 +741,6 @@ const CreateBill = () => {
             </form.Subscribe>
           </form>
         </CardContent>
-        <CardAction className="justify-end">
-          <Button type="submit" form="form-create-bill">
-            สร้างบิล
-          </Button>
-        </CardAction>
-        {/* <CardFooter className="pt-0 border-t border-t-border/50">
-
-        </CardFooter> */}
       </Card>
     </>
   );

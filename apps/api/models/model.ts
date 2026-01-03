@@ -1,3 +1,4 @@
+import { status } from "elysia";
 import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
@@ -260,6 +261,113 @@ const customerSchemaq = new Schema(
   }
 );
 
+const billSchemaq = new Schema(
+  {
+    name_customer: {
+      type: String,
+      required: true,
+    },
+    phone_customer: {
+      type: String,
+    },
+    address_customer: {
+      type: String,
+    },
+    prducts: [
+      {
+        no: {
+          type: Number,
+        },
+        productId: {
+          type: String,
+          ref: "Product",
+        },
+        name: {
+          type: String,
+        },
+        quantity: {
+          type: Number,
+          default: 1,
+        },
+        cost: {
+          type: Number,
+          default: 0,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+        note: {
+          type: String,
+          required: true,
+        },
+
+        total: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    customerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Customer",
+    },
+
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    discountPercent: {
+      type: Number,
+      default: 0,
+    },
+    includeVat: {
+      type: Boolean,
+      default: false,
+    },
+    discount: {
+      type: Number,
+      default: 0,
+    },
+    taxPercent: {
+      type: Number,
+      default: 0,
+    },
+
+    total: {
+      type: Number,
+      required: true,
+    },
+    vat: {
+      type: Number,
+      default: 0,
+    },
+    note: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "paid", "canceled"],
+      default: "pending",
+    },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    collection: "bill",
+    timestamps: true,
+  }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -268,6 +376,7 @@ const Organization = model("Organization", OrganizationSchema);
 const Member = model("Member", memberSchema);
 const Product = model("Product", productSchema);
 const Customer = model("Customer", customerSchemaq);
+const Bill = model("Bill", billSchemaq);
 
 export {
   User,
@@ -278,4 +387,5 @@ export {
   Member,
   Product,
   Customer,
+  Bill,
 };
