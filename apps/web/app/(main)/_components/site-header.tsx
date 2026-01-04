@@ -26,6 +26,7 @@ import {
   CreditCardIcon,
   GearSixIcon,
   SignOutIcon,
+  MoonIcon,
 } from "@phosphor-icons/react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, usePathname } from "next/navigation";
@@ -138,39 +139,14 @@ const SiteHeader = () => {
         </div>
 
         <div className="flex justify-center items-center gap-2">
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="outline"
-                  className="
-    h-7 px-4 gap-2
-    justify-start
-    rounded-md
-    border-muted
-    text-xs
-    hover:bg-accent/50
-    hover:text-accent-foreground
-    transition-colors
-    cursor-pointer
-  "
-                >
-                  <div className="flex flex-1 items-center justify-between">
-                    <span className="fi fi-th"></span>
-
-                    <span className="text-muted-foreground truncate">TH</span>
-                  </div>
-                </Button>
-              }
-            />
-            <DropdownMenuContent
-              align="end"
-              side="top"
-              className="w-(--anchor-width) min-w-28"
-            >
-              {menuLa}
-            </DropdownMenuContent>
-          </DropdownMenu> */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+          >
+            {" "}
+            <MoonIcon size={28} />{" "}
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger

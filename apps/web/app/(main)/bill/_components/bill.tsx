@@ -156,7 +156,9 @@ const Bill = () => {
       <div className="flex justify-center items-center min-w-full">
         <Card className="shadow-2xl rounded-2xl w-full">
           <CardHeader>
-            <CardTitle className="text-2xl tracking-widest">บิล</CardTitle>
+            <CardTitle className="text-2xl tracking-widest">
+              รายการบิล
+            </CardTitle>
             <CardDescription className="text-base tracking-wider">
               รายการบิลทั้งหมดในระบบ
             </CardDescription>
