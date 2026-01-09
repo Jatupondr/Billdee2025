@@ -9,10 +9,10 @@
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/openapi": "^1.4.13",
     "@elysiajs/server-timing": "^1.4.0",
-    "better-auth": "^1.4.9",
+    "better-auth": "^1.4.10",
     "cors": "^2.8.5",
     "elysia": "latest",
-    "mongoose": "^9.1.1",
+    "mongoose": "^9.1.2",
     "valibot": "^1.2.0"
   },
   "devDependencies": {

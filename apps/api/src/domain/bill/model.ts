@@ -2,6 +2,14 @@ import { t } from "elysia";
 import { paginationBase } from "../../../share/pagination-base";
 export namespace BillModel {
   export const billCreateDto = t.Object({
+    billNumber: t.String({
+      minLength: 1,
+      error: "Bill number is required",
+    }),
+    date: t.String({
+      minLength: 1,
+      error: "Date is required",
+    }),
     name_customer: t.String({
       minLength: 1,
       error: "Name customer is required",
@@ -52,6 +60,8 @@ export namespace BillModel {
 
   export const billResponseDto = t.Object({
     _id: t.Any(),
+    billNumber: t.String(),
+    date: t.Date(),
     name_customer: t.String(),
     phone_customer: t.String(),
     address_customer: t.String(),
@@ -81,9 +91,15 @@ export namespace BillModel {
     paginationBase,
   ]);
 
+  export const billQueryLastBillNumber = t.Object({
+    organizationId: t.Optional(t.String()),
+    userId: t.Optional(t.String()),
+  });
+
   export type billCreateDto = typeof billCreateDto.static;
   export type billUpdateDto = typeof billUpdateDto.static;
   export type billResponseDto = typeof billResponseDto.static;
+  export type billQueryLastBillNumber = typeof billQueryLastBillNumber.static;
 
   export type billQueryWithPagination = typeof billQueryWithPagination.static;
 }

@@ -139,6 +139,34 @@ export const bill = new Elysia({ prefix: "/bills" })
       auth: true,
     }
   )
+  .get(
+    "/lastbillnumber",
+    async (c) => {
+      const { query, set } = c;
+      try {
+        const response =
+          await billService.getLastBillNumberByOrganizationIdAndUserId(query);
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      query: BillModel.billQueryLastBillNumber,
+      response: {
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Bill"],
+        summary: "get last bill number by organization id and user id",
+        description: "get last bill number by organization id and user id",
+      },
+      auth: true,
+    }
+  )
   .delete(
     "/:id/delete",
     async (c) => {

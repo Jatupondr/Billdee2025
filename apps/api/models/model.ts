@@ -263,6 +263,14 @@ const customerSchemaq = new Schema(
 
 const billSchemaq = new Schema(
   {
+    billNumber: {
+      type: String,
+      required: true,
+    },
+    date: {
+      type: Date,
+      required: true,
+    },
     name_customer: {
       type: String,
       required: true,

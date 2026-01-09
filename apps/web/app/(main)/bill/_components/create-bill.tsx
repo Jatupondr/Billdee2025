@@ -38,13 +38,27 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TrashSimpleIcon } from "@phosphor-icons/react";
+import {
+  BackspaceIcon,
+  CalendarIcon,
+  CaretDownIcon,
+  FloppyDiskBackIcon,
+  PlusCircleIcon,
+  TrashSimpleIcon,
+} from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/hooks/axios";
 import { useDebounce } from "@/hooks/use-debounce";
 import { authClient } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 export const billSchema = v.object({
   name_customer: v.pipe(
@@ -52,6 +66,8 @@ export const billSchema = v.object({
     v.nonEmpty("กรุณาเลอกหรือตั้งค่าลูกค้า"),
     v.maxLength(255, "อีเมลยาวเกินไป")
   ),
+  billNumber: v.string("กรุณาใส่เลขที่บิล"),
+  date: v.string("กรุณาเลือกวันที่"),
   customerId: v.optional(v.string()),
   phone_customer: v.string(),
   address_customer: v.string(),
@@ -82,6 +98,8 @@ export const billSchema = v.object({
 type billData = v.InferOutput<typeof billSchema>;
 const defaultValues: billData = {
   name_customer: "",
+  billNumber: "",
+  date: "",
   customerId: "",
   phone_customer: "",
   address_customer: "",
@@ -108,6 +126,8 @@ const defaultValues: billData = {
 
 const CreateBill = () => {
   const router = useRouter();
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [openDate, setOpenDate] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -124,6 +144,21 @@ const CreateBill = () => {
   const { data: customersData, isLoading } = useQuery<any>({
     queryKey: ["customers", debouncedSearch],
     queryFn: () => getCustomers(debouncedSearch),
+  });
+
+  const getLastBillNumber = async (organizationId: string, userId: string) => {
+    const response = await api.get(
+      `/bills/lastbillnumber?organizationId=${organizationId}&userId=${userId}`
+    );
+    return response.data;
+  };
+
+  const { data: lastbill, isLoading: isLoadingLastBill } = useQuery<any>({
+    queryKey: ["lastbill", activeOrg?.id, session?.user.id],
+    queryFn: () =>
+      getLastBillNumber(activeOrg?.id ?? "", session?.user.id ?? ""),
+
+    enabled: !!activeOrg?.id && !!session?.user.id,
   });
 
   const getProducts = async (search: string) => {
@@ -178,6 +213,8 @@ const CreateBill = () => {
         const totalAmount = afterDiscount + taxAmount;
 
         const formattedData = {
+          billNumber: lastbill?.data?.billNumber,
+          date: value.date || new Date().toISOString(),
           name_customer: value.name_customer,
           phone_customer: value.phone_customer,
           address_customer: value.address_customer,
@@ -266,7 +303,7 @@ const CreateBill = () => {
       <Card className="p-4 shadow-md border border-border/50 ">
         <CardHeader>
           <CardTitle className="text-2xl tracking-widest">
-            สร้างบิลใหม่ #RE202500001
+            สร้างบิลใหม่ #{lastbill?.data?.billNumber}
           </CardTitle>
           <CardDescription className="tracking-wider">
             หากพบปัญหาในการใช้งาน กรุณาติดต่อฝ่ายสนับสนุน
@@ -275,15 +312,21 @@ const CreateBill = () => {
             <Button
               type="button"
               variant="outline"
+              size="sm"
+              className="tracking-wide cursor-pointer active:scale-95 duration-200 ease-in-out"
               onClick={() => router.push("/bill")}
             >
+              <BackspaceIcon size={32} weight="fill" className="" />
               ย้อนกลับ
             </Button>
             <Button
               type="submit"
               form="form-create-bill"
               disabled={createBillMutation.isPending}
+              size="sm"
+              className="tracking-wide cursor-pointer active:scale-95 duration-200 ease-in-out"
             >
+              <FloppyDiskBackIcon size={32} weight="fill" className="" />
               {createBillMutation.isPending ? "กำลังสร้าง..." : "สร้างบิล"}
             </Button>
           </CardAction>
@@ -299,7 +342,7 @@ const CreateBill = () => {
           >
             <FieldSet data-invalid>
               <FieldGroup className="flex flex-col  text-left">
-                <div className="grid grid-cols-3">
+                <div className="grid grid-cols-1">
                   <form.Field
                     name="name_customer"
                     children={(field) => {
@@ -358,6 +401,74 @@ const CreateBill = () => {
                               </ComboboxList>
                             </ComboboxContent>
                           </Combobox>
+
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
+                </div>
+              </FieldGroup>
+            </FieldSet>
+            <FieldSet data-invalid>
+              <FieldGroup className="flex flex-col  text-left">
+                <div className="grid grid-cols-1">
+                  <form.Field
+                    name="date"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>
+                            วันที่ออกบิล
+                          </FieldLabel>
+                          <Popover>
+                            <PopoverTrigger
+                              render={
+                                <Button
+                                  variant="outline"
+                                  id={field.name}
+                                  className="w-full justify-between font-normal"
+                                  type="button"
+                                >
+                                  {date
+                                    ? date.toLocaleDateString("th-TH", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      })
+                                    : "เลือกวันที่"}
+                                  <CaretDownIcon
+                                    className="ml-2 h-4 w-4 opacity-50"
+                                    size={32}
+                                  />
+                                </Button>
+                              }
+                            />
+                            <PopoverContent
+                              className="w-auto overflow-hidden p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={date}
+                                captionLayout="dropdown"
+                                onSelect={(selectedDate) => {
+                                  if (selectedDate) {
+                                    setDate(selectedDate);
+                                    const dateString = selectedDate
+                                      .toISOString()
+                                      .split("T")[0];
+                                    field.handleChange(dateString);
+                                    setOpenDate(false);
+                                  }
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
 
                           {isInvalid && (
                             <FieldError errors={field.state.meta.errors} />
@@ -436,10 +547,10 @@ const CreateBill = () => {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                className="mb-2 tracking-widest cursor-pointer"
+                className="mb-1 tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
                 onClick={addProduct}
               >
+                <PlusCircleIcon size={32} weight="duotone" />
                 เพิ่มสินค้า
               </Button>
             </div>

@@ -88,7 +88,7 @@ const SiteHeader = () => {
         }}
       >
         <SignOutIcon />
-        Sign Out
+        ออกจากระบบ
       </DropdownMenuItem>
     </>
   );

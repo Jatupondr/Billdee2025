@@ -25,12 +25,20 @@ export abstract class billService {
       const page = Number(query.page) || 1;
       const limit = Number(query.pageSize) || 10;
       const search = query.search || "";
+      close;
       const organizationId = query.organizationId || "";
       const skip = (page - 1) * limit;
 
       const filter: any = {
         ...(search && {
-          $or: [{ name_customer: { $regex: search, $options: "i" } }],
+          $or: [
+            {
+              name_customer: { $regex: search, $options: "i" },
+            },
+            {
+              billNumber: { $regex: search, $options: "i" },
+            },
+          ],
         }),
         ...(organizationId && { organizationId }),
         isDeleted: false,
@@ -122,6 +130,43 @@ export abstract class billService {
         throw status(404, "Bill not found");
       }
       return deletedBill;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getLastBillNumberByOrganizationIdAndUserId(
+    query: BillModel.billQueryLastBillNumber
+  ) {
+    const { organizationId, userId } = query;
+    try {
+      const lastBill = await Bill.findOne({
+        ...(organizationId && { organizationId }),
+        ...(userId && { userId }),
+        isDeleted: false,
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      let nextBillNumber = "RE202500001";
+
+      if (lastBill?.billNumber) {
+        const match = lastBill.billNumber.match(/(\d+)$/);
+        if (match) {
+          const numericPart = parseInt(match[1], 10);
+          const incrementedNumber = numericPart + 1;
+
+          const prefix = lastBill.billNumber.replace(/\d+$/, "");
+
+          const paddedNumber = incrementedNumber.toString().padStart(5, "0");
+          nextBillNumber = `${prefix}${paddedNumber}`;
+        }
+      }
+
+      return {
+        data: { billNumber: nextBillNumber },
+        message: "Next bill number generated successfully",
+      };
     } catch (error) {
       throw error;
     }
