@@ -181,7 +181,7 @@ export default function ShopInfo() {
 
   const router = useRouter();
   return (
-    <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-black flex-col rounded-2xl shadow-xl border border-border/50 ">
+    <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-zinc-900 flex-col rounded-2xl shadow-xl border border-border/50 ">
       <form
         id="form-organization"
         onSubmit={(e) => {

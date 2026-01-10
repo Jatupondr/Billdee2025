@@ -12,6 +12,7 @@ import {
 import UserInfo from "./user-info";
 import PasswordInfo from "./password-info";
 import SubscriptionInfo from "./subscription-info";
+import BillTem from "./bill-tem";
 
 const Setting = () => {
   const searchParams = useSearchParams();
@@ -54,12 +55,12 @@ const Setting = () => {
             <TabsTrigger className="cursor-pointer text-lg" value="bill-format">
               รูปแบบบิล
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               className="cursor-pointer text-lg"
               value="bill-setting"
             >
               ตั้งค่าการสร้างบิล
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
           <div>
             <TabsContent value="shop-info">
@@ -74,6 +75,9 @@ const Setting = () => {
 
             <TabsContent value="subscription-info">
               <SubscriptionInfo />
+            </TabsContent>
+            <TabsContent value="bill-format">
+              <BillTem />
             </TabsContent>
           </div>
         </Tabs>

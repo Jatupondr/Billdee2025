@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { useForm, revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as v from "valibot";
 
 export const formSchema = v.object({
@@ -49,8 +49,23 @@ const defaultValues: orgData = {
 
 export default function UserInfo() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
-  console.log("session", session);
+  const [accounts, setAccounts] = useState<any>([]);
 
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      const accounts = await authClient.listAccounts();
+      console.log("accounts", accounts);
+      if (accounts.data) {
+        setAccounts(accounts.data[0]);
+      } else {
+        setAccounts([]);
+      }
+
+      // setAccounts(accounts || []);
+    };
+
+    fetchAccounts();
+  }, []);
   const form = useForm({
     defaultValues: defaultValues,
     validationLogic: revalidateLogic(),
@@ -85,7 +100,7 @@ export default function UserInfo() {
 
   const router = useRouter();
   return (
-    <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-black flex-col rounded-2xl shadow-xl border border-border/50 ">
+    <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-zinc-900 flex-col rounded-2xl shadow-xl border border-border/50 ">
       <form
         id="form-organization"
         onSubmit={(e) => {
@@ -280,7 +295,12 @@ export default function UserInfo() {
           <div className="sm:max-w-3xl md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
               <div className="col-span-full">
-                <p className="text-base">เชื่อมต่อผ่าน: Google</p>
+                <p className="text-base">
+                  เชื่อมต่อผ่าน:{" "}
+                  {accounts.providerId === "google"
+                    ? "Google"
+                    : "ไมีการเชื่อมต่อ"}
+                </p>
                 <Button
                   variant="destructive"
                   className="whitespace-nowrap mt-1 cursor-pointer active:scale-95 duration-200 ease-in-out"
@@ -288,7 +308,7 @@ export default function UserInfo() {
                   ยกเลิกการเชื่อมต่อ
                 </Button>
 
-                <p className="text-sm text-zinc-600  ">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 ">
                   <span className="text-destructive tracking-wide font-medium leading-6">
                     *
                   </span>{" "}
@@ -320,14 +340,23 @@ export default function UserInfo() {
                 >
                   ลบบัญชีผู้ใช้
                 </Button>
-                <p className="text-sm text-zinc-600  ">
-                  <span className="text-destructive tracking-wide font-medium leading-6">
-                    *
-                  </span>{" "}
-                  หากลบบัญชีผู้ใช้แล้ว
-                  ข้อมูลทั้งหมดจะถูกลบอย่างถาวรและไม่สามารถกู้คืนได้ รวมทั้ง
-                  ข้อมูลร้านค้าและข้อมูลที่เกี่ยวข้องทั้งหมดด้วย
-                </p>
+                <div className="space-x-2">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 ">
+                    <span className="text-destructive tracking-wide font-medium leading-6">
+                      *
+                    </span>{" "}
+                    หากลบบัญชีผู้ใช้แล้ว
+                    ข้อมูลทั้งหมดจะถูกลบอย่างถาวรและไม่สามารถกู้คืนได้ รวมทั้ง
+                    ข้อมูลร้านค้าและข้อมูลที่เกี่ยวข้องทั้งหมดด้วย
+                  </p>
+                  <p className="text-sm text-zinc-600  dark:text-zinc-400 ">
+                    <span className="text-destructive tracking-wide font-medium leading-6">
+                      *
+                    </span>{" "}
+                    หากเเพ็กแก็จยังเหลือวันใช้งานอยู่ จะไม่สามารถลบบัญชีได้
+                    จนกว่าจะหมดอายุเเพ็กแก็จ
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -27,10 +27,13 @@ import {
   GearSixIcon,
   SignOutIcon,
   MoonIcon,
+  SunIcon,
 } from "@phosphor-icons/react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 const SiteHeader = () => {
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
@@ -109,7 +112,7 @@ const SiteHeader = () => {
   );
   return (
     <>
-      <header className="flex justify-between shrink-0 h-16 items-center bg-[#ffffff] shadow-md border-b border-border px-6">
+      <header className="flex justify-between shrink-0 h-16 items-center bg-[#ffffff] dark:bg-zinc-900 shadow-md border-b border-border px-6">
         <div className="flex items-center gap-1">
           <SidebarTrigger className="-ml-1 cursor-pointer" />
 
@@ -118,7 +121,9 @@ const SiteHeader = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                <BreadcrumbLink className="dark:text-white" href="/">
+                  Home
+                </BreadcrumbLink>
               </BreadcrumbItem>
               {breadcrumbItems.map((item, index) => (
                 <React.Fragment key={item.path}>
@@ -143,9 +148,10 @@ const SiteHeader = () => {
             variant="outline"
             size="icon"
             className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {" "}
-            <MoonIcon size={28} />{" "}
+            {theme === "dark" ? <SunIcon size={28} /> : <MoonIcon size={28} />}
           </Button>
 
           <DropdownMenu>
@@ -164,7 +170,7 @@ const SiteHeader = () => {
                     />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="hidden md:grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
                       {session?.user?.name || "-"}
                     </span>
@@ -172,7 +178,7 @@ const SiteHeader = () => {
                       {session?.user?.email || "-"}
                     </span>
                   </div>
-                  <CaretUpDownIcon className="text-muted-foreground ml-auto" />
+                  <CaretUpDownIcon className="hidden md:block text-muted-foreground ml-auto" />
                 </Button>
               }
             />

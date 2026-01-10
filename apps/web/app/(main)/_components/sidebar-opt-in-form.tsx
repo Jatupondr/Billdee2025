@@ -14,7 +14,7 @@ export function SidebarOptInForm() {
   const router = useRouter();
 
   return (
-    <Card className="gap-2 py-4 shadow-none">
+    <Card className="gap-2 py-4 shadow-none dark:bg-zinc-900 border border-border/50">
       <CardHeader className="px-4">
         <CardTitle className="text-sm tracking-wide">
           อัปเกรดเป็น BillDee Pro

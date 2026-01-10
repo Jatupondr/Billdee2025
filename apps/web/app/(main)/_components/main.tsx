@@ -11,6 +11,7 @@ import {
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import StatsSummary from "./summary-stats";
 
 const Main = () => {
   const router = useRouter();
@@ -47,6 +48,7 @@ const Main = () => {
         </div>
       ) : activeOrg ? (
         <>
+          <StatsSummary />
           <div className="text-center">
             <h2>Main Component Content</h2>
             <p>Organization: {activeOrg.name}</p>
