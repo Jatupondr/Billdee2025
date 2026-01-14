@@ -166,7 +166,7 @@ const ListProduct = () => {
   return (
     <>
       <div className="flex justify-center items-center min-w-full ">
-        <Card className="shadow-2xl rounded-2xl w-full ">
+        <Card className="shadow-2xl rounded-2xl w-full  dark:bg-zinc-900">
           <CardHeader>
             <CardTitle className="text-2xl tracking-widest">สินค้า</CardTitle>
             <CardDescription className="text-base tracking-wider">

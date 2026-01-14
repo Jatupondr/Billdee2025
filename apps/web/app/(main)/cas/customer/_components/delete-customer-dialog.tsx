@@ -98,7 +98,7 @@ const DeleteCustomerDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md dark:bg-zinc-900">
         <AlertDialogHeader className="space-y-2">
           <AlertDialogTitle>ยืนยันการลบลูกค้า</AlertDialogTitle>
           <AlertDialogDescription className="space-y-3">

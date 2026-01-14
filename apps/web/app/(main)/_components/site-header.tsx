@@ -51,6 +51,32 @@ const SiteHeader = () => {
     return { path, label };
   });
 
+  const textTf = (t: string) => {
+    // check text bill == บิล
+
+    switch (t) {
+      case "Bill":
+        return "บิล";
+      case "Products":
+        return "สินค้า";
+      case "Settings":
+        return "ตั้งค่าระบบ";
+      case "Create":
+        return "สร้างบิล";
+      case "Edit":
+        return "แก้ไขบิล";
+      case "Cas":
+        return "ลูกค้าและซับพลายเออร์";
+      case "Customer":
+        return "ลูกค้า";
+      case "Supplier":
+        return "ซับพลายเออร์";
+
+      default:
+        return t;
+    }
+  };
+
   const menuContent = (
     <>
       <DropdownMenuGroup className="">
@@ -96,20 +122,20 @@ const SiteHeader = () => {
     </>
   );
 
-  const menuLa = (
-    <>
-      <DropdownMenuGroup className="">
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-          <CheckCircleIcon />
-          TH
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-          <CreditCardIcon />
-          EN
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
-    </>
-  );
+  // const menuLa = (
+  //   <>
+  //     <DropdownMenuGroup className="">
+  //       <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+  //         <CheckCircleIcon />
+  //         TH
+  //       </DropdownMenuItem>
+  //       <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+  //         <CreditCardIcon />
+  //         EN
+  //       </DropdownMenuItem>
+  //     </DropdownMenuGroup>
+  //   </>
+  // );
   return (
     <>
       <header className="flex justify-between shrink-0 h-16 items-center bg-[#ffffff] dark:bg-zinc-900 shadow-md border-b border-border px-6">
@@ -122,7 +148,7 @@ const SiteHeader = () => {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink
-                  className="dark:text-white tracking-wider text-base font-medium"
+                  className="dark:text-white tracking-widest text-base font-medium"
                   href="/"
                 >
                   หน้าแรก
@@ -133,15 +159,15 @@ const SiteHeader = () => {
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     {index === breadcrumbItems.length - 1 ? (
-                      <BreadcrumbPage className="dark:text-white tracking-wider text-base font-medium">
-                        {item.label}
+                      <BreadcrumbPage className="dark:text-white tracking-widest text-lg font-medium">
+                        {textTf(item.label)}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink
-                        className="dark:text-white tracking-wider text-base font-medium"
+                        className="dark:text-white tracking-widest text-lg font-medium"
                         href={item.path}
                       >
-                        {item.label}
+                        {textTf(item.label)}
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
@@ -193,7 +219,7 @@ const SiteHeader = () => {
             <DropdownMenuContent
               align="end"
               side="top"
-              className="w-(--anchor-width) min-w-56"
+              className="w-(--anchor-width) min-w-56 dark:bg-zinc-900"
             >
               {menuContent}
             </DropdownMenuContent>

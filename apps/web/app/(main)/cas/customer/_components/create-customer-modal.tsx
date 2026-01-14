@@ -119,7 +119,7 @@ const CreateCustomerModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
         <DialogHeader>
           <DialogTitle className="text-2xl">เพิ่มลูกค้าใหม่</DialogTitle>
           <DialogDescription className="text-base">

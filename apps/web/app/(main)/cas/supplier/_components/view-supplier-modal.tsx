@@ -24,7 +24,7 @@ const ViewSupplierModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl dark:bg-zinc-900">
         <DialogHeader>
           <DialogTitle className="text-2xl">รายละเอียดซัพพลายเออร์</DialogTitle>
           <DialogDescription className="text-base">

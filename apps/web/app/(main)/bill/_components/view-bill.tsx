@@ -52,7 +52,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
 
   if (isLoading) {
     return (
-      <Card className="p-4 shadow-md border border-border/50">
+      <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
         <CardHeader>
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-4 w-96 mt-2" />
@@ -68,7 +68,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
 
   if (!billData) {
     return (
-      <Card className="p-4 shadow-md border border-border/50">
+      <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
         <CardContent className="text-center py-8">
           <p className="text-muted-foreground">ไม่พบข้อมูลบิล</p>
         </CardContent>
@@ -79,7 +79,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
   const bill = billData.data;
 
   return (
-    <Card className="p-4 shadow-md border border-border/50">
+    <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
       <CardHeader>
         <CardTitle className="text-2xl tracking-widest">
           รายละเอียดบิล #{bill.billNumber}

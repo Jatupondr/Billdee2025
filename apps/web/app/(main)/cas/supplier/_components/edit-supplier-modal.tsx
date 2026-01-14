@@ -126,7 +126,7 @@ const EditSupplierModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
         <DialogHeader>
           <DialogTitle className="text-2xl">แก้ไขซัพพลายเออร์</DialogTitle>
           <DialogDescription className="text-base">

@@ -324,7 +324,7 @@ const CreateBill = () => {
 
   return (
     <>
-      <Card className="p-4 shadow-md border border-border/50 ">
+      <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
         <CardHeader>
           <CardTitle className="text-2xl tracking-widest">
             สร้างบิลใหม่ #{lastbill?.data?.billNumber}

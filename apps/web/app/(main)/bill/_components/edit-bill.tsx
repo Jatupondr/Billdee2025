@@ -362,7 +362,7 @@ const EditBill = ({ id }: EditBillProps) => {
 
   return (
     <>
-      <Card className="p-4 shadow-md border border-border/50 ">
+      <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
         <CardHeader>
           <CardTitle className="text-2xl tracking-widest">
             แก้ไขบิล #{billData?.data?.billNumber}
