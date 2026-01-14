@@ -199,6 +199,10 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isRecommended: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     collection: "product",

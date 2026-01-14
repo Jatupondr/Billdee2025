@@ -21,6 +21,7 @@ export abstract class productService {
         cost: dto.cost,
         organizationId: dto.organizationId,
         userId: dto.userId,
+        isRecommended: dto.isRecommended,
       });
 
       return product;
@@ -88,6 +89,7 @@ export abstract class productService {
 
   static async update(id: string, dto: ProductModel.productUpdateDto) {
     try {
+      console.log("dto ==>", dto);
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }

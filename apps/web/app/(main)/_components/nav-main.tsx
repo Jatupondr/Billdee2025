@@ -38,6 +38,7 @@ export function NavMain({
   }[];
 }) {
   const pathname = usePathname();
+  const [isRotate, setIsRotate] = React.useState(false);
 
   return (
     <SidebarGroup>
@@ -61,9 +62,12 @@ export function NavMain({
                     <CollapsibleTrigger
                       render={
                         <SidebarMenuButton
+                          onClick={() => {
+                            setIsRotate(!isRotate);
+                          }}
                           isActive={isCurrentPath || hasActiveSubItem}
                           className={cn(
-                            "group/item flex items-center gap-2 transition-colors w-full",
+                            "group/item flex items-center gap-2 transition-colors w-full cursor-pointer",
                             isCurrentPath
                               ? "text-sidebar-foreground"
                               : hasActiveSubItem
@@ -83,7 +87,11 @@ export function NavMain({
                         />
                       )}
                       <span>{item.title}</span>
-                      <CaretDownIcon className=" ml-auto " size={18} />
+                      <CaretDownIcon
+                        className={`ml-auto  ${isRotate ? "" : "-rotate-90"} duration-200 ease-in-out`}
+                        size={18}
+                        weight="duotone"
+                      />
                     </CollapsibleTrigger>
                   ) : (
                     <SidebarMenuButton
@@ -120,7 +128,7 @@ export function NavMain({
                               <SidebarMenuSubButton
                                 render={<Link href={subItem.url as any} />}
                                 isActive={isSubActive}
-                                className="group/sub-item flex items-center gap-2 transition-colors space-x-4  text-[#f4f6f9] hover:text-sidebar-foreground/70 data-active:bg-sidebar-accent tracking-widest"
+                                className="group/sub-item flex items-center cursor-pointer gap-2 transition-colors space-x-4  text-[#f4f6f9] hover:text-sidebar-foreground/70 data-active:bg-sidebar-accent tracking-widest"
                               >
                                 {subItem.title}
                               </SidebarMenuSubButton>

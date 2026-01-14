@@ -70,19 +70,28 @@ const ViewProductModal = ({
                 </p>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  กำไรที่ขายได้
+                </label>
+                <p className="text-base font-semibold text-green-600">
+                  ฿
+                  {(
+                    Number(product.price) - Number(product.cost)
+                  ).toLocaleString()}
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">
-                กำไรที่ขายได้
-              </label>
-              <p className="text-base font-semibold text-green-600">
-                ฿
-                {(
-                  Number(product.price) - Number(product.cost)
-                ).toLocaleString()}
-              </p>
+              <div className="space-y-2 flex flex-col ">
+                <label className="text-sm font-medium text-muted-foreground">
+                  สถานะ
+                </label>
+                <Badge variant="default">
+                  {product.isRecommended ? "แนะนำ" : "ทั่วไป"}
+                </Badge>
+              </div>
             </div>
-
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">
                 รายละเอียด

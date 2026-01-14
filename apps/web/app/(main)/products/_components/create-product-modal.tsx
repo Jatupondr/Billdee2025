@@ -45,11 +45,7 @@ export const productSchema = v.object({
     v.number("กรุณากรอกราคาต้นทุน"),
     v.minValue(0, "ราคาต้องไม่น้อยกว่า 0")
   ),
-  description: v.pipe(
-    v.string("กรุณากรอกรายละเอียด"),
-    v.nonEmpty("กรุณากรอกรายละเอียด"),
-    v.maxLength(500, "รายละเอียดยาวเกินไป")
-  ),
+  description: v.optional(v.string()),
   isRecommended: v.optional(v.boolean()),
 });
 
@@ -82,6 +78,7 @@ const CreateProductModal = ({
         ...data,
         userId: session?.user?.id,
         organizationId: activeOrg?.id,
+        isRecommended: data.isRecommended,
       });
       return response.data;
     },
@@ -108,6 +105,7 @@ const CreateProductModal = ({
     validators: {
       onSubmit: productSchema,
       onSubmitAsync: async ({ value }) => {
+        console.log(value);
         createProductMutation.mutate(value);
       },
     },
@@ -253,13 +251,6 @@ const CreateProductModal = ({
 
               <formProducts.Field
                 name="description"
-                validators={{
-                  onChange: v.pipe(
-                    v.string("กรุณากรอกรายละเอียด"),
-                    v.nonEmpty("กรุณากรอกรายละเอียด"),
-                    v.maxLength(500, "รายละเอียดยาวเกินไป")
-                  ),
-                }}
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
@@ -315,7 +306,10 @@ const CreateProductModal = ({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+                formProducts.reset();
+              }}
               disabled={createProductMutation.isPending}
             >
               ยกเลิก

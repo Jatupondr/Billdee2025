@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   BackspaceIcon,
   CalendarIcon,
@@ -76,6 +77,7 @@ export const billSchema = v.object({
     v.array(
       v.object({
         no: v.optional(v.number()),
+        productId: v.optional(v.string()), // <-- add this line
         name: v.string(),
         quantity: v.number(),
         cost: v.number(),
@@ -107,6 +109,7 @@ const defaultValues: billData = {
   products: [
     {
       no: 1,
+      productId: "",
       name: "",
       quantity: 1,
       cost: 0,
@@ -297,6 +300,12 @@ const CreateBill = () => {
       currentProducts.filter((_: any, i: number) => i !== index)
     );
   };
+  //productsData filter isRecommended is true
+  const recommendedProducts = productsData?.rows.filter(
+    (item: any) => item.isRecommended === true
+  );
+
+  console.log("recommendedProducts ==>", recommendedProducts);
 
   return (
     <>
@@ -555,6 +564,93 @@ const CreateBill = () => {
               </Button>
             </div>
 
+            {/* card recommended products */}
+            {isLoadingProducts ? (
+              <>
+                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[...Array(6)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
+                    >
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : recommendedProducts?.length > 0 ? (
+              <>
+                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
+                  <span className="text-base font-semibold text-foreground">
+                    สินค้าแนะนำ
+                  </span>
+                  <span className="text-xs text-muted-foreground bg-accent px-2 py-1 rounded-full">
+                    {Math.min(recommendedProducts.length, 6)} รายการ
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {recommendedProducts.slice(0, 6).map((product: any) => (
+                    <div
+                      key={product._id}
+                      className="group relative flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-200"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          ราคา: {product.price?.toFixed(2) || "0.00"} บาท
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentProducts =
+                            form.getFieldValue("products") || [];
+                          if (currentProducts.length >= 12) {
+                            toast.error(
+                              "ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ"
+                            );
+                            return;
+                          }
+
+                          form.setFieldValue("products", [
+                            ...currentProducts,
+                            {
+                              no: currentProducts.length + 1,
+                              productId: product._id || "",
+                              name: product.name,
+                              quantity: 1,
+                              cost: product.cost || 0,
+                              price: product.price || 0,
+                              note: "",
+                              total: product.price || 0,
+                            },
+                          ]);
+                          toast.success(
+                            `เพิ่ม "${product.name}" เข้ารายการแล้ว`
+                          );
+                        }}
+                        className="shrink-0 cursor-pointer active:scale-95  ease-in-out h-8 w-8 p-0 hover:bg-primary hover:text-primary-foreground group-hover:scale-110 transition-transform duration-200"
+                      >
+                        <PlusCircleIcon size={18} weight="duotone" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
+
             <Table>
               <TableHeader className="bg-accent">
                 <TableRow>
@@ -574,7 +670,13 @@ const CreateBill = () => {
                     <>
                       {field.state.value && field.state.value.length > 0 ? (
                         field.state.value.map((product: any, index: number) => (
-                          <TableRow key={index}>
+                          <TableRow
+                            key={
+                              product._tempId ||
+                              product.productId ||
+                              `row-${index}`
+                            }
+                          >
                             <TableCell className="font-normal w-20 text-center text-base">
                               {index + 1}
                             </TableCell>
@@ -633,9 +735,9 @@ const CreateBill = () => {
                                           ไม่พบสินค้า
                                         </ComboboxEmpty>
                                         <ComboboxList>
-                                          {(item) => (
+                                          {(item, index) => (
                                             <ComboboxItem
-                                              key={item}
+                                              key={index}
                                               value={item}
                                             >
                                               {item}

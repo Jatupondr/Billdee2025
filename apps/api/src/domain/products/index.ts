@@ -123,7 +123,7 @@ export const product = new Elysia({ prefix: "/products" })
       params: BaseResponse.ParamsId,
       body: ProductModel.productUpdateDto,
       response: {
-        200: BaseResponse.success(ProductModel.productResponseDto),
+        // 200: BaseResponse.success(ProductModel.productResponseDto),
         400: BaseResponse.badRequest,
         403: BaseResponse.forbidden,
         401: BaseResponse.unauthorized,

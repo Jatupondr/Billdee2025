@@ -7,6 +7,7 @@ export namespace ProductModel {
     description: t.Optional(t.String()),
     price: t.Number({ minimum: 0, error: "Price product is required" }),
     cost: t.Number({ minimum: 0, error: "Cost product is required" }),
+    isRecommended: t.Optional(t.Boolean()),
     organizationId: t.String({
       minLength: 1,
       error: "OrganizationId is required",
@@ -18,7 +19,7 @@ export namespace ProductModel {
     description: t.Optional(t.String()),
     price: t.Optional(t.Number({ minimum: 0 })),
     cost: t.Optional(t.Number({ minimum: 0 })),
-
+    isRecommended: t.Optional(t.Boolean()),
     updatedBy: t.String({ minLength: 1 }),
   });
 
@@ -33,6 +34,7 @@ export namespace ProductModel {
     organizationId: t.Any(),
     createdAt: t.Date(),
     updatedAt: t.Date(),
+    isRecommended: t.Boolean(),
     __v: t.Number(),
   });
 

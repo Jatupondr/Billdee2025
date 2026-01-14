@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import api from "@/hooks/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export const productSchema = v.object({
   name: v.pipe(
@@ -45,12 +46,9 @@ export const productSchema = v.object({
     v.number("กรุณากรอกราคาต้นทุน"),
     v.minValue(0, "ราคาต้องไม่น้อยกว่า 0")
   ),
-  description: v.pipe(
-    v.string("กรุณากรอกรายละเอียด"),
-    v.nonEmpty("กรุณากรอกรายละเอียด"),
-    v.maxLength(500, "รายละเอียดยาวเกินไป")
-  ),
+  description: v.optional(v.string("")),
   isRecommended: v.optional(v.boolean()),
+  updatedBy: v.string("กรุณากรอกชื่อผู้แก้ไข"),
 });
 
 type ProductData = v.InferOutput<typeof productSchema>;
@@ -76,10 +74,10 @@ const EditProductModal = ({
   product,
 }: EditProductModalProps) => {
   const queryClient = useQueryClient();
-
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const updateProductMutation = useMutation({
     mutationFn: async (data: ProductData & { id: string }) => {
-      const response = await api.put(`/products/${data.id}`, data);
+      const response = await api.patch(`/products/${data.id}`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -110,7 +108,12 @@ const EditProductModal = ({
     validators: {
       onSubmitAsync: async ({ value }) => {
         if (product) {
-          updateProductMutation.mutate({ ...value, id: product.id });
+          updateProductMutation.mutate({
+            ...value,
+            id: product._id,
+            isRecommended: value.isRecommended || false,
+            updatedBy: session?.user?.id || "",
+          });
         }
       },
     },
@@ -122,7 +125,10 @@ const EditProductModal = ({
       formProducts.setFieldValue("price", Number(product.price));
       formProducts.setFieldValue("cost", Number(product.cost));
       formProducts.setFieldValue("description", product.description || "");
-      formProducts.setFieldValue("isRecommended", product.recommended || false);
+      formProducts.setFieldValue(
+        "isRecommended",
+        product.isRecommended || false
+      );
     }
   }, [product, open]);
 
@@ -266,13 +272,6 @@ const EditProductModal = ({
 
               <formProducts.Field
                 name="description"
-                validators={{
-                  onChange: v.pipe(
-                    v.string("กรุณากรอกรายละเอียด"),
-                    v.nonEmpty("กรุณากรอกรายละเอียด"),
-                    v.maxLength(500, "รายละเอียดยาวเกินไป")
-                  ),
-                }}
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
