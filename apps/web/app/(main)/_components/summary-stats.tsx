@@ -37,7 +37,7 @@ export default function StatsSummary() {
         {data.map((item) => (
           <Card key={item.name} className="p-6 py-4 dark:bg-zinc-900">
             <CardContent className="p-0">
-              <dt className="text-sm font-medium text-zinc-300 tracking-wide">
+              <dt className="text-sm font-medium dark:text-zinc-300 tracking-wide">
                 {item.name}
               </dt>
               <dd className="mt-2 flex items-baseline space-x-2.5">

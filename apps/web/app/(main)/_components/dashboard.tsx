@@ -9,10 +9,10 @@ const Dashboard = () => {
     <>
       <div className="flex  justify-between gap-4 mx-auto mb-4">
         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold tracking-widest font-mono ">
+          <h1 className="text-2xl font-semibold tracking-widest  dark:text-zinc-300">
             ยินดีต้อนรับกลับ คุณ{session?.user?.name}
           </h1>
-          <p className="text-base text-muted-foreground tracking-widest mt-2">
+          <p className="text-base text-muted-foreground dark:text-zinc-300 tracking-widest mt-2">
             Dashboard สรุปข้อมูลร้านค้า
           </p>
         </div>
