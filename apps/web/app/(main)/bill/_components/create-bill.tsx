@@ -268,13 +268,13 @@ const CreateBill = () => {
   ] as const;
 
   const addProduct = () => {
-    // เกิด 12 รายการ ไม่ได้ โชว์ toast
-
     const currentProducts = form.getFieldValue("products") || [];
+
     if (currentProducts.length >= 12) {
       toast.error("ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ");
       return;
     }
+
     form.setFieldValue("products", [
       ...currentProducts,
       {
@@ -299,6 +299,21 @@ const CreateBill = () => {
       "products",
       currentProducts.filter((_: any, i: number) => i !== index)
     );
+  };
+
+  const clearAllProducts = () => {
+    form.setFieldValue("products", [
+      {
+        no: 1,
+        name: "",
+        quantity: 1,
+        cost: 0,
+        price: 0,
+        note: "",
+        total: 0,
+      },
+    ]);
+    toast.success("เคลียร์รายการสินค้าทั้งหมดแล้ว");
   };
   //productsData filter isRecommended is true
   const recommendedProducts = productsData?.rows.filter(
@@ -552,17 +567,37 @@ const CreateBill = () => {
               }}
             </form.Subscribe>
 
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="mb-1 tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
-                onClick={addProduct}
-              >
-                <PlusCircleIcon size={32} weight="duotone" />
-                เพิ่มสินค้า
-              </Button>
-            </div>
+            <form.Subscribe selector={(state) => state.values.products || []}>
+              {(products) => {
+                const hasProducts =
+                  products.length > 1 ||
+                  (products.length === 1 && products[0].name);
+
+                return (
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mb-1 tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
+                      onClick={addProduct}
+                    >
+                      <PlusCircleIcon size={32} weight="duotone" />
+                      เพิ่มสินค้า
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mb-1 tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                      onClick={clearAllProducts}
+                      disabled={!hasProducts}
+                    >
+                      <TrashSimpleIcon size={32} weight="duotone" />
+                      เคลียร์รายการสินค้า
+                    </Button>
+                  </div>
+                );
+              }}
+            </form.Subscribe>
 
             {/* card recommended products */}
             {isLoadingProducts ? (
@@ -617,6 +652,41 @@ const CreateBill = () => {
                         onClick={() => {
                           const currentProducts =
                             form.getFieldValue("products") || [];
+
+                          // หารายการว่างแรก
+                          const emptyIndex = currentProducts.findIndex(
+                            (p: any) => !p.name || p.name === ""
+                          );
+
+                          // ถ้ามีรายการว่าง ให้แทนที่รายการนั้น
+                          if (emptyIndex !== -1) {
+                            form.setFieldValue(
+                              `products[${emptyIndex}].productId`,
+                              product._id || ""
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].name`,
+                              product.name
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].cost`,
+                              product.cost || 0
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].price`,
+                              product.price || 0
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].total`,
+                              product.price || 0
+                            );
+                            toast.success(
+                              `เพิ่ล "${product.name}" เข้ารายการแล้ว`
+                            );
+                            return;
+                          }
+
+                          // ถ้าไม่มีรายการว่าง ตรวจสอบจำนวน
                           if (currentProducts.length >= 12) {
                             toast.error(
                               "ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ"
@@ -670,13 +740,7 @@ const CreateBill = () => {
                     <>
                       {field.state.value && field.state.value.length > 0 ? (
                         field.state.value.map((product: any, index: number) => (
-                          <TableRow
-                            key={
-                              product._tempId ||
-                              product.productId ||
-                              `row-${index}`
-                            }
-                          >
+                          <TableRow key={product.productId || `row-${index}`}>
                             <TableCell className="font-normal w-20 text-center text-base">
                               {index + 1}
                             </TableCell>
