@@ -121,8 +121,11 @@ const SiteHeader = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink className="dark:text-white" href="/">
-                  Home
+                <BreadcrumbLink
+                  className="dark:text-white tracking-wider text-base font-medium"
+                  href="/"
+                >
+                  หน้าแรก
                 </BreadcrumbLink>
               </BreadcrumbItem>
               {breadcrumbItems.map((item, index) => (
@@ -130,9 +133,14 @@ const SiteHeader = () => {
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     {index === breadcrumbItems.length - 1 ? (
-                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                      <BreadcrumbPage className="dark:text-white tracking-wider text-base font-medium">
+                        {item.label}
+                      </BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={item.path}>
+                      <BreadcrumbLink
+                        className="dark:text-white tracking-wider text-base font-medium"
+                        href={item.path}
+                      >
                         {item.label}
                       </BreadcrumbLink>
                     )}

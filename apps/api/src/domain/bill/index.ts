@@ -92,7 +92,7 @@ export const bill = new Elysia({ prefix: "/bills" })
     {
       params: BaseResponse.ParamsId,
       response: {
-        200: BaseResponse.success(BillModel.billResponseDto),
+        // 200: BaseResponse.success(BillModel.billResponseDto),
         400: BaseResponse.badRequest,
         403: BaseResponse.forbidden,
         401: BaseResponse.unauthorized,

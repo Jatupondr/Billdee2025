@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EyeIcon,
@@ -90,11 +91,63 @@ const Bill = () => {
       header: "สถานะ",
       accessorKey: "status",
       size: 100,
-      cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
-          {row.original.status || "-"}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const status = row.original.status?.toLowerCase() || "";
+
+        const getStatusConfig = (status: string) => {
+          switch (status) {
+            case "paid":
+            case "ชำระแล้ว":
+              return {
+                variant: "default" as const,
+                className: "bg-green-500 hover:bg-green-600 text-white",
+                label: "ชำระแล้ว",
+              };
+            case "pending":
+            case "รอดำเนินการ":
+              return {
+                variant: "default" as const,
+                className: "bg-yellow-500 hover:bg-yellow-600 text-white",
+                label: "รอดำเนินการ",
+              };
+            case "cancelled":
+            case "ยกเลิก":
+              return {
+                variant: "destructive" as const,
+                className: "",
+                label: "ยกเลิก",
+              };
+            case "draft":
+            case "ร่าง":
+              return {
+                variant: "secondary" as const,
+                className: "",
+                label: "ร่าง",
+              };
+            case "overdue":
+            case "เกินกำหนด":
+              return {
+                variant: "default" as const,
+                className: "bg-orange-500 hover:bg-orange-600 text-white",
+                label: "เกินกำหนด",
+              };
+            default:
+              return {
+                variant: "outline" as const,
+                className: "",
+                label: row.original.status || "-",
+              };
+          }
+        };
+
+        const config = getStatusConfig(status);
+
+        return (
+          <Badge variant={config.variant} className={config.className}>
+            {config.label}
+          </Badge>
+        );
+      },
     },
     {
       header: "วันที่สร้าง",
@@ -112,25 +165,25 @@ const Bill = () => {
       size: 150,
       cell: ({ row }) => (
         <div className="flex gap-2">
-          {/* <Button
+          <Button
             size="icon"
             variant="outline"
             className="cursor-pointer active:scale-95 duration-200 ease-in-out"
             onClick={() => {
-              router.push(`/bill/${row.original._id}`);
+              router.push(`/bill/${row.original._id}` as any);
             }}
           >
             <EyeIcon size={20} weight="bold" />
-          </Button> */}
-          {/* <Button
+          </Button>
+          <Button
             size="icon"
             className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]/90 text-black"
             onClick={() => {
-              router.push(`/bill/edit/${row.original._id}`);
+              router.push(`/bill/${row.original._id}/edit`);
             }}
           >
             <PencilIcon size={20} weight="bold" />
-          </Button> */}
+          </Button>
           <Button
             size="icon"
             className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90"

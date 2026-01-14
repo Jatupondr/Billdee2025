@@ -77,7 +77,10 @@ export abstract class productService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
-      const product = await Product.findById(id, { isDeleted: false }).lean();
+      const product = await Product.findOne({
+        _id: id,
+        isDeleted: false,
+      }).lean();
       if (!product) {
         throw status(404, "Product not found");
       }

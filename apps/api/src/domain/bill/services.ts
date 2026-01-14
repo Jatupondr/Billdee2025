@@ -93,8 +93,8 @@ export abstract class billService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
-      const updatedBill = await Bill.findByIdAndUpdate(
-        id,
+      const updatedBill = await Bill.findOneAndUpdate(
+        { _id: id },
         {
           ...dto,
         },
