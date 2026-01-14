@@ -8,10 +8,10 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import StatsSummary from "./summary-stats";
+
+import Dashboard from "./dashboard";
 
 const Main = () => {
   const router = useRouter();
@@ -48,8 +48,8 @@ const Main = () => {
         </div>
       ) : activeOrg ? (
         <>
-          <StatsSummary />
-          <div className="text-center">
+          <Dashboard />
+          <div className="text-center mt-4">
             <h2>Main Component Content</h2>
             <p>Organization: {activeOrg.name}</p>
             <p>Organization ID: {activeOrg.id}</p>
