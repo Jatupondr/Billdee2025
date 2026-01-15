@@ -49,11 +49,11 @@ const Main = () => {
       ) : activeOrg ? (
         <>
           <Dashboard />
-          <div className="text-center mt-4">
+          {/* <div className="text-center mt-4">
             <h2>Main Component Content</h2>
             <p>Organization: {activeOrg.name}</p>
             <p>Organization ID: {activeOrg.id}</p>
-          </div>
+          </div> */}
         </>
       ) : (
         <>
