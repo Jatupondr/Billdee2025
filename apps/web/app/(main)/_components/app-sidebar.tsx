@@ -55,7 +55,7 @@ const data = {
     },
 
     {
-      title: "ตั่งค่าระบบ",
+      title: "ตั้งค่า",
       url: "/settings",
       icon: ReceiptIcon,
       isActive: false,

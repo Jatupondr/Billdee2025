@@ -179,7 +179,7 @@ const ListProduct = () => {
           <CardHeader>
             <CardTitle className="text-2xl tracking-widest">สินค้า</CardTitle>
             <CardDescription className="text-base tracking-wider">
-              List of products available.
+              รายชื่อสินค้าทั้งหมดในระบบ
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col  gap-4  w-full">
