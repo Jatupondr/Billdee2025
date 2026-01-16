@@ -8,7 +8,6 @@ export abstract class billService {
     try {
       console.log("DTO in service:", dto);
       const date = new Date(dto.date);
-      date.setUTCHours(17, 0, 0, 0);
 
       const bill = await Bill.create({
         ...dto,

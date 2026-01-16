@@ -91,6 +91,7 @@ export const billSchema = v.object({
   discountPercent: v.optional(v.number(), 0),
   taxPercent: v.optional(v.number(), 7),
   includeVat: v.optional(v.boolean(), false),
+  cost: v.optional(v.number(), 0),
   billNote: v.optional(v.string(), ""),
   total: v.optional(v.number(), 0),
   discount: v.optional(v.number(), 0),
@@ -120,6 +121,7 @@ const defaultValues: billData = {
   ],
   discountPercent: 0,
   taxPercent: 7,
+  cost: 0,
   includeVat: false,
   billNote: "",
   total: 0,
@@ -184,6 +186,7 @@ const CreateBill = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bills"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
       toast.success("สร้างบิลสำเร็จ", {
         position: "bottom-right",
       });
@@ -214,7 +217,10 @@ const CreateBill = () => {
           ? (afterDiscount * (value.taxPercent || 7)) / 100
           : 0;
         const totalAmount = afterDiscount + taxAmount;
-
+        const costAmount = (value.products || []).reduce(
+          (sum: number, item: any) => sum + (item.cost || 0),
+          0
+        );
         const formattedData = {
           billNumber: lastbill?.data?.billNumber,
           date: value.date || new Date().toISOString(),
@@ -235,7 +241,7 @@ const CreateBill = () => {
           discountPercent: value.discountPercent || 0,
           taxPercent: value.taxPercent || 7,
           includeVat: value.includeVat || false,
-
+          cost: costAmount,
           total: totalAmount,
           discount: discountAmount,
           vat: taxAmount,

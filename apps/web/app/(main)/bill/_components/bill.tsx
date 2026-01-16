@@ -35,6 +35,8 @@ interface Bill {
   status: string;
   createdAt: string;
   updatedAt: string;
+  date: string;
+  cost: number;
 }
 
 const Bill = () => {
@@ -80,6 +82,34 @@ const Bill = () => {
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
           {row.original.total?.toLocaleString("th-TH", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) || "0.00"}{" "}
+          ฿
+        </span>
+      ),
+    },
+    {
+      header: "ยอดต้นทุน",
+      accessorKey: "costAmount",
+      size: 100,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1">
+          {row.original.cost?.toLocaleString("th-TH", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) || "0.00"}{" "}
+          ฿
+        </span>
+      ),
+    },
+    {
+      header: "กำไรต่อบิล",
+      accessorKey: "profitPerBill",
+      size: 100,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-left line-clamp-1 text-green-500">
+          {(row.original.total - row.original.cost)?.toLocaleString("th-TH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }) || "0.00"}{" "}
@@ -149,13 +179,14 @@ const Bill = () => {
         );
       },
     },
+
     {
-      header: "วันที่สร้าง",
-      accessorKey: "createdAt",
+      header: "วันที่ออกบิล",
+      accessorKey: "date",
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {format(new Date(row.original.createdAt), "dd/MM/yyyy") || "-"}
+          {format(new Date(row.original.date), "dd/MM/yyyy") || "-"}
         </span>
       ),
     },

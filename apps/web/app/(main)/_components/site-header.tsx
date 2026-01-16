@@ -92,6 +92,13 @@ const SiteHeader = () => {
           onClick={() => router.push("/settings?tab=subscription-info")}
         >
           <CreditCardIcon />
+          โปรแกรม affiliate
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer flex items-center gap-2"
+          onClick={() => router.push("/settings?tab=subscription-info")}
+        >
+          <CreditCardIcon />
           การชำระเงินและแผน
         </DropdownMenuItem>
         <DropdownMenuItem

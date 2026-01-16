@@ -7,6 +7,7 @@ import { betterAuth } from "./plugins/better-auth";
 import { product } from "./domain/products";
 import { customer } from "./domain/customers";
 import { bill } from "./domain/bill";
+import { overview } from "./domain/overview";
 
 const app = new Elysia({
   prefix: "/api",
@@ -68,6 +69,7 @@ const app = new Elysia({
   .use(product)
   .use(customer)
   .use(bill)
+  .use(overview)
   .listen(3001);
 
 console.log(
