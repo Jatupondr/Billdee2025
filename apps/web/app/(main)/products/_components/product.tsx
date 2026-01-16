@@ -12,10 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  CheckCircleIcon,
   EyeIcon,
   PencilIcon,
   PlusCircleIcon,
   TrashIcon,
+  XCircleIcon,
 } from "@phosphor-icons/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -39,6 +41,7 @@ interface Product {
   recommended: boolean;
   createdAt: string;
   updatedAt: string;
+  isRecommended: boolean;
 }
 
 const ListProduct = () => {
@@ -98,11 +101,17 @@ const ListProduct = () => {
     },
     {
       header: "สินค้าแนะนำ",
-      accessorKey: "recommended",
+      accessorKey: "isRecommended",
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {row.original.recommended ? "✓" : "-"}
+          {row.original.isRecommended ? (
+            <CheckCircleIcon size={32} weight="duotone" color="#235822" />
+          ) : (
+            <span className="text-sm font-medium text-left line-clamp-1">
+              -
+            </span>
+          )}
         </span>
       ),
     },
