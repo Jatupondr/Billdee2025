@@ -74,7 +74,7 @@ const ListProduct = () => {
       accessorKey: "name",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 hover:underline cursor-pointer">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1 hover:underline cursor-pointer">
           {row.original.name || "-"}
         </span>
       ),
@@ -84,7 +84,7 @@ const ListProduct = () => {
       accessorKey: "price",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           ฿{Number(row.original.price).toLocaleString() || "-"}
         </span>
       ),
@@ -94,7 +94,7 @@ const ListProduct = () => {
       accessorKey: "costPrice",
       size: 150,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           ฿{Number(row.original.cost).toLocaleString() || "-"}
         </span>
       ),
@@ -104,11 +104,11 @@ const ListProduct = () => {
       accessorKey: "isRecommended",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           {row.original.isRecommended ? (
             <CheckCircleIcon size={32} weight="duotone" color="#235822" />
           ) : (
-            <span className="text-sm font-medium text-left line-clamp-1">
+            <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
               -
             </span>
           )}
@@ -120,8 +120,12 @@ const ListProduct = () => {
       accessorKey: "createdAt",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
-          {format(new Date(row.original.createdAt), "dd/MM/yyyy") || "-"}
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
+          {new Date(row.original.createdAt).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }) || "-"}
         </span>
       ),
     },
@@ -134,7 +138,7 @@ const ListProduct = () => {
           <Button
             size="icon"
             variant="outline"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out text-sm font-normal tracking-widest"
             onClick={() => {
               setSelectedProduct(row.original);
               setViewModalOpen(true);
@@ -144,7 +148,7 @@ const ListProduct = () => {
           </Button>
           <Button
             size="icon"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]/90 text-black"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]/90 text-black text-sm font-normal tracking-widest"
             onClick={() => {
               setSelectedProduct(row.original);
               setEditModalOpen(true);
@@ -155,7 +159,7 @@ const ListProduct = () => {
 
           <Button
             size="icon"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90 text-sm font-normal tracking-widest"
             onClick={() => {
               setSelectedProduct(row.original);
               setDeleteDialogOpen(true);
@@ -177,8 +181,8 @@ const ListProduct = () => {
       <div className="flex justify-center items-center min-w-full ">
         <Card className="shadow-2xl rounded-2xl w-full  dark:bg-zinc-900">
           <CardHeader>
-            <CardTitle className="text-2xl tracking-widest">สินค้า</CardTitle>
-            <CardDescription className="text-base tracking-wider">
+            <CardTitle className="text-2xl font-normal tracking-widest">สินค้า</CardTitle>
+            <CardDescription className="text-base font-normal tracking-widest">
               รายชื่อสินค้าทั้งหมดในระบบ
             </CardDescription>
           </CardHeader>
@@ -186,7 +190,7 @@ const ListProduct = () => {
             <div className="flex justify-between items-center">
               <Button
                 size="lg"
-                className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+                className="cursor-pointer active:scale-95 duration-200 ease-in-out text-sm font-normal tracking-widest"
                 onClick={() => setCreateModalOpen(true)}
               >
                 <PlusCircleIcon size={36} weight="bold" />

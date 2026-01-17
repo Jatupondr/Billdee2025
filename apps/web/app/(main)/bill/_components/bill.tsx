@@ -117,68 +117,68 @@ const Bill = () => {
         </span>
       ),
     },
-    {
-      header: "สถานะ",
-      accessorKey: "status",
-      size: 100,
-      cell: ({ row }) => {
-        const status = row.original.status?.toLowerCase() || "";
+    // {
+    //   header: "สถานะ",
+    //   accessorKey: "status",
+    //   size: 100,
+    //   cell: ({ row }) => {
+    //     const status = row.original.status?.toLowerCase() || "";
 
-        const getStatusConfig = (status: string) => {
-          switch (status) {
-            case "paid":
-            case "ชำระแล้ว":
-              return {
-                variant: "default" as const,
-                className: "bg-green-500 hover:bg-green-600 text-white",
-                label: "ชำระแล้ว",
-              };
-            case "pending":
-            case "รอดำเนินการ":
-              return {
-                variant: "default" as const,
-                className: "bg-yellow-500 hover:bg-yellow-600 text-white",
-                label: "รอดำเนินการ",
-              };
-            case "cancelled":
-            case "ยกเลิก":
-              return {
-                variant: "destructive" as const,
-                className: "",
-                label: "ยกเลิก",
-              };
-            case "draft":
-            case "ร่าง":
-              return {
-                variant: "secondary" as const,
-                className: "",
-                label: "ร่าง",
-              };
-            case "overdue":
-            case "เกินกำหนด":
-              return {
-                variant: "default" as const,
-                className: "bg-orange-500 hover:bg-orange-600 text-white",
-                label: "เกินกำหนด",
-              };
-            default:
-              return {
-                variant: "outline" as const,
-                className: "",
-                label: row.original.status || "-",
-              };
-          }
-        };
+    //     const getStatusConfig = (status: string) => {
+    //       switch (status) {
+    //         case "paid":
+    //         case "ชำระแล้ว":
+    //           return {
+    //             variant: "default" as const,
+    //             className: "bg-green-500 hover:bg-green-600 text-white",
+    //             label: "ชำระแล้ว",
+    //           };
+    //         case "pending":
+    //         case "รอดำเนินการ":
+    //           return {
+    //             variant: "default" as const,
+    //             className: "bg-yellow-500 hover:bg-yellow-600 text-white",
+    //             label: "รอดำเนินการ",
+    //           };
+    //         case "cancelled":
+    //         case "ยกเลิก":
+    //           return {
+    //             variant: "destructive" as const,
+    //             className: "",
+    //             label: "ยกเลิก",
+    //           };
+    //         case "draft":
+    //         case "ร่าง":
+    //           return {
+    //             variant: "secondary" as const,
+    //             className: "",
+    //             label: "ร่าง",
+    //           };
+    //         case "overdue":
+    //         case "เกินกำหนด":
+    //           return {
+    //             variant: "default" as const,
+    //             className: "bg-orange-500 hover:bg-orange-600 text-white",
+    //             label: "เกินกำหนด",
+    //           };
+    //         default:
+    //           return {
+    //             variant: "outline" as const,
+    //             className: "",
+    //             label: row.original.status || "-",
+    //           };
+    //       }
+    //     };
 
-        const config = getStatusConfig(status);
+    //     const config = getStatusConfig(status);
 
-        return (
-          <Badge variant={config.variant} className={config.className}>
-            {config.label}
-          </Badge>
-        );
-      },
-    },
+    //     return (
+    //       <Badge variant={config.variant} className={config.className}>
+    //         {config.label}
+    //       </Badge>
+    //     );
+    //   },
+    // },
 
     {
       header: "วันที่ออกบิล",
@@ -186,7 +186,12 @@ const Bill = () => {
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-left line-clamp-1">
-          {format(new Date(row.original.date), "dd/MM/yyyy") || "-"}
+         {new Date(row.original.date).toLocaleDateString("th-TH", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+         }
+         ) || "-"}
         </span>
       ),
     },
