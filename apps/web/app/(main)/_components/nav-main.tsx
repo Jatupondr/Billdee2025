@@ -42,7 +42,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-sx font-normal text-[#f4f6f9] tracking-wider mb-0.5">
+      <SidebarGroupLabel className="text-sx font-normal text-[#f4f6f9] tracking-widest mb-0.5">
         เมนูหลัก
       </SidebarGroupLabel>
 
