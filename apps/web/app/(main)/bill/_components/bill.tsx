@@ -245,10 +245,10 @@ const Bill = () => {
       <div className="flex justify-center items-center min-w-full">
         <Card className="shadow-2xl rounded-2xl w-full dark:bg-zinc-900">
           <CardHeader>
-            <CardTitle className="text-2xl tracking-widest">
+            <CardTitle className="text-2xl  font-normal tracking-widest">
               รายการบิล
             </CardTitle>
-            <CardDescription className="text-base tracking-wider">
+            <CardDescription className="text-base  font-normal tracking-widest">
               รายการบิลทั้งหมดในระบบ
             </CardDescription>
           </CardHeader>
@@ -256,7 +256,7 @@ const Bill = () => {
             <div className="flex justify-between items-center">
               <Button
                 size="lg"
-                className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+                className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 onClick={() => router.push("/bill/create")}
               >
                 <PlusCircleIcon size={36} weight="bold" />
@@ -264,7 +264,7 @@ const Bill = () => {
               </Button>
               <Input
                 placeholder="ค้นหาบิล ชื่อลูกค้า เลขที่บิล"
-                className="max-w-xs"
+                className="max-w-xs font-normal tracking-widest"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />

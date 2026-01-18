@@ -113,10 +113,10 @@ const CreateProductModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
+      <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl">เพิ่มสินค้าใหม่</DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogTitle className="text-2xl font-normal tracking-widest">เพิ่มสินค้าใหม่</DialogTitle>
+          <DialogDescription className="text-base font-normal tracking-widest">
             กรอกข้อมูลสินค้าของคุณที่นี่
           </DialogDescription>
         </DialogHeader>
@@ -144,7 +144,7 @@ const CreateProductModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>ชื่อสินค้า</FieldLabel>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ชื่อสินค้า</FieldLabel>
                       <InputGroup className="h-12">
                         <InputGroupInput
                           id={field.name}
@@ -157,6 +157,7 @@ const CreateProductModal = ({
                             !field.state.meta.isValid
                           }
                           placeholder="ชื่อสินค้า"
+                          className="font-normal tracking-widest"
                         />
                         <InputGroupAddon>
                           <PackageIcon size={32} className="size-5" />
@@ -183,7 +184,7 @@ const CreateProductModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>ราคาขาย</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ราคาขาย</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -199,6 +200,7 @@ const CreateProductModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="ราคาขาย"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -222,7 +224,7 @@ const CreateProductModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>ต้นทุน</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ต้นทุน</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -238,6 +240,7 @@ const CreateProductModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="ต้นทุน"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -256,7 +259,7 @@ const CreateProductModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>รายละเอียด</FieldLabel>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">รายละเอียด</FieldLabel>
                       <Textarea
                         id={field.name}
                         name={field.name}
@@ -269,6 +272,7 @@ const CreateProductModal = ({
                         }
                         placeholder="รายละเอียดสินค้า"
                         rows={4}
+                        className="font-normal tracking-widest"
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -283,17 +287,17 @@ const CreateProductModal = ({
                 children={(field) => (
                   <Field orientation="horizontal">
                     <FieldContent>
-                      <FieldLabel htmlFor="isRecommended">
+                      <FieldLabel htmlFor="isRecommended" className="font-normal tracking-widest">
                         สินค้าแนะนำ
                       </FieldLabel>
-                      <FieldDescription>
+                      <FieldDescription className="font-normal tracking-widest"   >
                         ถ้าเปิดใช้งานจะสามารถแสดงรายการสินค้าในหน้าสร้างบิล
                       </FieldDescription>
                     </FieldContent>
                     <Switch
                       id="isRecommended"
                       name={field.name}
-                      className="h-8 w-14"
+                      className="h-8 w-14 font-normal tracking-widest"
                       checked={field.state.value}
                       onCheckedChange={field.handleChange}
                     />
@@ -306,6 +310,7 @@ const CreateProductModal = ({
             <Button
               type="button"
               variant="outline"
+              className="font-normal tracking-widest"
               onClick={() => {
                 onOpenChange(false);
                 formProducts.reset();
@@ -318,7 +323,7 @@ const CreateProductModal = ({
               type="submit"
               form="form-create-product"
               disabled={createProductMutation.isPending}
-              className="active:scale-95 duration-300 cursor-pointer"
+              className="active:scale-95 duration-300 cursor-pointer font-normal tracking-widest"
             >
               {createProductMutation.isPending
                 ? "กำลังสร้าง..."

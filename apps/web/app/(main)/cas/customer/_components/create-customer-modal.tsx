@@ -121,8 +121,8 @@ const CreateCustomerModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl">เพิ่มลูกค้าใหม่</DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogTitle className="text-2xl font-normal tracking-widest">เพิ่มลูกค้าใหม่</DialogTitle>
+          <DialogDescription className="text-base font-normal tracking-widest">
             กรอกข้อมูลลูกค้าของคุณที่นี่
           </DialogDescription>
         </DialogHeader>
@@ -143,7 +143,7 @@ const CreateCustomerModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>ชื่อลูกค้า</FieldLabel>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ชื่อลูกค้า</FieldLabel>
                       <InputGroup className="h-12">
                         <InputGroupInput
                           id={field.name}
@@ -156,6 +156,7 @@ const CreateCustomerModal = ({
                             !field.state.meta.isValid
                           }
                           placeholder="ชื่อลูกค้า"
+                          className="font-normal tracking-widest"
                         />
                       </InputGroup>
                       {isInvalid && (
@@ -172,7 +173,7 @@ const CreateCustomerModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                         เบอร์โทรศัพท์ลูกค้า
                       </FieldLabel>
                       <InputGroup className="h-12">
@@ -187,6 +188,7 @@ const CreateCustomerModal = ({
                             !field.state.meta.isValid
                           }
                           placeholder="เบอร์โทรศัพท์"
+                          className="font-normal tracking-widest"
                         />
                       </InputGroup>
                       {isInvalid && (
@@ -203,7 +205,7 @@ const CreateCustomerModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                         ที่อยู่ลูกค้า
                       </FieldLabel>
                       <Textarea
@@ -217,6 +219,7 @@ const CreateCustomerModal = ({
                           !field.state.meta.isValid
                         }
                         placeholder="ที่อยู่ร้านค้า"
+                        className="font-normal tracking-widest"
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -233,7 +236,7 @@ const CreateCustomerModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>จังหวัด</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">จังหวัด</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -246,6 +249,7 @@ const CreateCustomerModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="จังหวัด"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -262,7 +266,7 @@ const CreateCustomerModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>เขต/อำเภอ</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">เขต/อำเภอ</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -275,7 +279,8 @@ const CreateCustomerModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="เขต/อำเภอ"
-                          />
+                            className="font-normal tracking-widest"
+                            />
                         </InputGroup>
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
@@ -293,7 +298,7 @@ const CreateCustomerModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>ตำบล/แขวง</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ตำบล/แขวง</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -306,6 +311,7 @@ const CreateCustomerModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="ตำบล/แขวง"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -322,7 +328,7 @@ const CreateCustomerModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           รหัสไปรษณีย์
                         </FieldLabel>
                         <InputGroup className="h-12">
@@ -337,6 +343,7 @@ const CreateCustomerModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="รหัสไปรษณีย์"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -353,6 +360,7 @@ const CreateCustomerModal = ({
             <Button
               type="button"
               variant="outline"
+              className="font-normal tracking-widest"
               onClick={() => onOpenChange(false)}
               disabled={createCustomerMutation.isPending}
             >
@@ -362,7 +370,7 @@ const CreateCustomerModal = ({
               type="submit"
               form="form-create-customer"
               disabled={createCustomerMutation.isPending}
-              className="active:scale-95 duration-300 cursor-pointer"
+              className="active:scale-95 duration-300 cursor-pointer font-normal tracking-widest"
             >
               {createCustomerMutation.isPending
                 ? "กำลังสร้าง..."

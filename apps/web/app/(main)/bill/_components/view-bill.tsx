@@ -81,10 +81,10 @@ const ViewBill = ({ id }: ViewBillProps) => {
   return (
     <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
       <CardHeader>
-        <CardTitle className="text-2xl tracking-widest">
+        <CardTitle className="text-2xl  font-normal tracking-widest">
           รายละเอียดบิล #{bill.billNumber}
         </CardTitle>
-        <CardDescription className="tracking-wider">
+        <CardDescription className=" font-normal tracking-widest">
           ข้อมูลบิลฉบับนี้
         </CardDescription>
         <CardAction className="space-x-2">
@@ -92,7 +92,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
             type="button"
             variant="outline"
             size="sm"
-            className="tracking-wide cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
             onClick={() => router.push("/bill")}
           >
             <BackspaceIcon size={32} weight="fill" />
@@ -102,7 +102,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
             type="button"
             variant="default"
             size="sm"
-            className="tracking-wide cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
             onClick={() => router.push(`/bill/${id}/edit`)}
           >
             <PencilSimpleIcon size={32} weight="fill" />
@@ -115,10 +115,10 @@ const ViewBill = ({ id }: ViewBillProps) => {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-normal tracking-widest text-muted-foreground">
                 วันที่ออกบิล:
               </span>
-              <span className="text-base font-semibold">
+              <span className="text-base font-normal tracking-widest">
                 {new Date(bill.date).toLocaleDateString("th-TH", {
                   year: "numeric",
                   month: "long",
@@ -131,31 +131,31 @@ const ViewBill = ({ id }: ViewBillProps) => {
 
         {/* ข้อมูลลูกค้า */}
         <Card className="border border-border/50 bg-accent/20">
-          <CardContent className="pt-6">
+          <CardContent className="">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-sm font-normal tracking-widest text-muted-foreground">
                     ชื่อลูกค้า:
                   </span>
-                  <span className="text-base font-semibold">
+                  <span className="text-base font-normal tracking-widest">
                     {bill.name_customer}
                   </span>
                 </div>
                 {bill.phone_customer && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <span className="text-sm font-normal tracking-widest text-muted-foreground">
                       เบอร์โทร:
                     </span>
-                    <span className="text-sm">{bill.phone_customer}</span>
+                    <span className="text-sm font-normal tracking-widest">{bill.phone_customer}</span>
                   </div>
                 )}
                 {bill.address_customer && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <span className="text-sm font-normal tracking-widest text-muted-foreground">
                       ที่อยู่:
                     </span>
-                    <span className="text-sm">{bill.address_customer}</span>
+                    <span className="text-sm font-normal tracking-widest">{bill.address_customer}</span>
                   </div>
                 )}
               </div>
@@ -165,11 +165,11 @@ const ViewBill = ({ id }: ViewBillProps) => {
 
         {/* ตารางสินค้า */}
         <Table>
-          <TableHeader className="bg-accent">
+          <TableHeader className="bg-zinc-100 dark:bg-zinc-600">
             <TableRow>
               {ListTable.map((header, idx: number) => (
                 <TableHead
-                  className="text-base tracking-widest font-normal leading-4"
+                  className="text-base font-normal tracking-widest leading-4"
                   key={idx}
                 >
                   {header}
@@ -184,24 +184,24 @@ const ViewBill = ({ id }: ViewBillProps) => {
                   <TableCell className="font-normal w-20 text-center text-base">
                     {index + 1}
                   </TableCell>
-                  <TableCell className="font-medium text-base">
+                  <TableCell className="font-normal tracking-widest text-base">
                     {product.name}
                     {product.note && (
-                      <div className="text-sm font-normal text-muted-foreground mt-1">
+                      <div className="text-sm font-normal tracking-widest text-muted-foreground mt-1">
                         {product.note}
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="w-28 text-center">
+                  <TableCell className="w-28 text-center font-normal tracking-widest    ">
                     {product.quantity}
                   </TableCell>
-                  <TableCell className="w-28 text-right">
+                  <TableCell className="w-28 text-right font-normal tracking-widest    ">
                     {product.cost?.toFixed(2) || "0.00"}
                   </TableCell>
-                  <TableCell className="w-32 text-right">
+                  <TableCell className="w-32 text-right font-normal tracking-widest    ">
                     {product.price?.toFixed(2) || "0.00"}
                   </TableCell>
-                  <TableCell className="w-32 text-right font-medium">
+                  <TableCell className="w-32 text-right font-normal tracking-widest    ">
                     {product.total?.toFixed(2) || "0.00"}
                   </TableCell>
                 </TableRow>
@@ -210,7 +210,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
               <TableRow>
                 <TableCell
                   colSpan={6}
-                  className="text-center text-muted-foreground"
+                  className="text-center text-muted-foreground font-normal tracking-widest    "
                 >
                   ไม่มีสินค้า
                 </TableCell>
@@ -224,17 +224,17 @@ const ViewBill = ({ id }: ViewBillProps) => {
           <div className="space-y-1">
             {bill.note && (
               <div className="space-y-2">
-                <span className="text-sm font-medium text-muted-foreground">
+                <span className="text-sm font-normal tracking-widest text-muted-foreground">
                   หมายเหตุ:
                 </span>
-                <p className="text-sm">{bill.note}</p>
+                <p className="text-sm font-normal tracking-widest">{bill.note}</p>
               </div>
             )}
           </div>
           <div className="w-96 space-y-3 border rounded-lg p-4 bg-accent/30">
             <div className="flex justify-between items-center">
-              <span className="text-sm tracking-wider">ยอดรวมก่อนส่วนลด</span>
-              <span className="text-base font-medium">
+              <span className="text-sm  font-normal tracking-widest">ยอดรวมก่อนส่วนลด</span>
+              <span className="text-base font-normal tracking-widest">
                 {(
                   (bill.total || 0) +
                   (bill.discount || 0) -
@@ -244,30 +244,30 @@ const ViewBill = ({ id }: ViewBillProps) => {
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-sm tracking-wider">
+              <span className="text-sm font-normal tracking-widest">
                 ส่วนลด ({bill.discountPercent || 0}%)
               </span>
-              <span className="text-base font-medium">
+              <span className="text-base font-normal tracking-widest">
                 {(bill.discount || 0).toFixed(2)}
               </span>
             </div>
 
             {bill.includeVat && (
               <div className="flex justify-between items-center">
-                <span className="text-sm tracking-wider">
+                <span className="text-sm  font-normal tracking-widest text-muted-foreground">
                   ภาษีมูลค่าเพิ่ม ({bill.taxPercent || 7}%)
                 </span>
-                <span className="text-base font-medium">
+                <span className="text-base font-normal tracking-widest">
                   {(bill.vat || 0).toFixed(2)}
                 </span>
               </div>
             )}
 
             <div className="border-t pt-3 flex justify-between items-center">
-              <span className="text-base font-semibold tracking-wider">
+              <span className="text-base font-normal tracking-widest">
                 รวมสุทธิ
               </span>
-              <span className="text-xl font-normal">
+              <span className="text-xl font-normal tracking-widest">
                 {(bill.total || 0).toFixed(2)}
               </span>
             </div>

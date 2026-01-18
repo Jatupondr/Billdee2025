@@ -134,10 +134,10 @@ const EditProductModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl">แก้ไขสินค้า</DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogTitle className="text-2xl font-normal tracking-widest">แก้ไขสินค้า</DialogTitle>
+          <DialogDescription className="text-base font-normal tracking-widest">
             แก้ไขข้อมูลสินค้าของคุณที่นี่
           </DialogDescription>
         </DialogHeader>
@@ -165,7 +165,7 @@ const EditProductModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>ชื่อสินค้า</FieldLabel>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ชื่อสินค้า</FieldLabel>
                       <InputGroup className="h-12">
                         <InputGroupInput
                           id={field.name}
@@ -178,6 +178,7 @@ const EditProductModal = ({
                             !field.state.meta.isValid
                           }
                           placeholder="ชื่อสินค้า"
+                          className="font-normal tracking-widest"
                         />
                         <InputGroupAddon>
                           <PackageIcon size={32} className="size-5" />
@@ -204,7 +205,7 @@ const EditProductModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>ราคาขาย</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ราคาขาย</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -220,6 +221,7 @@ const EditProductModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="ราคาขาย"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -243,7 +245,7 @@ const EditProductModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>ต้นทุน</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ต้นทุน</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -259,6 +261,7 @@ const EditProductModal = ({
                               !field.state.meta.isValid
                             }
                             placeholder="ต้นทุน"
+                            className="font-normal tracking-widest"
                           />
                         </InputGroup>
                         {isInvalid && (
@@ -277,7 +280,7 @@ const EditProductModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>รายละเอียด</FieldLabel>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">รายละเอียด</FieldLabel>
                       <Textarea
                         id={field.name}
                         name={field.name}
@@ -290,6 +293,7 @@ const EditProductModal = ({
                         }
                         placeholder="รายละเอียดสินค้า"
                         rows={4}
+                        className="font-normal tracking-widest"
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -304,10 +308,10 @@ const EditProductModal = ({
                 children={(field) => (
                   <Field orientation="horizontal">
                     <FieldContent>
-                      <FieldLabel htmlFor="isRecommended-edit">
+                      <FieldLabel htmlFor="isRecommended-edit" className="font-normal tracking-widest">
                         สินค้าแนะนำ
                       </FieldLabel>
-                      <FieldDescription>
+                      <FieldDescription className="font-normal tracking-widest" >
                         ถ้าเปิดใช้งานจะสามารถแสดงรายการสินค้าในหน้าสร้างบิล
                       </FieldDescription>
                     </FieldContent>
@@ -327,6 +331,7 @@ const EditProductModal = ({
             <Button
               type="button"
               variant="outline"
+              className="font-normal tracking-widest"
               onClick={() => onOpenChange(false)}
               disabled={updateProductMutation.isPending}
             >
@@ -336,7 +341,7 @@ const EditProductModal = ({
               type="submit"
               form="form-edit-product"
               disabled={updateProductMutation.isPending}
-              className="active:scale-95 duration-300 cursor-pointer"
+              className="active:scale-95 duration-300 cursor-pointer font-normal tracking-widest"
             >
               {updateProductMutation.isPending
                 ? "กำลังบันทึก..."
