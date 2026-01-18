@@ -16,10 +16,10 @@ export function SidebarOptInForm() {
   return (
     <Card className="gap-2 py-4 shadow-none dark:bg-zinc-900 border border-border/50">
       <CardHeader className="px-4">
-        <CardTitle className="text-sm tracking-wide">
+        <CardTitle className="text-sm font-normal tracking-widest">
           อัปเกรดเป็น BillDee Pro
         </CardTitle>
-        <CardDescription className="tracking-wide">
+        <CardDescription className="font-normal tracking-wide text-xs">
           ปลดล็อกฟีเจอร์ขั้นสูงด้วยการอัปเกรดเป็น BillDee Pro
         </CardDescription>
       </CardHeader>
@@ -27,7 +27,7 @@ export function SidebarOptInForm() {
         <form>
           <div className="grid gap-2.5">
             <Button
-              className="bg-sidebar-primary tracking-widest text-sidebar-primary-foreground w-full shadow-none cursor-pointer hover:bg-sidebar-primary/90"
+              className="bg-sidebar-primary font-normal tracking-widest text-sidebar-primary-foreground w-full shadow-none cursor-pointer hover:bg-sidebar-primary/90"
               size="sm"
               onClick={() => router.push("/settings?tab=subscription-info")}
             >

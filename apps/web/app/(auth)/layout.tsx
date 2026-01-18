@@ -46,7 +46,7 @@ export default function AuthLayout({
     <div className="bg-[#f9fafb] dark:bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="w-full max-w-sm">
         {children}
-        <p className="mt-auto pt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-auto pt-6 text-center text-sm text-muted-foreground font-normal tracking-widest">
           &copy; 2026 billdee. All rights reserved.
         </p>
       </div>

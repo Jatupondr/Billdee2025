@@ -51,10 +51,10 @@ export function TeamSwitcher({
 
         {/* Team info */}
         <div className="flex flex-col leading-tight min-w-0 flex-1">
-          <span className="text-xl font-semibold font-mono text-white tracking-widest truncate uppercase">
+          <span className="text-xl font-normal font-mono text-white tracking-widest truncate uppercase">
             {activeTeam.name}
           </span>
-          <span className="text-sm text-white/70 truncate leading-tight max-w-40">
+          <span className="text-sm text-white/70 truncate leading-tight max-w-40 font-normal tracking-widest">
             {activeOrg?.name}
           </span>
         </div>

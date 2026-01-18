@@ -159,10 +159,10 @@ const LoginComponent = () => {
               </div>
               <span className="sr-only">Acme Inc.</span>
             </a>
-            <h1 className="text-2xl font-normal tracking-widest text-caption">
+            <h1 className="text-4xl font-normal tracking-widest text-caption ">
               Billdee บิลดี
             </h1>
-            <FieldDescription className="tracking-wider">
+            <FieldDescription className=" text-xl font-normal tracking-widest">
               ล็อกอินเข้าสู่ระบบ
             </FieldDescription>
           </div>
@@ -183,7 +183,7 @@ const LoginComponent = () => {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>อีเมล</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">อีเมล</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -198,6 +198,7 @@ const LoginComponent = () => {
                             }
                             placeholder="อีเมลหรือชื่อผู้ใช้"
                             autoComplete="email"
+                            className="font-normal tracking-widest "
                           />
                           <InputGroupAddon>
                             <EnvelopeSimpleIcon
@@ -222,7 +223,7 @@ const LoginComponent = () => {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>รหัสผ่าน</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">รหัสผ่าน</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
                             id={field.name}
@@ -236,7 +237,7 @@ const LoginComponent = () => {
                               !field.state.meta.isValid
                             }
                             placeholder="รหัสผ่าน"
-                            className="tracking-widest"
+                            className="font-normal tracking-widest"
                           />
                           <InputGroupAddon>
                             <PasswordIcon
@@ -269,8 +270,8 @@ const LoginComponent = () => {
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
                         )}
-                        <FieldDescription className="text-right">
-                          <a href="/forgot" className="text-sm ">
+                        <FieldDescription className="text-right font-normal tracking-widest">
+                          <a href="/forgot" className="text-sm font-normal tracking-widest">
                             ลืมรหัสผ่าน?
                           </a>
                         </FieldDescription>
@@ -286,23 +287,23 @@ const LoginComponent = () => {
             <Button
               type="submit"
               form="form-login"
-              className="active:scale-95 duration-300 cursor-pointer flex justify-center gap-2 py-3 px-2 h-11 w-full"
+              className="active:scale-95 duration-300 cursor-pointer flex justify-center gap-2 py-3 px-2 h-11 w-full font-normal tracking-widest  "
             >
               <SignInIcon
                 size={32}
                 weight="fill"
                 className="size-5 dark:text-gray-100"
               />
-              <p className="text-base tracking-widest">เข้าสู่ระบบ</p>
+              <p className="text-base font-normal tracking-widest">เข้าสู่ระบบ</p>
             </Button>
           </Field>
-          <FieldSeparator>หรือ</FieldSeparator>
+          <FieldSeparator className="font-normal tracking-widest">หรือ</FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-1">
             <Button
               onClick={handleGoogleSignIn}
               variant="outline"
               type="button"
-              className="active:scale-95 duration-300 cursor-pointer py-3 px-2 h-11 w-full flex justify-center gap-2"
+              className="active:scale-95 duration-300 cursor-pointer py-3 px-2 h-11 w-full flex justify-center gap-2 font-normal tracking-widest"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path
@@ -310,14 +311,14 @@ const LoginComponent = () => {
                   fill="currentColor"
                 />
               </svg>
-              Continue with Google
+              <p className="font-normal tracking-widest">Continue with Google</p>
             </Button>
           </Field>
         </FieldGroup>
 
-        <FieldDescription className="px-6 text-center">
-          เมื่อคลิก “เข้าสู่ระบบ”คุณยอมรับ <a href="#">ข้อตกลงการให้บริการ</a>{" "}
-          และ <a href="#">นโยบายความเป็นส่วนตัว</a>.
+        <FieldDescription className="px-6 text-center font-normal tracking-widest">
+          เมื่อคลิก “เข้าสู่ระบบ”คุณยอมรับ <a href="#" className="font-normal tracking-widest">ข้อตกลงการให้บริการ</a>{" "}
+          และ <a href="#" className="font-normal tracking-widest">นโยบายความเป็นส่วนตัว</a>.
         </FieldDescription>
       </div>
     </>

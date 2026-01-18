@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { th } from "date-fns/locale";
 
 // const months = [
 //   "January",
@@ -432,13 +433,13 @@ export const CalendarDatePicker = React.forwardRef<
           `}
         </style>
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger>
+          <PopoverTrigger className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
             <Button
               id="date"
               // ref={ref as React.RefObject<HTMLButtonElement>}
               {...props}
               className={cn(
-                "w-auto",
+                "w-auto font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
                 multiSelectVariants({ variant, className })
               )}
               onClick={handleTogglePopover}
@@ -449,11 +450,15 @@ export const CalendarDatePicker = React.forwardRef<
                 {date?.from ? (
                   date.to && numberOfMonths === 2 ? (
                     <>
-                      <span
+                     <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"> {new Date(date.from).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}</span>
+                     {" - "}
+                     <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"> {new Date(date.to).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}</span>
+
+                      {/* <span
                         id={`firstDay-${id}`}
                         className={cn(
-                          "date-part",
-                          highlightedPart === "firstDay" && " font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                          highlightedPart === "firstDay" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("firstDay")}
                         onMouseLeave={handleMouseLeave}
@@ -463,8 +468,8 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id={`firstMonth-${id}`}
                         className={cn(
-                          "date-part",
-                          highlightedPart === "firstMonth" && " font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                          highlightedPart === "firstMonth" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("firstMonth")}
                         onMouseLeave={handleMouseLeave}
@@ -475,8 +480,8 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id={`firstYear-${id}`}
                         className={cn(
-                          "date-part",
-                          highlightedPart === "firstYear" && " font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                          highlightedPart === "firstYear" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("firstYear")}
                         onMouseLeave={handleMouseLeave}
@@ -487,8 +492,8 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id={`secondDay-${id}`}
                         className={cn(
-                          "date-part",
-                          highlightedPart === "secondDay" && " font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                          highlightedPart === "secondDay" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("secondDay")}
                         onMouseLeave={handleMouseLeave}
@@ -498,8 +503,8 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id={`secondMonth-${id}`}
                         className={cn(
-                          "date-part",
-                          highlightedPart === "secondMonth" && " font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                          highlightedPart === "secondMonth" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("secondMonth")}
                         onMouseLeave={handleMouseLeave}
@@ -510,22 +515,24 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id={`secondYear-${id}`}
                         className={cn(
-                          "date-part",
-                          highlightedPart === "secondYear" && " font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                          highlightedPart === "secondYear" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("secondYear")}
                         onMouseLeave={handleMouseLeave}
                       >
                         {formatWithTz(date.to, "y")}
-                      </span>
+                      </span> */}
                     </>
                   ) : (
                     <>
-                      <span
+                      <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"> {new Date(date.from).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}</span>
+
+                      {/* <span
                         id="day"
                         className={cn(
-                          "date-part",
-                          highlightedPart === "day" && "underline font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900  ",
+                          highlightedPart === "day" && "underline font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("day")}
                         onMouseLeave={handleMouseLeave}
@@ -535,8 +542,8 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id="month"
                         className={cn(
-                          "date-part",
-                          highlightedPart === "month" && "underline font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900  ",
+                          highlightedPart === "month" && "underline font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("month")}
                         onMouseLeave={handleMouseLeave}
@@ -547,18 +554,18 @@ export const CalendarDatePicker = React.forwardRef<
                       <span
                         id="year"
                         className={cn(
-                          "date-part",
-                          highlightedPart === "year" && "underline font-bold"
+                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900  ",
+                            highlightedPart === "year" && "underline font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
                         )}
                         onMouseOver={() => handleMouseOver("year")}
                         onMouseLeave={handleMouseLeave}
                       >
                         {formatWithTz(date.from, "y")}
-                      </span>
+                      </span> */}
                     </>
                   )
                 ) : (
-                  <span>เลือกวันที่</span>
+                  <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">เลือกวันที่</span>
                 )}
               </span>
             </Button>
@@ -582,9 +589,9 @@ export const CalendarDatePicker = React.forwardRef<
                         variant="ghost"
                         size="sm"
                         className={cn(
-                          "justify-start hover:bg-primary/90 hover:text-background cursor-pointer active:scale-95 transition-all duration-100",
+                          "justify-start font-normal tracking-widest dark:text-zinc-300  hover:bg-primary dark:hover:bg-zinc-800 hover:text-background cursor-pointer active:scale-95 transition-all duration-100",
                           selectedRange === label &&
-                            "bg-primary text-background hover:bg-primary/90 hover:text-background cursor-pointer active:scale-95 transition-all duration-100"
+                            "bg-primary text-zinc-100 dark:text-zinc-100  hover:bg-primary hover:text-zinc-100 dark:hover:text-zinc-100 cursor-pointer active:scale-95 transition-all duration-100"
                         )}
                         onClick={() => {
                           selectDateRange(start, end, label);
@@ -622,18 +629,18 @@ export const CalendarDatePicker = React.forwardRef<
                       </Select>
                       <Select
                         onValueChange={(value) => {
-                          handleYearChange(Number(value), "from");
+                          handleYearChange(Number(value) - 543, "from");
                           setSelectedRange(null);
                         }}
-                        value={yearFrom ? yearFrom.toString() : ""}
+                        value={yearFrom ? (yearFrom + 543).toString() : ""}
                       >
                         <SelectTrigger className="hidden sm:flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {years.map((year, idx) => (
-                            <SelectItem key={idx} value={year.toString()}>
-                              {year}
+                            <SelectItem key={idx} value={(year + 543).toString()}>
+                              {year + 543}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -661,18 +668,18 @@ export const CalendarDatePicker = React.forwardRef<
                         </Select>
                         <Select
                           onValueChange={(value) => {
-                            handleYearChange(Number(value), "to");
+                            handleYearChange(Number(value) - 543, "to");
                             setSelectedRange(null);
                           }}
-                          value={yearTo ? yearTo.toString() : ""}
+                          value={yearTo ? (yearTo + 543).toString() : ""}
                         >
                           <SelectTrigger className="hidden sm:flex w-30.5 focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {years.map((year, idx) => (
-                              <SelectItem key={idx} value={year.toString()}>
-                                {year}
+                              <SelectItem key={idx} value={(year + 543).toString()}>
+                                {year  + 543}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -691,6 +698,14 @@ export const CalendarDatePicker = React.forwardRef<
                       numberOfMonths={numberOfMonths}
                       showOutsideDays={false}
                       className={className}
+                      locale={th}
+                      formatters={{
+                        formatCaption: (date) =>
+                          date.toLocaleDateString("th-TH", {
+                            month: "long",
+                            year: "numeric",
+                          }),
+                      }}
                     />
                   </div>
                 </div>
