@@ -8,6 +8,7 @@ import { product } from "./domain/products";
 import { customer } from "./domain/customers";
 import { bill } from "./domain/bill";
 import { overview } from "./domain/overview";
+import { billTemplate } from "./domain/bill-tem";
 
 const app = new Elysia({
   prefix: "/api",
@@ -70,6 +71,7 @@ const app = new Elysia({
   .use(customer)
   .use(bill)
   .use(overview)
+  .use(billTemplate)
   .listen(3001);
 
 console.log(

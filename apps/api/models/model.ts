@@ -381,6 +381,61 @@ const billSchemaq = new Schema(
   }
 );
 
+
+const billTemplateSchema = new Schema(
+  {
+    type: {
+      type: String,
+      required: true,
+    },
+
+    footerText: {
+      type: String,
+      default: null,
+    },
+    footerSubText: {
+      type: String,
+      default: null,
+    },
+    themcolor: {
+      type: String,
+      default: null,
+    },
+    fontSize: {
+      type: Number,
+      default: 14,
+    },
+    typePage: {
+      type: String,
+
+      default: "A4",
+    },
+    pageOrientation: {
+      type: String,
+      enum: ["portrait", "landscape"],
+      default: "portrait",
+    },
+    pageMargins: {
+      type: Object,
+      default: {
+        top: 60,
+        right: 60,
+        bottom: 60,
+        left: 60,
+      },
+    },
+    organizationId: {
+      type: String,
+      ref: "Organization",
+      required: true,
+    },
+  },
+  {
+    collection: "billTemplate",
+    timestamps: true,
+  }
+
+);
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -390,7 +445,7 @@ const Member = model("Member", memberSchema);
 const Product = model("Product", productSchema);
 const Customer = model("Customer", customerSchemaq);
 const Bill = model("Bill", billSchemaq);
-
+const BillTemplate = model("BillTemplate", billTemplateSchema);
 export {
   User,
   Session,
@@ -401,4 +456,5 @@ export {
   Product,
   Customer,
   Bill,
+  BillTemplate,
 };
