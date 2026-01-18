@@ -17,7 +17,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { format } from "date-fns";
+
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 
 interface MassCustomerProps {
@@ -49,11 +49,15 @@ const MassCustomer = ({
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <MagnifyingGlassIcon size={40} />
-            </EmptyMedia>
-            <EmptyTitle>ไม่พบข้อมูล</EmptyTitle>
-            <EmptyDescription>
-              ไม่พบข้อมูลลูกค้าซื้อสินค้า {format(startDate, "dd/MM/yyyy")} -{" "}
-              {format(endDate, "dd/MM/yyyy")}
+              </EmptyMedia>
+              <EmptyTitle className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">ไม่พบข้อมูล</EmptyTitle>
+            <EmptyDescription className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+
+
+{new Date(startDate).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })} - {new Date(endDate).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}
+
+
+
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent></EmptyContent>

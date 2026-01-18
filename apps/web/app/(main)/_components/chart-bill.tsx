@@ -67,10 +67,14 @@ const ChartBill = ({ startDate, endDate, organizationId }: ChartBillProps) => {
             <EmptyMedia variant="icon">
               <MagnifyingGlassIcon size={40} />
             </EmptyMedia>
-            <EmptyTitle>ไม่พบข้อมูล</EmptyTitle>
-            <EmptyDescription>
-              ไม่พบข้อมูลกราฟยอดขาย {format(startDate, "dd/MM/yyyy")} -{" "}
-              {format(endDate, "dd/MM/yyyy")}
+            <EmptyTitle className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">ไม่พบข้อมูล</EmptyTitle>
+            <EmptyDescription className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+
+
+{new Date(startDate).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })} - {new Date(endDate).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}
+
+
+
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent></EmptyContent>
