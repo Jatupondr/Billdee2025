@@ -52,12 +52,12 @@ const Paginations = ({
               handlePageChange(i);
             }}
             className={`
-              px-4 py-2 text-sm font-medium rounded-xl
+              px-4 py-2 text-sm font-normal tracking-widest rounded-xl
               transition-colors duration-200 cursor-pointer
               ${
                 currentPage === i
                   ? "bg-primary text-white hover:bg-primary/90 hover:text-white dark:bg-white dark:text-black hover:dark:bg-muted hover:dark:text-muted-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted hover:text-muted-foreground dark:bg-white dark:text-black hover:dark:bg-muted hover:dark:text-muted-foreground"
+                  : "bg-muted text-zinc-700 hover:bg-muted hover:text-zinc-700 dark:bg-white dark:text-black hover:dark:bg-muted hover:dark:text-zinc-700"
               }
             `}
           >
@@ -74,7 +74,7 @@ const Paginations = ({
     <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-4 sm:gap-2">
       <div className="flex items-center gap-3 text-sm">
         <div className="flex items-center gap-2">
-          <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap font-kanit">
+          <span className="text-zinc-600 dark:text-zinc-300 whitespace-nowrap font-normal tracking-widest">
             แสดงรายการต่อหน้า:
           </span>
           <Select
@@ -115,7 +115,7 @@ const Paginations = ({
                   handlePageChange(currentPage - 1);
                 }}
                 className={`
-                  rounded-md transition-all duration-200
+                  rounded-md transition-all duration-200 cursor-pointer font-normal tracking-widest
 
                   ${
                     currentPage <= 1
@@ -134,7 +134,7 @@ const Paginations = ({
                   handlePageChange(currentPage + 1);
                 }}
                 className={`
-                  rounded-md transition-all duration-200
+                  rounded-md transition-all duration-200 cursor-pointer font-normal tracking-widest
 
                   ${
                     currentPage >= totalPages

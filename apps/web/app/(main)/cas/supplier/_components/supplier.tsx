@@ -71,7 +71,7 @@ const Supplier = () => {
       accessorKey: "name",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 hover:underline cursor-pointer">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1 hover:underline cursor-pointer">
           {row.original.name || "-"}
         </span>
       ),
@@ -81,7 +81,7 @@ const Supplier = () => {
       accessorKey: "typeCustomer",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 tracking-wider">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           {row.original.typeCustomer === "customer" ? "ลูกค้า" : "ซัพพลายเออร์"}
         </span>
       ),
@@ -102,8 +102,26 @@ const Supplier = () => {
       accessorKey: "createdAt",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
-          {format(new Date(row.original.createdAt), "dd/MM/yyyy") || "-"}
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
+          {new Date(row.original.createdAt).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          }) || "-"}
+        </span>
+      ),
+    },
+    {
+      header: "วันที่แก้ไขล่าสุด",
+      accessorKey: "updatedAt",
+      size: 120,
+      cell: ({ row }) => (
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
+          {new Date(row.original.updatedAt).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          }) || "-"}
         </span>
       ),
     },
@@ -159,10 +177,10 @@ const Supplier = () => {
       <div className="flex justify-center items-center min-w-full ">
         <Card className="shadow-2xl rounded-2xl w-full dark:bg-zinc-900">
           <CardHeader>
-            <CardTitle className="text-2xl tracking-widest">
+            <CardTitle className="text-2xl font-normal tracking-widest">
               ซัพพลายเออร์
             </CardTitle>
-            <CardDescription className="text-base tracking-wider">
+            <CardDescription className="text-base font-normal tracking-widest">
               รายชื่อซัพพลายเออร์ทั้งหมดในระบบ
             </CardDescription>
           </CardHeader>
@@ -170,7 +188,7 @@ const Supplier = () => {
             <div className="flex justify-between items-center">
               <Button
                 size="lg"
-                className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+                className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 onClick={() => setCreateModalOpen(true)}
               >
                 <PlusCircleIcon size={36} weight="bold" />
@@ -178,7 +196,7 @@ const Supplier = () => {
               </Button>
               <Input
                 placeholder="ค้นหาซัพพลายเออร์"
-                className="max-w-xs"
+                className="max-w-xs font-normal tracking-widest"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />

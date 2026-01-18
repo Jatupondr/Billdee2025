@@ -60,7 +60,7 @@ const Bill = () => {
       accessorKey: "billNumber",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 hover:underline cursor-pointer">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           {row.original.billNumber || "-"}
         </span>
       ),
@@ -70,7 +70,7 @@ const Bill = () => {
       accessorKey: "customerName",
       size: 150,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 tracking-wider">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1 ">
           {row.original.name_customer || "-"}
         </span>
       ),
@@ -80,7 +80,7 @@ const Bill = () => {
       accessorKey: "totalAmount",
       size: 100,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           {row.original.total?.toLocaleString("th-TH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -94,7 +94,7 @@ const Bill = () => {
       accessorKey: "costAmount",
       size: 100,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
           {row.original.cost?.toLocaleString("th-TH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -108,7 +108,7 @@ const Bill = () => {
       accessorKey: "profitPerBill",
       size: 100,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1 text-green-500">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1 text-green-500">
           {(row.original.total - row.original.cost)?.toLocaleString("th-TH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -185,7 +185,7 @@ const Bill = () => {
       accessorKey: "date",
       size: 120,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-left line-clamp-1">
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
          {new Date(row.original.date).toLocaleDateString("th-TH", {
           day: "2-digit",
           month: "short",

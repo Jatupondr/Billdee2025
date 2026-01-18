@@ -71,97 +71,35 @@ const DeleteSupplierDialog = ({
   });
 
   const handleDelete = () => {
-    if (supplier && confirmName === supplier.name) {
-      deleteSupplierMutation.mutate(supplier._id);
-    }
+    if (!supplier) return;
+    deleteSupplierMutation.mutate(supplier._id);
   };
 
-  const copyToClipboard = async () => {
-    if (supplier?.name) {
-      try {
-        await navigator.clipboard.writeText(supplier.name);
-        setIsCopied(true);
-        toast.success("คัดลอกชื่อซัพพลายเออร์แล้ว", {
-          position: "bottom-right",
-        });
-        // Reset copied state after 2 seconds
-        setTimeout(() => setIsCopied(false), 2000);
-      } catch (error) {
-        toast.error("ไม่สามารถคัดลอกได้", {
-          position: "bottom-right",
-        });
-      }
-    }
-  };
-
-  const isDeleteDisabled =
-    deleteSupplierMutation.isPending || confirmName !== supplier?.name;
+  if (!supplier) return null;
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md dark:bg-zinc-900">
-        <AlertDialogHeader className="space-y-2">
-          <AlertDialogTitle>ยืนยันการลบซัพพลายเออร์</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-3">
-            <p className="text-sm">
-              คุณต้องการลบซัพพลายเออร์{" "}
-              <span className="font-semibold">"{supplier?.name}"</span>{" "}
-              ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
-            </p>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="confirm-name" className="text-xs font-medium">
-                  กรุณากรอกชื่อซัพพลายเออร์{" "}
-                  <span className="font-semibold">"{supplier?.name}"</span>{" "}
-                  เพื่อยืนยัน
-                </Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={copyToClipboard}
-                  className="h-6 px-2 text-xs cursor-pointer"
-                  disabled={isCopied}
-                >
-                  {isCopied ? (
-                    <>
-                      <CheckCircleIcon
-                        size={14}
-                        weight="fill"
-                        className="mr-1 text-green-600"
-                      />
-                      คัดลอกแล้ว
-                    </>
-                  ) : (
-                    <>
-                      <CopyIcon size={14} weight="bold" className="mr-1" />
-                      คัดลอก
-                    </>
-                  )}
-                </Button>
-              </div>
-              <Input
-                id="confirm-name"
-                type="text"
-                value={confirmName}
-                onChange={(e) => setConfirmName(e.target.value)}
-                placeholder="กรอกชื่อซัพพลายเออร์เพื่อยืนยันการลบ"
-                disabled={deleteSupplierMutation.isPending}
-              />
-            </div>
+        <AlertDialogHeader className="space-y-1">
+          <AlertDialogTitle className="font-normal tracking-widest">
+            ยืนยันการลบซัพพลายเออร์
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm font-normal ">
+            Are you sure you want to delete the supplier? All of the data will
+            be permanently removed. This action cannot be undone
           </AlertDialogDescription>
         </AlertDialogHeader>
+
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={deleteSupplierMutation.isPending}
-            className="cursor-pointer"
+            className="cursor-pointer font-normal tracking-widest"
           >
             ยกเลิก
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={isDeleteDisabled}
-            className="bg-destructive text-white hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed"
+            className="bg-destructive text-white hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed font-normal tracking-widest"
           >
             {deleteSupplierMutation.isPending ? "กำลังลบ..." : "ลบซัพพลายเออร์"}
           </AlertDialogAction>

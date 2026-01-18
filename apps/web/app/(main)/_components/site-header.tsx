@@ -81,28 +81,28 @@ const SiteHeader = () => {
     <>
       <DropdownMenuGroup className="">
         <DropdownMenuItem
-          className="cursor-pointer flex items-center gap-2"
+          className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
           onClick={() => router.push("/settings?tab=users-info")}
         >
           <CheckCircleIcon />
           บัญชีผู้ใช้
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer flex items-center gap-2"
+          className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
           onClick={() => router.push("/settings?tab=subscription-info")}
         >
           <CreditCardIcon />
           โปรแกรม affiliate
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer flex items-center gap-2"
+          className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
           onClick={() => router.push("/settings?tab=subscription-info")}
         >
           <CreditCardIcon />
           การชำระเงินและแผน
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer flex items-center gap-2"
+          className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
           onClick={() => router.push("/settings?tab=password-info")}
         >
           <GearSixIcon />
@@ -112,7 +112,7 @@ const SiteHeader = () => {
       <DropdownMenuSeparator />
       <DropdownMenuItem
         variant="destructive"
-        className="cursor-pointer"
+        className="cursor-pointer font-normal tracking-widest"
         onClick={() => {
           authClient.signOut({
             fetchOptions: {
@@ -145,7 +145,7 @@ const SiteHeader = () => {
   // );
   return (
     <>
-      <header className="flex justify-between shrink-0 h-16 items-center bg-[#ffffff] dark:bg-zinc-900 shadow-md border-b border-border px-6">
+      <header className="flex justify-between shrink-0 h-16 items-center bg-[#ffffff] dark:bg-zinc-900 shadow-md border-b border-border dark:border-zinc-700 px-6">
         <div className="flex items-center gap-1">
           <SidebarTrigger className="-ml-1 cursor-pointer" />
 
@@ -155,7 +155,7 @@ const SiteHeader = () => {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink
-                  className="dark:text-white tracking-widest text-base font-medium"
+                  className="dark:text-zinc-300  text-base font-normal tracking-widest"
                   href="/"
                 >
                   หน้าแรก
@@ -166,12 +166,12 @@ const SiteHeader = () => {
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     {index === breadcrumbItems.length - 1 ? (
-                      <BreadcrumbPage className="dark:text-white tracking-widest text-lg font-medium">
+                      <BreadcrumbPage className="dark:text-zinc-300  text-base font-normal tracking-widest">
                         {textTf(item.label)}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink
-                        className="dark:text-white tracking-widest text-lg font-medium"
+                        className="dark:text-zinc-300  text-base font-normal tracking-widest"
                         href={item.path}
                       >
                         {textTf(item.label)}
@@ -212,14 +212,14 @@ const SiteHeader = () => {
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="hidden md:grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {session?.user?.name || "-"}
+                    <span className="truncate font-normal tracking-widest">
+                      {session?.user?.name?.split(" ")[0] || "-"}
                     </span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      {session?.user?.email || "-"}
+                    <span className="text-zinc-700 dark:text-zinc-300 truncate text-xs font-normal tracking-widest">
+                      {session?.user?.email?.split("@")[0] || "-"}
                     </span>
                   </div>
-                  <CaretUpDownIcon className="hidden md:block text-muted-foreground ml-auto" />
+                  <CaretUpDownIcon className="hidden md:block text-zinc-700 dark:text-zinc-300 ml-auto" />
                 </Button>
               }
             />

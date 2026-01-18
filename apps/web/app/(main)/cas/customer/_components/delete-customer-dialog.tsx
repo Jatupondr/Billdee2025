@@ -70,97 +70,34 @@ const DeleteCustomerDialog = ({
   });
 
   const handleDelete = () => {
-    if (customer && confirmName === customer.name) {
-      deleteCustomerMutation.mutate(customer._id);
-    }
+    if (!customer) return;
+    deleteCustomerMutation.mutate(customer._id);
   };
 
-  const copyToClipboard = async () => {
-    if (customer?.name) {
-      try {
-        await navigator.clipboard.writeText(customer.name);
-        setIsCopied(true);
-        toast.success("คัดลอกชื่อลูกค้าแล้ว", {
-          position: "bottom-right",
-        });
-        // Reset copied state after 2 seconds
-        setTimeout(() => setIsCopied(false), 2000);
-      } catch (error) {
-        toast.error("ไม่สามารถคัดลอกได้", {
-          position: "bottom-right",
-        });
-      }
-    }
-  };
-
-  const isDeleteDisabled =
-    deleteCustomerMutation.isPending || confirmName !== customer?.name;
+  if (!customer) return null;
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md dark:bg-zinc-900">
         <AlertDialogHeader className="space-y-2">
-          <AlertDialogTitle>ยืนยันการลบลูกค้า</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-3">
-            <p className="text-sm">
-              คุณต้องการลบลูกค้า{" "}
-              <span className="font-semibold">"{customer?.name}"</span>{" "}
-              ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
-            </p>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="confirm-name" className="text-xs font-medium">
-                  กรุณากรอกชื่อลูกค้า{" "}
-                  <span className="font-semibold">"{customer?.name}"</span>{" "}
-                  เพื่อยืนยัน
-                </Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={copyToClipboard}
-                  className="h-6 px-2 text-xs cursor-pointer"
-                  disabled={isCopied}
-                >
-                  {isCopied ? (
-                    <>
-                      <CheckCircleIcon
-                        size={14}
-                        weight="fill"
-                        className="mr-1 text-green-600"
-                      />
-                      คัดลอกแล้ว
-                    </>
-                  ) : (
-                    <>
-                      <CopyIcon size={14} weight="bold" className="mr-1" />
-                      คัดลอก
-                    </>
-                  )}
-                </Button>
-              </div>
-              <Input
-                id="confirm-name"
-                type="text"
-                value={confirmName}
-                onChange={(e) => setConfirmName(e.target.value)}
-                placeholder="กรอกชื่อลูกค้าเพื่อยืนยันการลบ"
-                disabled={deleteCustomerMutation.isPending}
-              />
-            </div>
+          <AlertDialogTitle className="font-normal tracking-widest">
+            ยืนยันการลบลูกค้า
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm font-normal ">
+            Are you sure you want to delete the customer? All of the data will
+            be permanently removed. This action cannot be undone
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={deleteCustomerMutation.isPending}
-            className="cursor-pointer"
+            className="cursor-pointer font-normal tracking-widest"
           >
             ยกเลิก
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={isDeleteDisabled}
-            className="bg-destructive text-white hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed"
+            className="bg-destructive text-white hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed font-normal tracking-widest"
           >
             {deleteCustomerMutation.isPending ? "กำลังลบ..." : "ลบลูกค้า"}
           </AlertDialogAction>

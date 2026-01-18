@@ -191,10 +191,10 @@ export default function ShopInfo() {
       >
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
-              ตั่งค่าข้อมูลร้านค้า
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
+              ข้อมูลร้านค้า
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest">
               รายละเอียดเกี่ยวกับร้านค้าของคุณ
             </p>
           </div>
@@ -208,7 +208,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           ชื่อร้านค้า
                         </FieldLabel>
 
@@ -219,6 +219,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -243,13 +244,14 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>slug</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">slug</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
                             id={field.name}
                             name={field.name}
                             disabled
+                            className="font-normal tracking-widest"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
@@ -261,7 +263,7 @@ export default function ShopInfo() {
                           />
                         </InputGroup>
 
-                        <FieldDescription>
+                        <FieldDescription className="font-normal tracking-widest">
                           Slug จะถูกสร้างขึ้นโดยอัตโนมัติจากชื่อร้านค้า
                         </FieldDescription>
 
@@ -281,7 +283,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           เบอร์โทรศัพท์ร้านค้า
                         </FieldLabel>
 
@@ -292,6 +294,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -323,7 +326,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           เลขประจำตัวผู้เสียภาษี
                         </FieldLabel>
 
@@ -334,6 +337,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -365,7 +369,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           อีเมลร้านค้า
                         </FieldLabel>
 
@@ -376,6 +380,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -400,7 +405,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>หมายเหตุ</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">หมายเหตุ</FieldLabel>
 
                         <Textarea
                           id={field.name}
@@ -408,6 +413,7 @@ export default function ShopInfo() {
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
+                          className="font-normal tracking-widest"
                           aria-invalid={
                             field.state.meta.isTouched &&
                             !field.state.meta.isValid
@@ -419,7 +425,7 @@ export default function ShopInfo() {
                           <FieldError errors={field.state.meta.errors} />
                         ) : (
                           <>
-                            <FieldDescription>
+                            <FieldDescription className="font-normal tracking-widest">
                               หมายเหตุ:
                               ข้อมูลนี้จะไม่แสดงผลภายนอกแต่จะเก็บไว้เป็นข้อมูล
                             </FieldDescription>
@@ -436,10 +442,10 @@ export default function ShopInfo() {
         <Separator className="my-8" />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               ที่อยู่ร้านค้า
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest   ">
               รายละเอียดที่อยู่สำหรับร้านค้าของคุณ
             </p>
           </div>
@@ -453,7 +459,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           ที่อยู่ร้านค้า
                         </FieldLabel>
 
@@ -463,6 +469,7 @@ export default function ShopInfo() {
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
+                          className="font-normal tracking-widest"
                           aria-invalid={
                             field.state.meta.isTouched &&
                             !field.state.meta.isValid
@@ -474,7 +481,7 @@ export default function ShopInfo() {
                           <FieldError errors={field.state.meta.errors} />
                         ) : (
                           <>
-                            <FieldDescription>
+                            <FieldDescription className="font-normal tracking-widest">
                               หมายเหตุ:
                               ที่อยู่จะไม่แสดงผลภายนอกแต่จะแสดงในเอกสารต่างๆ
                             </FieldDescription>
@@ -494,7 +501,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>จังหวัด</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">จังหวัด</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -503,6 +510,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -534,7 +542,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>อำเภอ</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">อำเภอ</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -543,7 +551,8 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
-                            aria-invalid={
+                            className="font-normal tracking-widest"
+                              aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
@@ -567,7 +576,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>ตำบล</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ตำบล</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -576,6 +585,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -600,7 +610,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           รหัสไปรษณีย์
                         </FieldLabel>
 
@@ -640,10 +650,10 @@ export default function ShopInfo() {
         <Separator className="my-8" />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               บัญชีและการเงิน
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest">
               รายละเอียดทสำหรับข้อมุลบัญชีเเละการเงินของร้านค้า
             </p>
           </div>
@@ -657,7 +667,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           หมายเลขบัญชีธนาคาร
                         </FieldLabel>
 
@@ -668,6 +678,7 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            className="font-normal tracking-widest"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
@@ -692,7 +703,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>ธนาคาร</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ธนาคาร</FieldLabel>
                         <Select
                           name="bank_name"
                           key={`bankName-${field.state.value || ""}`}
@@ -736,7 +747,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest"    >
                           ชื่อเจ้าของบัญชีธนาคาร
                         </FieldLabel>
 
@@ -747,7 +758,8 @@ export default function ShopInfo() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
-                            aria-invalid={
+                            className="font-normal tracking-widest"
+                              aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
@@ -771,7 +783,7 @@ export default function ShopInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           หมายเลขพร้อมเพย์ (ถ้ามี)
                         </FieldLabel>
 
@@ -779,10 +791,12 @@ export default function ShopInfo() {
                           <InputGroupInput
                             id={field.name}
                             name={field.name}
+                            className="font-normal tracking-widest"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
-                            aria-invalid={
+
+                              aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
@@ -790,7 +804,7 @@ export default function ShopInfo() {
                           />
                         </InputGroup>
 
-                        <FieldDescription>
+                        <FieldDescription className="font-normal tracking-widest text-sm">
                           qrcode จะแสดงในหน้าใบแจ้งหนี้/หรือใบเสร็จรับเงิน
                         </FieldDescription>
 
@@ -811,7 +825,7 @@ export default function ShopInfo() {
             type="button"
             variant="outline"
             size="lg"
-            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
             onClick={() => router.back()}
           >
             ย้อนกลับ
@@ -820,7 +834,7 @@ export default function ShopInfo() {
             type="submit"
             size="lg"
             form="form-organization"
-            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
           >
             บันทึกข้อมูล
           </Button>

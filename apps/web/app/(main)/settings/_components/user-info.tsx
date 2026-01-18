@@ -110,10 +110,10 @@ export default function UserInfo() {
       >
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+            <h2 className=" text-foreground dark:text-foreground text-xl font-normal tracking-widest">
               ข้อมูลผู้ใช้
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-zinc-400 font-normal tracking-widest">
               รายละเอียดเกี่ยวกับข้อมูลผู้ใช้
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function UserInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>ชื่อผู้ใช้</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ชื่อผู้ใช้</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -135,6 +135,7 @@ export default function UserInfo() {
                             name={field.name}
                             value={field.state.value}
                             onBlur={field.handleBlur}
+                            className="font-normal tracking-widest"
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={
                               field.state.meta.isTouched &&
@@ -168,7 +169,7 @@ export default function UserInfo() {
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
                         <FieldLabel htmlFor={field.name}>
-                          เบอร์โทรศัพท์
+                          <span className="font-normal tracking-widest">เบอร์โทรศัพท์</span>
                         </FieldLabel>
 
                         <InputGroup>
@@ -177,6 +178,7 @@ export default function UserInfo() {
                             name={field.name}
                             value={field.state.value}
                             onBlur={field.handleBlur}
+                            className="font-normal tracking-widest"
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={
                               field.state.meta.isTouched &&
@@ -209,7 +211,7 @@ export default function UserInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>อีเมล</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">อีเมล</FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -218,6 +220,7 @@ export default function UserInfo() {
                             disabled
                             value={field.state.value}
                             onBlur={field.handleBlur}
+                            className="font-normal tracking-widest"
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={
                               field.state.meta.isTouched &&
@@ -242,27 +245,27 @@ export default function UserInfo() {
         <Separator className="my-4" />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+              <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               สถานะอีเมล
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-zinc-400 font-normal tracking-widest">
               รายละเอียดเกี่ยวกับสถานะอีเมลของคุณ
             </p>
           </div>
           <div className="sm:max-w-3xl md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
               <div className="col-span-full">
-                <p className="text-base">อีเมล: {session?.user?.email}</p>
+                <p className="text-base font-normal tracking-widest">อีเมล: {session?.user?.email}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span>สถานะ:</span>
+                  <span className="font-normal tracking-widest">สถานะ:</span>
                   {session?.user?.emailVerified ? (
-                    <Badge variant="default">
+                    <Badge variant="default" className="font-normal tracking-widest">
                       <span className="flex items-center gap-1">
                         ✓ ยืนยันแล้ว
                       </span>
                     </Badge>
                   ) : (
-                    <Badge variant="destructive">ยังไม่ยืนยัน</Badge>
+                    <Badge variant="destructive" className="font-normal tracking-widest"  >ยังไม่ยืนยัน</Badge>
                   )}
                 </div>
                 {!session?.user?.emailVerified && (
@@ -270,7 +273,7 @@ export default function UserInfo() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="whitespace-nowrap mt-4 cursor-pointer active:scale-95 duration-200 ease-in-out"
+                    className="whitespace-nowrap mt-4 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                     onClick={() => {
                       alert("ส่งอีเมลยืนยันไปยัง " + session?.user?.email);
                     }}
@@ -285,17 +288,17 @@ export default function UserInfo() {
         <Separator className="my-4" />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               เชื่อมต่อบัญชีโซเชียลมีเดีย
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-zinc-400 font-normal tracking-widest">
               รายละเอียดเกี่ยวกับสถานะเชื่อมต่อบัญชีโซเชียลมีเดียของคุณ
             </p>
           </div>
           <div className="sm:max-w-3xl md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
               <div className="col-span-full">
-                <p className="text-base">
+                <p className="text-base font-normal tracking-widest">
                   เชื่อมต่อผ่าน:{" "}
                   {accounts.providerId === "google"
                     ? "Google"
@@ -303,12 +306,12 @@ export default function UserInfo() {
                 </p>
                 <Button
                   variant="destructive"
-                  className="whitespace-nowrap mt-1 cursor-pointer active:scale-95 duration-200 ease-in-out"
+                  className="whitespace-nowrap mt-1 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 >
                   ยกเลิกการเชื่อมต่อ
                 </Button>
 
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 ">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 font-normal tracking-widest">
                   <span className="text-destructive tracking-wide font-medium leading-6">
                     *
                   </span>{" "}
@@ -322,7 +325,7 @@ export default function UserInfo() {
         <Separator className="my-4" />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               ลบบัญชีผู้ใช้
             </h2>
           </div>
@@ -333,7 +336,7 @@ export default function UserInfo() {
                   type="button"
                   size="sm"
                   variant="destructive"
-                  className="whitespace-nowrap   cursor-pointer active:scale-95 duration-200 ease-in-out"
+                  className="whitespace-nowrap   cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                   // onClick={() => {
                   //   alert("ส่งอีเมลยืนยันไปยัง " + session?.user?.email);
                   // }}
@@ -341,15 +344,14 @@ export default function UserInfo() {
                   ลบบัญชีผู้ใช้
                 </Button>
                 <div className="space-x-2">
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 ">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 font-normal tracking-widest">
                     <span className="text-destructive tracking-wide font-medium leading-6">
                       *
                     </span>{" "}
                     หากลบบัญชีผู้ใช้แล้ว
-                    ข้อมูลทั้งหมดจะถูกลบอย่างถาวรและไม่สามารถกู้คืนได้ รวมทั้ง
-                    ข้อมูลร้านค้าและข้อมูลที่เกี่ยวข้องทั้งหมดด้วย
+                    ข้อมูลทั้งหมดจะถูกลบอย่างถาวรและไม่สามารถกู้คืนได้
                   </p>
-                  <p className="text-sm text-zinc-600  dark:text-zinc-400 ">
+                  <p className="text-sm text-zinc-600  dark:text-zinc-400 font-normal tracking-widest">
                     <span className="text-destructive tracking-wide font-medium leading-6">
                       *
                     </span>{" "}
@@ -367,7 +369,7 @@ export default function UserInfo() {
             type="button"
             variant="outline"
             size="lg"
-            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
             onClick={() => router.back()}
           >
             ย้อนกลับ
@@ -376,7 +378,7 @@ export default function UserInfo() {
             type="submit"
             size="lg"
             form="form-organization"
-            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
           >
             อัพเดทข้อมูล
           </Button>

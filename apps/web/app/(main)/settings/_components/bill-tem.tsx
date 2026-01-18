@@ -1105,7 +1105,7 @@ export default function BillTem() {
         <div className="flex flex-col gap-4">
           <div>
             <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
-             พรีวิวใบเสร็จรับเงิน
+              พรีวิวใบเสร็จรับเงิน
             </h2>
             <p className="mt-1 text-base font-normal tracking-widest leading-6 text-muted-foreground dark:text-muted-foreground">
               พรีวิวใบเสร็จรับเงินของคุณ

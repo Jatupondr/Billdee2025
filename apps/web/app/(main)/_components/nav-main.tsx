@@ -42,7 +42,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-sx font-normal text-[#f4f6f9] tracking-widest mb-0.5">
+      <SidebarGroupLabel className="text-sx font-normal text-[#f4f6f9] dark:text-zinc-300 tracking-widest mb-0.5">
         เมนูหลัก
       </SidebarGroupLabel>
 
@@ -71,7 +71,7 @@ export function NavMain({
                             isCurrentPath
                               ? "text-sidebar-foreground"
                               : hasActiveSubItem
-                                ? "text-sidebar-foreground/70 cursor-pointer data-active:bg-sidebar-accent/60"
+                                ? "text-sidebar-foreground/70 cursor-pointer data-active:bg-zinc-100 dark:data-active:bg-zinc-600"
                                 : "text-[#f4f6f9] hover:text-sidebar-foreground/70"
                           )}
                         />
@@ -86,7 +86,7 @@ export function NavMain({
                           weight="duotone"
                         />
                       )}
-                      <span>{item.title}</span>
+                      <span className="font-normal tracking-widest">{item.title}</span>
                       <CaretDownIcon
                         className={`ml-auto  ${isRotate ? "" : "-rotate-90"} duration-200 ease-in-out`}
                         size={18}
@@ -100,22 +100,22 @@ export function NavMain({
                       className={cn(
                         "group/item flex items-center gap-2 transition-colors",
                         isCurrentPath
-                          ? "text-sidebar-foreground"
+                          ? "text-zinc-700 dark:text-zinc-300"
                           : hasActiveSubItem
-                            ? "text-sidebar-foreground/70  data-active:bg-sidebar-accent/60"
-                            : "text-[#f4f6f9] hover:text-sidebar-foreground/70"
+                            ? "text-sidebar-foreground/70  data-active:bg-zinc-100 dark:data-active:bg-zinc-600"
+                            : "text-[#f4f6f9] hover:text-zinc-700 dark:hover:text-zinc-300"
                       )}
                     >
                       {Icon && (
                         <Icon
                           className={cn(
                             "h-5 w-5 shrink-0 transition-colors group-hover/item:text-sidebar-foreground/70",
-                            hasActiveSubItem && "text-sidebar-foreground/70"
+                            hasActiveSubItem && "text-zinc-700 dark:text-zinc-300"
                           )}
                           weight="duotone"
                         />
-                      )}
-                      <span>{item.title}</span>
+                        )}
+                        <span className="font-normal tracking-widest">{item.title}</span>
                     </SidebarMenuButton>
                   )}
                   {item.items?.length ? (
@@ -130,7 +130,7 @@ export function NavMain({
                                 isActive={isSubActive}
                                 className="group/sub-item flex items-center cursor-pointer gap-2 transition-colors space-x-4  text-[#f4f6f9] hover:text-sidebar-foreground/70 data-active:bg-sidebar-accent tracking-widest"
                               >
-                                {subItem.title}
+                                <span className="font-normal tracking-widest">{subItem.title}</span>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           );

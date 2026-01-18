@@ -128,8 +128,8 @@ const EditSupplierModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto dark:bg-zinc-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl">แก้ไขซัพพลายเออร์</DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogTitle className="text-2xl font-normal tracking-widest">แก้ไขซัพพลายเออร์</DialogTitle>
+          <DialogDescription className="text-base font-normal tracking-widest">
             แก้ไขข้อมูลซัพพลายเออร์ของคุณที่นี่
           </DialogDescription>
         </DialogHeader>
@@ -150,7 +150,7 @@ const EditSupplierModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                         ชื่อซัพพลายเออร์
                       </FieldLabel>
                       <InputGroup className="h-12">
@@ -184,7 +184,7 @@ const EditSupplierModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                         เบอร์โทรศัพท์
                       </FieldLabel>
                       <InputGroup className="h-12">
@@ -217,7 +217,7 @@ const EditSupplierModal = ({
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                         ที่อยู่ซัพพลายเออร์
                       </FieldLabel>
                       <Textarea
@@ -247,7 +247,7 @@ const EditSupplierModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>จังหวัด</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">จังหวัด</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -276,7 +276,7 @@ const EditSupplierModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>เขต/อำเภอ</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">เขต/อำเภอ</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -307,7 +307,7 @@ const EditSupplierModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>ตำบล/แขวง</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ตำบล/แขวง</FieldLabel>
                         <InputGroup className="h-12">
                           <InputGroupInput
                             id={field.name}
@@ -336,7 +336,7 @@ const EditSupplierModal = ({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           รหัสไปรษณีย์
                         </FieldLabel>
                         <InputGroup className="h-12">
@@ -369,6 +369,7 @@ const EditSupplierModal = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={updateSupplierMutation.isPending}
+              className="font-normal tracking-widest"
             >
               ยกเลิก
             </Button>
@@ -376,7 +377,8 @@ const EditSupplierModal = ({
               type="submit"
               form="form-edit-supplier"
               disabled={updateSupplierMutation.isPending}
-              className="active:scale-95 duration-300 cursor-pointer"
+
+              className="active:scale-95 duration-300 cursor-pointer font-normal tracking-widest"
             >
               {updateSupplierMutation.isPending
                 ? "กำลังบันทึก..."

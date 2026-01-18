@@ -35,13 +35,13 @@ export function DataTable<TData, TValue>({
     <div className="border rounded-xl overflow-hidden">
       <Table className="w-full">
         {/* ---- Table Header ---- */}
-        <TableHeader className="bg-muted sticky top-0 z-10">
+        <TableHeader className="bg-zinc-100 dark:bg-zinc-600 sticky top-0 z-10">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id + 64}>
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={`${headerGroup.id + 88}_${header.id + 22}`} // ✅ guaranteed unique
-                  className="text-base  font-normal tracking-widest"
+                  className="text-sm  font-normal tracking-widest"
                 >
                   {header.isPlaceholder
                     ? null
@@ -62,12 +62,12 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id + 2}
                 data-state={row.getIsSelected() && "selected"}
-                className={`${index % 2 === 0 ? " dark:bg-gray-800" : "bg-muted dark:bg-gray-700"}`}
+                className={`${index % 2 === 0 ? " dark:bg-zinc-800" : "bg-muted dark:bg-zinc-700"}`}
               >
                 {row.getVisibleCells().map((cell, index) => (
                   <TableCell
                     key={`${row.id + 4}_${cell.id + 3}`} // ✅ unique even for duplicate accessorKeys
-                    className={`text-xs sm:text-sm md:text-base text-gray-700 dark:text-gray-300 tracking-widest`}
+                    className={`text-xs sm:text-sm md:text-base text-zinc-700 dark:text-zinc-300 tracking-widest`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

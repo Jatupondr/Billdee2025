@@ -29,30 +29,30 @@ const Setting = () => {
       <div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList variant="line" className="cursor-pointer">
-            <TabsTrigger className="cursor-pointer text-lg" value="shop-info">
+            <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="shop-info">
               <StorefrontIcon size={120} weight="duotone" />
               ข้อมูลร้านค้า
             </TabsTrigger>
-            <TabsTrigger className="cursor-pointer text-lg" value="users-info">
+            <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="users-info">
               <UserCircleIcon size={120} weight="duotone" />
               ข้อมูลผู้ใช้
             </TabsTrigger>
             <TabsTrigger
-              className="cursor-pointer text-lg"
+              className="cursor-pointer text-lg font-normal tracking-widest"
               value="password-info"
             >
               <LockKeyIcon size={120} weight="duotone" />
               แก้ไขรหัสผ่าน
             </TabsTrigger>
             <TabsTrigger
-              className="cursor-pointer text-lg"
+              className="cursor-pointer text-lg font-normal tracking-widest"
               value="subscription-info"
             >
               <MoneyWavyIcon size={120} weight="duotone" />
               เเพ็กเก็จเเละการชำระเงิน
             </TabsTrigger>
 
-            <TabsTrigger className="cursor-pointer text-lg" value="bill-format">
+            <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="bill-format">
               รูปแบบบิล
             </TabsTrigger>
             {/* <TabsTrigger

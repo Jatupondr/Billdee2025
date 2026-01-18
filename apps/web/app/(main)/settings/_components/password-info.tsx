@@ -84,11 +84,11 @@ export default function PasswordInfo() {
       >
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="font-semibold text-foreground dark:text-foreground text-xl">
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               รหัสผ่านใหม่
             </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground">
-              รายละเอียดเกี่ยวกับรหัสผ่านใหม่
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-zinc-400 font-normal tracking-widest">
+              เเก้ไขรหัสผ่านของคุณ
             </p>
           </div>
           <div className="sm:max-w-3xl md:col-span-2">
@@ -101,7 +101,7 @@ export default function PasswordInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           รหัสผ่านปัจจุบัน
                         </FieldLabel>
 
@@ -112,6 +112,7 @@ export default function PasswordInfo() {
                             type="password"
                             value={field.state.value}
                             onBlur={field.handleBlur}
+                            className="font-normal tracking-widest"
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={
                               field.state.meta.isTouched &&
@@ -138,7 +139,7 @@ export default function PasswordInfo() {
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
                         <FieldLabel htmlFor={field.name}>
-                          รหัสผ่านใหม่
+                          <span className="font-normal tracking-widest">รหัสผ่านใหม่</span>
                         </FieldLabel>
 
                         <InputGroup>
@@ -148,6 +149,7 @@ export default function PasswordInfo() {
                             type="password"
                             value={field.state.value}
                             onBlur={field.handleBlur}
+                            className="font-normal tracking-widest"
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={
                               field.state.meta.isTouched &&
@@ -180,7 +182,7 @@ export default function PasswordInfo() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
                           ยืนยันรหัสผ่านใหม่
                         </FieldLabel>
 
@@ -191,6 +193,7 @@ export default function PasswordInfo() {
                             type="password"
                             value={field.state.value}
                             onBlur={field.handleBlur}
+                            className="font-normal tracking-widest"
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={
                               field.state.meta.isTouched &&
@@ -225,7 +228,7 @@ export default function PasswordInfo() {
             type="button"
             variant="outline"
             size="lg"
-            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
             onClick={() => router.back()}
           >
             ย้อนกลับ
@@ -234,7 +237,7 @@ export default function PasswordInfo() {
             type="submit"
             size="lg"
             form="form-password"
-            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+            className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
           >
             อัพเดทรหัสผ่าน
           </Button>
