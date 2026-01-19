@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "./ui/empty";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -46,9 +48,9 @@ export function DataTable<TData, TValue>({
                   {header.isPlaceholder
                     ? null
                     : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
                 </TableHead>
               ))}
             </TableRow>
@@ -80,7 +82,18 @@ export function DataTable<TData, TValue>({
                 colSpan={columns.length}
                 className="h-24 text-center tracking-widest"
               >
-                ไม่พบข้อมูล
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <MagnifyingGlassIcon size={40} />
+                    </EmptyMedia>
+                    <EmptyTitle className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+                      ไม่พบข้อมูล
+                    </EmptyTitle>
+
+                  </EmptyHeader>
+
+                </Empty>
               </TableCell>
             </TableRow>
           )}

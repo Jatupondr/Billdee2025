@@ -44,7 +44,7 @@ const Main = () => {
     <>
       {isPending || sessionPending ? (
         <div className="flex justify-center items-center min-h-[calc(100vh-60px)]">
-          <p>Loading...</p>
+          <p className="font-normal tracking-widest text-2xl">Loading...</p>
         </div>
       ) : activeOrg ? (
         <>
@@ -60,25 +60,20 @@ const Main = () => {
           <div className="flex justify-center items-center  min-h-[calc(100vh-60px)] ">
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>ไม่พบร้านค้า</EmptyTitle>
-                <EmptyDescription>
+                <EmptyTitle className="font-normal tracking-widest">
+                  ไม่พบร้านค้า
+                </EmptyTitle>
+                <EmptyDescription className="font-normal tracking-widest">
                   คลิกที่ปุ่มด้านล่างเพื่อสร้างร้านค้าใหม่
                 </EmptyDescription>
               </EmptyHeader>
-              <EmptyContent>
-                <Button onClick={() => router.push("/organization")}>
+              <EmptyContent className="font-normal tracking-widest">
+                <Button
+                  className="font-normal tracking-widest"
+                  onClick={() => router.push("/organization")}
+                >
                   สร้างร้านค้าใหม่
                 </Button>
-                {/* <Button
-                  variant="link"
-                  className="text-muted-foreground"
-                  nativeButton={false}
-                  render={
-                    <a href="#">
-                      Learn more <ArrowUpRightIcon />
-                    </a>
-                  }
-                /> */}
               </EmptyContent>
             </Empty>
           </div>

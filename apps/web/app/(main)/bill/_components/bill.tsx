@@ -26,6 +26,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { authClient } from "@/lib/auth-client";
 import api from "@/hooks/axios";
 import { useRouter } from "next/navigation";
+import DeleteBillDialog from "./delete-bill-dialog";
 
 interface Bill {
   _id: string;
@@ -42,6 +43,8 @@ interface Bill {
 const Bill = () => {
   const router = useRouter();
   const [page, setPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -186,12 +189,12 @@ const Bill = () => {
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
-         {new Date(row.original.date).toLocaleDateString("th-TH", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-         }
-         ) || "-"}
+          {new Date(row.original.date).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }
+          ) || "-"}
         </span>
       ),
     },
@@ -224,8 +227,9 @@ const Bill = () => {
             size="icon"
             className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90"
             onClick={() => {
-              // Handle delete
-              console.log("Delete bill:", row.original._id);
+
+              setSelectedBill(row.original);
+              setDeleteDialogOpen(true);
             }}
           >
             <TrashIcon size={20} weight="bold" />
@@ -298,6 +302,12 @@ const Bill = () => {
           </CardContent>
         </Card>
       </div>
+
+      <DeleteBillDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        bill={selectedBill}
+      />
     </>
   );
 };
