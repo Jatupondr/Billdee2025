@@ -71,7 +71,8 @@ const SiteHeader = () => {
         return "ลูกค้า";
       case "Supplier":
         return "ซับพลายเออร์";
-
+      case "Affiliate":
+        return "โปรแกรม affiliate";
       default:
         return t;
     }
@@ -89,10 +90,10 @@ const SiteHeader = () => {
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
-          onClick={() => router.push("/settings?tab=subscription-info")}
+          onClick={() => router.push("/affiliate")}
         >
           <CreditCardIcon />
-          โปรแกรม affiliate
+          affiliate
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"

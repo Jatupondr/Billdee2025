@@ -71,7 +71,7 @@ const ViewCustomerModal = ({
               </div>
 
               <div className="space-y-2">
-                  <label className="text-sm font-normal tracking-widest text-muted-foreground">
+                <label className="text-sm font-normal tracking-widest text-muted-foreground">
                   เขต/อำเภอ
                 </label>
                 <p className="text-base font-normal tracking-widest">
@@ -85,7 +85,7 @@ const ViewCustomerModal = ({
                   ตำบล/แขวง
                 </label>
                 <p className="text-base font-normal tracking-widest">
-                  {customer.subdistrict || "-"}
+                  {customer.subDistrict || "-"}
                 </p>
               </div>
 
@@ -118,7 +118,7 @@ const ViewCustomerModal = ({
                   วันที่สร้าง
                 </label>
                 <p className="text-sm font-normal tracking-widest">
-                {new Date(customer.createdAt).toLocaleDateString("th-TH", {
+                  {new Date(customer.createdAt).toLocaleDateString("th-TH", {
                     day: "2-digit",
                     month: "long",
                     year: "numeric",
@@ -131,7 +131,7 @@ const ViewCustomerModal = ({
                   แก้ไขล่าสุด
                 </label>
                 <p className="text-sm font-normal tracking-widest">
-                {new Date(customer.updatedAt).toLocaleDateString("th-TH", {
+                  {new Date(customer.updatedAt).toLocaleDateString("th-TH", {
                     day: "2-digit",
                     month: "long",
                     year: "numeric",

@@ -69,6 +69,7 @@ const EditCustomerModal = ({
   onOpenChange,
   customer,
 }: EditCustomerModalProps) => {
+  console.log("customer ==>", customer);
   const queryClient = useQueryClient();
 
   const updateCustomerMutation = useMutation({
@@ -106,7 +107,7 @@ const EditCustomerModal = ({
     validators: {
       onSubmitAsync: async ({ value }) => {
         if (customer) {
-          updateCustomerMutation.mutate({ ...value, id: customer.id });
+          updateCustomerMutation.mutate({ ...value, id: customer._id });
         }
       },
     },
@@ -292,7 +293,7 @@ const EditCustomerModal = ({
                             }
                             placeholder="เขต/อำเภอ"
                             className="font-normal tracking-widest"
-                              />
+                          />
                         </InputGroup>
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />

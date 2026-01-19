@@ -475,10 +475,10 @@ const CreateBill = () => {
                                 >
                                   {date
                                     ? date.toLocaleDateString("th-TH", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                      })
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    })
                                     : "เลือกวันที่"}
                                   <CaretDownIcon
                                     className="ml-2 h-4 w-4 opacity-50"
@@ -569,8 +569,8 @@ const CreateBill = () => {
                               <span className="text-sm font-normal tracking-widest text-muted-foreground">
                                 ที่อยู่:
                               </span>
-                              <span className="text-sm font-normal tracking-widest">
-                                {selectedCustomer.address}
+                              <span className="text-sm font-normal tracking-wide">
+                                {selectedCustomer.address + ", แขวง/ตำบล: " + selectedCustomer.district + ",  เขต/อำเภอ: " + selectedCustomer.subDistrict + ", จังหวัด: " + selectedCustomer.province + ", รหัสไปรษณีย์: " + selectedCustomer.postalCode}
                               </span>
                             </div>
                           )}

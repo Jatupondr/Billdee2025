@@ -436,6 +436,43 @@ const billTemplateSchema = new Schema(
   }
 
 );
+
+
+const affiliateSchema = new Schema(
+  {
+
+    userId: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+    referalCode: {
+      type: String,
+      required: true,
+    },
+    referalLink: {
+      type: String,
+      required: true,
+    },
+
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  {
+  collection: "affiliate",
+  timestamps: true,
+  }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -446,6 +483,7 @@ const Product = model("Product", productSchema);
 const Customer = model("Customer", customerSchemaq);
 const Bill = model("Bill", billSchemaq);
 const BillTemplate = model("BillTemplate", billTemplateSchema);
+const Affiliate = model("Affiliate", affiliateSchema);
 export {
   User,
   Session,
@@ -457,4 +495,5 @@ export {
   Customer,
   Bill,
   BillTemplate,
+  Affiliate,
 };
