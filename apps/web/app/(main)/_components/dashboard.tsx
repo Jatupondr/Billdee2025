@@ -24,12 +24,10 @@ const Dashboard = () => {
     <>
       <div className="flex  justify-between gap-4 mx-auto mb-4">
         <div className="flex flex-col">
-          <h1 className="text-2xl font-normal tracking-widest  dark:text-zinc-300">
-            <p className="font-normal tracking-widest">ยินดีต้อนรับกลับ คุณ{session?.user?.name}</p>
+          <h1 className="text-2xl font-normal tracking-widest  dark:text-zinc-300 font-normal tracking-widest">
+            ยินดีต้อนรับกลับ คุณ{session?.user?.name}
           </h1>
-          <p className="text-base text-muted-foreground dark:text-zinc-300  mt-2 font-normal tracking-widest">
-            <p className="font-normal tracking-widest">Dashboard สรุปข้อมูลร้านค้า</p>
-          </p>
+          <p className="text-base text-muted-foreground dark:text-zinc-300  mt-2 font-normal tracking-widest">Dashboard สรุปข้อมูลร้านค้า</p>
         </div>
 
         <div className="flex flex-col mr-4">

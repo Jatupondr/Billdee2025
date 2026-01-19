@@ -84,7 +84,7 @@ const multiSelectVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 interface CalendarDatePickerProps
@@ -116,26 +116,28 @@ export const CalendarDatePicker = React.forwardRef<
       variant,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [selectedRange, setSelectedRange] = React.useState<string | null>(
-      numberOfMonths === 2 ? "วันนี้" : "ปีนี้"
+      numberOfMonths === 2 ? "วันนี้" : "ปีนี้",
     );
     const [monthFrom, setMonthFrom] = React.useState<Date | undefined>(
-      date?.from
+      date?.from,
     );
     const [yearFrom, setYearFrom] = React.useState<number | undefined>(
-      date?.from?.getFullYear()
+      date?.from?.getFullYear(),
     );
     const [monthTo, setMonthTo] = React.useState<Date | undefined>(
-      numberOfMonths === 2 ? date?.to : date?.from
+      numberOfMonths === 2 ? date?.to : date?.from,
     );
     const [yearTo, setYearTo] = React.useState<number | undefined>(
-      numberOfMonths === 2 ? date?.to?.getFullYear() : date?.from?.getFullYear()
+      numberOfMonths === 2
+        ? date?.to?.getFullYear()
+        : date?.from?.getFullYear(),
     );
     const [highlightedPart, setHighlightedPart] = React.useState<string | null>(
-      null
+      null,
     );
 
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -200,7 +202,7 @@ export const CalendarDatePicker = React.forwardRef<
                 ? new Date(
                     date.from.getFullYear(),
                     newMonth.getMonth(),
-                    date.from.getDate()
+                    date.from.getDate(),
                   )
                 : newMonth;
           const to =
@@ -289,7 +291,7 @@ export const CalendarDatePicker = React.forwardRef<
 
     const years = Array.from(
       { length: yearsRange + 1 },
-      (_, i) => today.getFullYear() - yearsRange / 2 + i
+      (_, i) => today.getFullYear() - yearsRange / 2 + i,
     );
 
     const dateRanges = [
@@ -401,7 +403,7 @@ export const CalendarDatePicker = React.forwardRef<
             handleWheel as unknown as EventListener,
             {
               passive: false,
-            }
+            },
           );
         }
       };
@@ -413,7 +415,7 @@ export const CalendarDatePicker = React.forwardRef<
           if (element) {
             element.removeEventListener(
               "wheel",
-              handleWheel as unknown as EventListener
+              handleWheel as unknown as EventListener,
             );
           }
         });
@@ -433,143 +435,63 @@ export const CalendarDatePicker = React.forwardRef<
           `}
         </style>
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
-            <Button
-              id="date"
-              // ref={ref as React.RefObject<HTMLButtonElement>}
-              {...props}
-              className={cn(
-                "w-auto font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                multiSelectVariants({ variant, className })
-              )}
-              onClick={handleTogglePopover}
-              suppressHydrationWarning
-            >
-              {/* <CalendarIcon className="mr-2 h-4 w-4" /> */}
-              <span>
-                {date?.from ? (
-                  date.to && numberOfMonths === 2 ? (
-                    <>
-                     <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"> {new Date(date.from).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}</span>
-                     {" - "}
-                     <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"> {new Date(date.to).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}</span>
-
-                      {/* <span
-                        id={`firstDay-${id}`}
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                          highlightedPart === "firstDay" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("firstDay")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.from, "dd")}
-                      </span>{" "}
-                      <span
-                        id={`firstMonth-${id}`}
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                          highlightedPart === "firstMonth" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("firstMonth")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.from, "LLL")}
-                      </span>
-                      ,{" "}
-                      <span
-                        id={`firstYear-${id}`}
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                          highlightedPart === "firstYear" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("firstYear")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.from, "y")}
-                      </span>
-                      {" - "}
-                      <span
-                        id={`secondDay-${id}`}
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                          highlightedPart === "secondDay" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("secondDay")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.to, "dd")}
-                      </span>{" "}
-                      <span
-                        id={`secondMonth-${id}`}
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                          highlightedPart === "secondMonth" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("secondMonth")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.to, "LLL")}
-                      </span>
-                      ,{" "}
-                      <span
-                        id={`secondYear-${id}`}
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
-                          highlightedPart === "secondYear" && " font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("secondYear")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.to, "y")}
-                      </span> */}
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"> {new Date(date.from).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}</span>
-
-                      {/* <span
-                        id="day"
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900  ",
-                          highlightedPart === "day" && "underline font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("day")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.from, "dd")}
-                      </span>{" "}
-                      <span
-                        id="month"
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900  ",
-                          highlightedPart === "month" && "underline font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("month")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.from, "LLL")}
-                      </span>
-                      ,{" "}
-                      <span
-                        id="year"
-                        className={cn(
-                          "date-part font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900  ",
-                            highlightedPart === "year" && "underline font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900"
-                        )}
-                        onMouseOver={() => handleMouseOver("year")}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {formatWithTz(date.from, "y")}
-                      </span> */}
-                    </>
-                  )
-                ) : (
-                  <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">เลือกวันที่</span>
+          <PopoverTrigger
+            render={
+              <Button
+                id="date"
+                ref={ref}
+                {...props}
+                className={cn(
+                  "w-auto font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900",
+                  multiSelectVariants({ variant, className }),
                 )}
-              </span>
-            </Button>
-          </PopoverTrigger>
+                onClick={handleTogglePopover}
+                suppressHydrationWarning
+              >
+                {/* <CalendarIcon className="mr-2 h-4 w-4" /> */}
+                <span>
+                  {date?.from ? (
+                    date.to && numberOfMonths === 2 ? (
+                      <>
+                        <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+                          {" "}
+                          {new Date(date.from).toLocaleDateString("th-TH", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                        {" - "}
+                        <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+                          {" "}
+                          {new Date(date.to).toLocaleDateString("th-TH", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+                          {" "}
+                          {new Date(date.from).toLocaleDateString("th-TH", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </>
+                    )
+                  ) : (
+                    <span className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+                      เลือกวันที่
+                    </span>
+                  )}
+                </span>
+              </Button>
+            }
+          />
           {isPopoverOpen && (
             <PopoverContent
               className="w-auto dark:bg-zinc-900"
@@ -591,7 +513,7 @@ export const CalendarDatePicker = React.forwardRef<
                         className={cn(
                           "justify-start font-normal tracking-widest dark:text-zinc-300  hover:bg-primary dark:hover:bg-zinc-800 hover:text-background cursor-pointer active:scale-95 transition-all duration-100",
                           selectedRange === label &&
-                            "bg-primary text-zinc-100 dark:text-zinc-100  hover:bg-primary hover:text-zinc-100 dark:hover:text-zinc-100 cursor-pointer active:scale-95 transition-all duration-100"
+                            "bg-primary text-zinc-100 dark:text-zinc-100  hover:bg-primary hover:text-zinc-100 dark:hover:text-zinc-100 cursor-pointer active:scale-95 transition-all duration-100",
                         )}
                         onClick={() => {
                           selectDateRange(start, end, label);
@@ -639,7 +561,10 @@ export const CalendarDatePicker = React.forwardRef<
                         </SelectTrigger>
                         <SelectContent>
                           {years.map((year, idx) => (
-                            <SelectItem key={idx} value={(year + 543).toString()}>
+                            <SelectItem
+                              key={idx}
+                              value={(year + 543).toString()}
+                            >
                               {year + 543}
                             </SelectItem>
                           ))}
@@ -678,8 +603,11 @@ export const CalendarDatePicker = React.forwardRef<
                           </SelectTrigger>
                           <SelectContent>
                             {years.map((year, idx) => (
-                              <SelectItem key={idx} value={(year + 543).toString()}>
-                                {year  + 543}
+                              <SelectItem
+                                key={idx}
+                                value={(year + 543).toString()}
+                              >
+                                {year + 543}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -715,7 +643,7 @@ export const CalendarDatePicker = React.forwardRef<
         </Popover>
       </>
     );
-  }
+  },
 );
 
 CalendarDatePicker.displayName = "CalendarDatePicker";
