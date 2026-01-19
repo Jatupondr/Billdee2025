@@ -32,7 +32,7 @@ const MassProduct = ({
 }: MassProductProps) => {
   const getMassProduct = async (from: string, to: string) => {
     const response = await api.get(
-      `/overview/summary/product?startDate=${startDate}&endDate=${endDate}&organizationId=${organizationId}`
+      `/overview/summary/product?startDate=${startDate}&endDate=${endDate}&organizationId=${organizationId}`,
     );
     return response.data;
   };
@@ -49,14 +49,21 @@ const MassProduct = ({
             <EmptyMedia variant="icon">
               <MagnifyingGlassIcon size={40} />
             </EmptyMedia>
-            <EmptyTitle className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">ไม่พบข้อมูล</EmptyTitle>
+            <EmptyTitle className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
+              ไม่พบข้อมูล
+            </EmptyTitle>
             <EmptyDescription className="font-normal tracking-widest dark:text-zinc-300 dark:bg-zinc-900">
-
-
-{new Date(startDate).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })} - {new Date(endDate).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" })}
-
-
-
+              {new Date(startDate).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}{" "}
+              -{" "}
+              {new Date(endDate).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent></EmptyContent>
@@ -78,11 +85,8 @@ const MassProduct = ({
         <CardContent className="">
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {massProduct?.data.map((product: any, index: number) => (
-              <>
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 rounded-md  transition-colors cursor-pointer"
-                >
+              <React.Fragment key={index}>
+                <div className="flex items-center justify-between p-2 rounded-md  transition-colors cursor-pointer">
                   <div className="flex-1 space-x-2">
                     <h1 className="text-base font-normal tracking-widest">
                       {product.productName}
@@ -103,7 +107,7 @@ const MassProduct = ({
                   </span>
                 </div>
                 <Separator />
-              </>
+              </React.Fragment>
             ))}
           </div>
         </CardContent>
