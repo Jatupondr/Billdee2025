@@ -1,4 +1,4 @@
-import Elysia from "elysia";
+import Elysia, { t } from "elysia";
 
 import { BaseResponse } from "../../utils/respone";
 
@@ -6,6 +6,42 @@ import { BaseResponse } from "../../utils/respone";
 import { affiliateService } from "./services";
 
 export const affiliate = new Elysia({ prefix: "/affiliate" })
+
+
+.get(
+  "/list-affiliate/:id",
+  async (c) => {
+    const { params, query, set } = c;
+    try {
+      const response = await affiliateService.listAffiliate(params.id, query.code);
+      return {
+        rows: response,
+        message: "Affiliate found successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+  {
+    params: BaseResponse.ParamsId,
+    query: t.Object({
+      code: t.String({ minLength: 1, errorMessage: "Code is required" }),
+    }),
+    response: {
+      // 200: BaseResponse.success(BillModel.billResponseDto),
+      400: BaseResponse.badRequest,
+      403: BaseResponse.forbidden,
+      401: BaseResponse.unauthorized,
+      500: BaseResponse.internalServerError,
+    },
+    detail: {
+      tags: ["Affiliate"],
+      summary: "list of affiliate by id",
+      description: "list of affiliate by id",
+    },
+    auth: true,
+  }
+)
 
   .get(
     "/:id",
@@ -38,6 +74,8 @@ export const affiliate = new Elysia({ prefix: "/affiliate" })
       auth: true,
     }
   )
+
+
   .patch(
     "/:id",
     async (c) => {

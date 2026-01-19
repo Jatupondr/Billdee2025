@@ -62,7 +62,7 @@ export default function StatsSummary({
   });
   return (
     <div className="flex items-center justify-center p-1 w-full">
-      <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full">
         <Card className="p-6 py-4 dark:bg-zinc-900">
           <CardContent className="p-0 flex items-start justify-between">
             <div className="flex-1">
@@ -171,7 +171,7 @@ export default function StatsSummary({
             </div>
           </CardContent>
         </Card>
-      </dl>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { createAuthClient } from "better-auth/react";
 import {
   inferOrgAdditionalFields,
   organizationClient,
+  adminClient,
+  lastLoginMethodClient,
 } from "better-auth/client/plugins";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 export const authClient = createAuthClient({
@@ -54,6 +56,19 @@ export const authClient = createAuthClient({
         },
       }),
     }),
+    adminClient(),
+    lastLoginMethodClient(),
+    inferAdditionalFields({
+      user: {
+        phoneNumber: {
+          type: "string",
+        },
+        referralCode: {
+          type: "string",
+        },
+      },
+    }),
+
   ],
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/auth`,
 });

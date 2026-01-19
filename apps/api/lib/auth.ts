@@ -1,14 +1,28 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { client } from "./db";
-import { openAPI, organization } from "better-auth/plugins";
+import { admin, haveIBeenPwned, lastLoginMethod, multiSession, openAPI, organization } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: mongodbAdapter(client),
   basePath: "/api/auth",
   trustedOrigins: [process.env.CORS_ORIGIN!],
+  user: {
+    additionalFields: {
+      phoneNumber: {
+        type: "string",
+        input: true,
+      },
+      referralCode: {
+        type: "string",
+        input: true,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 6,
+		maxPasswordLength: 20,
   },
   socialProviders: {
     google: {
@@ -33,6 +47,11 @@ export const auth = betterAuth({
   },
   plugins: [
     openAPI(),
+    multiSession({
+      maximumSessions: 2,
+    }),
+    lastLoginMethod(),
+    haveIBeenPwned(),
     organization({
       schema: {
         organization: {
@@ -107,5 +126,6 @@ export const auth = betterAuth({
         },
       },
     }),
+    admin()
   ],
 });

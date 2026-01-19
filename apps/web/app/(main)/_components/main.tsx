@@ -6,12 +6,14 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
 import Dashboard from "./dashboard";
+import { ShoppingBagIcon } from "@phosphor-icons/react";
 
 const Main = () => {
   const router = useRouter();
@@ -60,6 +62,10 @@ const Main = () => {
           <div className="flex justify-center items-center  min-h-[calc(100vh-60px)] ">
             <Empty>
               <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ShoppingBagIcon size={24} />
+
+                </EmptyMedia>
                 <EmptyTitle className="font-normal tracking-widest">
                   ไม่พบร้านค้า
                 </EmptyTitle>
@@ -69,7 +75,7 @@ const Main = () => {
               </EmptyHeader>
               <EmptyContent className="font-normal tracking-widest">
                 <Button
-                  className="font-normal tracking-widest"
+                  className="font-normal tracking-widest cursor-pointer active:scale-95 transition-all duration-100"
                   onClick={() => router.push("/organization")}
                 >
                   สร้างร้านค้าใหม่

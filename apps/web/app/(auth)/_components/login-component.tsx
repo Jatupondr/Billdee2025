@@ -33,12 +33,12 @@ export const formSchema = v.object({
     v.string("กรุณากรอกอีเมล"),
     v.nonEmpty("กรุณากรอกอีเมล"),
     v.maxLength(255, "อีเมลยาวเกินไป"),
-    v.email("รูปแบบอีเมลไม่ถูกต้อง")
+    v.email("รูปแบบอีเมลไม่ถูกต้อง"),
   ),
   password: v.pipe(
     v.string("กรุณากรอกรหัสผ่าน"),
     v.nonEmpty("กรุณากรอกรหัสผ่าน"),
-    v.minLength(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร")
+    v.minLength(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
   ),
 });
 
@@ -80,21 +80,8 @@ const LoginComponent = () => {
                 description: "กรุณาลองใหม่อีกครั้ง",
               });
             },
-          }
+          },
         );
-        //   description: (
-        //     <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-        //       <code>{JSON.stringify(value, null, 2)}</code>
-        //     </pre>
-        //   ),
-        //   position: "bottom-right",
-        //   classNames: {
-        //     content: "flex flex-col gap-2",
-        //   },
-        //   style: {
-        //     "--border-radius": "calc(var(--radius)  + 4px)",
-        //   } as React.CSSProperties,
-        // });
       },
     },
   });
@@ -113,7 +100,7 @@ const LoginComponent = () => {
           onError: (error) => {
             toast.error(error.error.message || "Failed to sign in with Google");
           },
-        }
+        },
       );
     } catch (error) {
       toast.error("An error occurred during sign-in");
@@ -183,7 +170,12 @@ const LoginComponent = () => {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">อีเมล</FieldLabel>
+                        <FieldLabel
+                          htmlFor={field.name}
+                          className="font-normal tracking-widest"
+                        >
+                          อีเมล
+                        </FieldLabel>
 
                         <InputGroup>
                           <InputGroupInput
@@ -223,7 +215,12 @@ const LoginComponent = () => {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">รหัสผ่าน</FieldLabel>
+                        <FieldLabel
+                          htmlFor={field.name}
+                          className="font-normal tracking-widest"
+                        >
+                          รหัสผ่าน
+                        </FieldLabel>
                         <InputGroup>
                           <InputGroupInput
                             id={field.name}
@@ -270,8 +267,11 @@ const LoginComponent = () => {
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
                         )}
-                        <FieldDescription className="text-right font-normal tracking-widest">
-                          <a href="/forgot" className="text-sm font-normal tracking-widest">
+                        <FieldDescription className=" text-right font-normal tracking-widest">
+                          <a
+                            href="/forgot"
+                            className="text-sm font-normal tracking-widest"
+                          >
                             ลืมรหัสผ่าน?
                           </a>
                         </FieldDescription>
@@ -294,10 +294,14 @@ const LoginComponent = () => {
                 weight="fill"
                 className="size-5 dark:text-gray-100"
               />
-              <p className="text-base font-normal tracking-widest">เข้าสู่ระบบ</p>
+              <p className="text-base font-normal tracking-widest">
+                เข้าสู่ระบบ
+              </p>
             </Button>
           </Field>
-          <FieldSeparator className="font-normal tracking-widest">หรือ</FieldSeparator>
+          <FieldSeparator className="font-normal tracking-widest">
+            หรือ
+          </FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-1">
             <Button
               onClick={handleGoogleSignIn}
@@ -311,14 +315,32 @@ const LoginComponent = () => {
                   fill="currentColor"
                 />
               </svg>
-              <p className="font-normal tracking-widest">Continue with Google</p>
+              <p className="font-normal tracking-widest">
+                Continue with Google
+              </p>
             </Button>
           </Field>
         </FieldGroup>
 
+        <FieldDescription className=" flex justify-center items-center gap-2  font-normal tracking-widest">
+          <span className="text-sm font-normal tracking-widest text-center">
+            หากคุณยังไม่มีบัญชี
+          </span>
+          <a href="/register" className="text-sm font-normal tracking-widest">
+            สามารถสมัครสมาชิกได้ที่นี่
+          </a>
+        </FieldDescription>
+
         <FieldDescription className="px-6 text-center font-normal tracking-widest">
-          เมื่อคลิก “เข้าสู่ระบบ”คุณยอมรับ <a href="#" className="font-normal tracking-widest">ข้อตกลงการให้บริการ</a>{" "}
-          และ <a href="#" className="font-normal tracking-widest">นโยบายความเป็นส่วนตัว</a>.
+          เมื่อคลิก “เข้าสู่ระบบ”คุณยอมรับ{" "}
+          <a href="#" className="font-normal tracking-widest">
+            ข้อตกลงการให้บริการ
+          </a>{" "}
+          และ{" "}
+          <a href="#" className="font-normal tracking-widest">
+            นโยบายความเป็นส่วนตัว
+          </a>
+          .
         </FieldDescription>
       </div>
     </>

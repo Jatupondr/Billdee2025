@@ -1,0 +1,69 @@
+"use client";
+import { DataTable } from "@/components/data-table";
+import { ColumnDef } from "@tanstack/react-table";
+import React from "react";
+import SummaryAffiliate from "./summary-affiliate";
+import api from "@/hooks/axios";
+import { useQuery } from "@tanstack/react-query";
+
+interface OverviewAffiliateProps {
+  id: string;
+  code: string;
+}
+
+const OverviewAffiliate = ({ id, code }: OverviewAffiliateProps) => {
+
+
+
+
+
+  const { data: listAffiliate, isLoading } = useQuery({
+    queryKey: ["listAffiliate", id, code],
+    queryFn: async () => {
+      const response = await api.get(
+        `/affiliate/list-affiliate/${id}?code=${code}`,
+      );
+      return response?.data;
+    },
+    enabled: !!id && !!code,
+  });
+  console.log("listAffiliate", listAffiliate);
+
+  const columns: ColumnDef<any>[] = [
+    {
+      header: "ชื่อผู้เชิญ",
+      accessorKey: "name",
+      size: 120,
+      cell: ({ row }) => (
+        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
+          {row.original.name || "-"}
+        </span>
+      ),
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-zinc-900 flex-col rounded-2xl shadow-xl border border-border/50">
+        <div className="text-center">
+          <p className="text-sm font-normal tracking-widest">
+            กำลังโหลดข้อมูล...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-zinc-900 flex-col rounded-2xl shadow-xl border border-border/50">
+      <div className="flex flex-col gap-4">
+        <SummaryAffiliate />
+        <DataTable columns={columns} data={listAffiliate?.rows || []} />
+
+
+      </div>
+    </div>
+  );
+};
+
+export default OverviewAffiliate;

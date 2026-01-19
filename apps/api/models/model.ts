@@ -10,6 +10,12 @@ const userSchema = new Schema(
     email: { type: String, required: true, unique: true },
     emailVerified: { type: Boolean, required: true },
     image: { type: String },
+    referralCode: { type: String },
+    banned:{ type: Boolean },
+    bannedReason: { type: String },
+    banExpires: { type: Date },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    phoneNumber: { type: String },
     // createdAt: { type: Date, required: true },
     // updatedAt: { type: Date, required: true },
   },
@@ -27,6 +33,7 @@ const sessionSchema = new Schema(
     userAgent: { type: String },
     userId: { type: String, ref: "User", required: true },
     activeOrganizationId: { type: String, ref: "Organization" },
+    impersonatedBy: { type: String, },
   },
   { collection: "session" }
 );
@@ -454,6 +461,7 @@ const affiliateSchema = new Schema(
     referalCode: {
       type: String,
       required: true,
+      unique: true,
     },
     referalLink: {
       type: String,
