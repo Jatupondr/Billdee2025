@@ -14,7 +14,7 @@ const userSchema = new Schema(
     banned:{ type: Boolean },
     bannedReason: { type: String },
     banExpires: { type: Date },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    role: { type: String, default: "user" },
     phoneNumber: { type: String },
     // createdAt: { type: Date, required: true },
     // updatedAt: { type: Date, required: true },
@@ -481,6 +481,47 @@ const affiliateSchema = new Schema(
   }
 );
 
+const subscriptionSchema = new Schema(
+  {
+    plan: {
+      type: String,
+      enum: ["free", "pro"],
+      default: "free",
+    },
+    status: {
+      type: String,
+      enum: ["paid", "unpaid", "expired"],
+      default: "paid",
+    },
+    startDate: {
+      type: Date,
+      required: true,
+    },
+
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    expDate: {
+      type: Date,
+      required: true,
+    },
+    userId: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    collection: "subscription",
+    timestamps: true,
+  }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -492,6 +533,7 @@ const Customer = model("Customer", customerSchemaq);
 const Bill = model("Bill", billSchemaq);
 const BillTemplate = model("BillTemplate", billTemplateSchema);
 const Affiliate = model("Affiliate", affiliateSchema);
+const Subscription = model("Subscription", subscriptionSchema);
 export {
   User,
   Session,
@@ -504,4 +546,5 @@ export {
   Bill,
   BillTemplate,
   Affiliate,
+  Subscription,
 };

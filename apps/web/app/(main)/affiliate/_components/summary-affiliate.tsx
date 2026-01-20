@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card';
-import { ChartLineUpIcon } from '@phosphor-icons/react';
+import { ChartLineUpIcon, ShoppingCartIcon } from '@phosphor-icons/react';
 const SummaryAffiliate = () => {
   return (
     <>
@@ -11,7 +11,7 @@ const SummaryAffiliate = () => {
           <CardContent className="p-0 flex items-start justify-between">
             <div className="flex-1">
               <dt className="text-sm tracking-widest font-normal dark:text-zinc-300 ">
-                ยอดขายรวม
+                ยอดรายได้รวม
               </dt>
               <dd className="mt-2 flex items-baseline space-x-2.5">
                 <span className="text-3xl  text-foreground tracking-widest font-normal">
@@ -29,19 +29,16 @@ const SummaryAffiliate = () => {
             </div>
           </CardContent>
         </Card>
-        {/* <Card className="p-6 py-4 dark:bg-zinc-900">
+       <Card className="p-6 py-4 dark:bg-zinc-900">
           <CardContent className="p-0 flex items-start justify-between">
             <div className="flex-1">
               <dt className="text-sm tracking-widest font-normal dark:text-zinc-300 ">
-                ต้นทุนขาย (COGS)
+                จำนวนสมาชิก
               </dt>
               <dd className="mt-2 flex items-baseline space-x-2.5">
                 <span className="text-3xl text-foreground tracking-widest font-normal">
-                  {overview?.data?.totalCost?.toLocaleString("th-TH", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }) || "0.00"}{" "}
-                  บาท
+
+                  100
                 </span>
               </dd>
             </div>
@@ -53,7 +50,7 @@ const SummaryAffiliate = () => {
               />
             </div>
           </CardContent>
-        </Card> */}
+        </Card>
         {/* <Card className="p-6 py-4 dark:bg-zinc-900">
           <CardContent className="p-0 flex items-start justify-between">
             <div className="flex-1">

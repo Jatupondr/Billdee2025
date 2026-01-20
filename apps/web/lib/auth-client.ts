@@ -4,6 +4,7 @@ import {
   organizationClient,
   adminClient,
   lastLoginMethodClient,
+
 } from "better-auth/client/plugins";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 export const authClient = createAuthClient({
@@ -66,6 +67,10 @@ export const authClient = createAuthClient({
         referralCode: {
           type: "string",
         },
+      },
+      delete: {
+        enabled: true,
+
       },
     }),
 

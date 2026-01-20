@@ -1,8 +1,15 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { client } from "./db";
-import { admin, haveIBeenPwned, lastLoginMethod, multiSession, openAPI, organization } from "better-auth/plugins";
-
+import {
+  haveIBeenPwned,
+  lastLoginMethod,
+  multiSession,
+  openAPI,
+  organization,
+  admin as adminPlugin,
+} from "better-auth/plugins";
+import { ac, admin, user } from "./permissions";
 export const auth = betterAuth({
   database: mongodbAdapter(client),
   basePath: "/api/auth",
@@ -18,11 +25,14 @@ export const auth = betterAuth({
         input: true,
       },
     },
+    delete: {
+      enabled: true,
+    },
   },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
-		maxPasswordLength: 20,
+    maxPasswordLength: 20,
   },
   socialProviders: {
     google: {
@@ -126,6 +136,17 @@ export const auth = betterAuth({
         },
       },
     }),
-    admin()
+    adminPlugin({
+      defaultRole: "user",
+      adminRoles: ["admin"],
+      bannedUserMessage: "คุณถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ",
+      ac,
+      defaultBanReason: "Spamming",
+      defaultBanExpiresIn: 60 * 60 * 24, // 1 day
+      roles: {
+        admin,
+        user,
+      },
+    }),
   ],
 });

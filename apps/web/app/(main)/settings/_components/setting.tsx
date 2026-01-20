@@ -13,10 +13,12 @@ import UserInfo from "./user-info";
 import PasswordInfo from "./password-info";
 import SubscriptionInfo from "./subscription-info";
 import BillTem from "./bill-tem";
+import { authClient } from "@/lib/auth-client";
 
 const Setting = () => {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
+  const [accounts, setAccounts] = useState<any>([]);
   const [activeTab, setActiveTab] = useState(tabParam || "shop-info");
 
   useEffect(() => {
@@ -24,6 +26,22 @@ const Setting = () => {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      const accounts = await authClient.listAccounts();
+
+      if (accounts.data) {
+        setAccounts(accounts.data[0]);
+      } else {
+        setAccounts([]);
+      }
+
+      // setAccounts(accounts || []);
+    };
+
+    fetchAccounts();
+  }, []);
   return (
     <>
       <div>
@@ -67,11 +85,14 @@ const Setting = () => {
               <ShopInfo />
             </TabsContent>
             <TabsContent value="users-info">
-              <UserInfo />
+              <UserInfo accounts={accounts} />
             </TabsContent>
-            <TabsContent value="password-info">
-              <PasswordInfo />
-            </TabsContent>
+            {accounts.providerId === "credential" && (
+              <TabsContent value="password-info">
+                <PasswordInfo />
+              </TabsContent>
+            )}
+
 
             <TabsContent value="subscription-info">
               <SubscriptionInfo />

@@ -10,6 +10,7 @@ import { bill } from "./domain/bill";
 import { overview } from "./domain/overview";
 import { billTemplate } from "./domain/bill-tem";
 import { affiliate } from "./domain/affiliate";
+import { subscription } from "./domain/subscription";
 
 const app = new Elysia({
   prefix: "/api",
@@ -74,6 +75,7 @@ const app = new Elysia({
   .use(overview)
   .use(billTemplate)
   .use(affiliate)
+  .use(subscription)
   .listen(3001);
 
 console.log(

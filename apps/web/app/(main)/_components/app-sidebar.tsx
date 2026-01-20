@@ -17,8 +17,12 @@ import {
   CashRegister,
   CashRegisterIcon,
   ReceiptIcon,
+  ShieldCheckIcon,
+  PackageIcon,
 } from "@phosphor-icons/react";
 import { SidebarOptInForm } from "./sidebar-opt-in-form";
+import { NavMainAdmin } from "./nav-main-admin";
+import { authClient } from "@/lib/auth-client";
 // This is sample data.
 const data = {
   user: {
@@ -78,9 +82,26 @@ const data = {
       ],
     },
   ],
+  navMainAdmin: [
+
+    {
+      title: "รายชื่อผู้ใช้งาน",
+      url: "/admin/users",
+      icon: ShieldCheckIcon,
+      isActive: false,
+    },
+    {
+      title: "เเพ็กเกจผู้ใช้งาน",
+      url: "/admin/packages",
+      icon: PackageIcon,
+      isActive: false,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = authClient.useSession();
+  console.log("session", session);
   return (
     <Sidebar collapsible="offExamples" {...props}>
       <SidebarHeader>
@@ -88,6 +109,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="w-full">
         <NavMain items={data.navMain} />
+        {session?.user?.role === "admin" && (
+          <NavMainAdmin items={data.navMainAdmin} />
+        )}
         {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>

@@ -55,6 +55,12 @@ const SiteHeader = () => {
     // check text bill == บิล
 
     switch (t) {
+      case "Users":
+        return "รายชื่อผู้ใช้งาน";
+      case "Packages":
+        return "เเพ็กเกจผู้ใช้งาน";
+      case "Admin":
+        return "ผู้ดูแลระบบ";
       case "Bill":
         return "บิล";
       case "Products":

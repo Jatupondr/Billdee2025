@@ -22,6 +22,7 @@ import { authClient } from "@/lib/auth-client";
 import { useForm, revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { toast } from "sonner";
 import * as v from "valibot";
 
 export const formSchema = v.object({
@@ -58,11 +59,27 @@ export default function PasswordInfo() {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
+        console.log("value", value);
         await authClient.changePassword({
           newPassword: value.newPassword, // required
           currentPassword: value.password, // required
           revokeOtherSessions: true,
-        });
+        },
+          {
+            onSuccess: (data) => {
+              console.log("data", data);
+              toast.success("สำเร็จ", {
+                description: "แก้ไขรหัสผ่านสำเร็จ",
+              });
+            },
+            onError: (error) => {
+              console.log("error", error);
+              toast.error("เกิดข้อผิดพลาด", {
+                description: error.error.message || "ไม่สามารถแก้ไขรหัสผ่านได้",
+              });
+            },
+          },
+        );
       },
     },
   });
