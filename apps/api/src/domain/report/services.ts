@@ -1,5 +1,6 @@
-import { values } from "valibot";
+
 import { Bill } from "../../../models/model";
+import generatePayload from "promptpay-qr";
 const PdfPrinter = require("pdfmake/src/printer");
 export abstract class reportService {
   static async receipt(id: string, set: any, query: any) {
@@ -25,6 +26,20 @@ export abstract class reportService {
       };
       const printer = new PdfPrinter(fonts);
 
+      let bankQrcodeBase64: string | null = null;
+      if (billdata?.organizationId?.prompt_pay) {
+        try {
+          const QRCode = require("qrcode");
+          const payload = generatePayload(billdata?.organizationId?.prompt_pay, {
+            amount: billdata?.total || 0,
+          });
+
+          bankQrcodeBase64 = await QRCode.toDataURL(payload);
+        } catch (error) {
+          bankQrcodeBase64 = null;
+        }
+      }
+
       const docDefinition = {
         pageSize: "A4",
         pageMargins: [26, 26, 36, 36],
@@ -35,6 +50,25 @@ export abstract class reportService {
           subject: "ใบเสร็จรับเงิน",
           keywords: `ใบเสร็จรับเงิน, ${billdata.billNumber}`,
           filename: `${billdata.billNumber}-ใบเสร็จรับเงิน.pdf`,
+        },
+        footer: function (currentPage: number, pageCount: number) {
+          return {
+            columns: [
+              {
+                text: `หน้า ${currentPage} / ${pageCount}`,
+                alignment: "left",
+                fontSize: 12,
+                width: "50%",
+              },
+              {
+                text: "ออกแบบรายงานด้วยระบบ billdee",
+                alignment: "right",
+                fontSize: 12,
+                width: "50%",
+              },
+            ],
+            margin: [36, 10, 36, 0],
+          };
         },
         content: [
           {
@@ -180,12 +214,7 @@ export abstract class reportService {
                     maximumFractionDigits: 2,
                   }) || "0.00", alignment: "right", margin: [5, 6, 5, 6] },
                 ]),
-                // [
-                //   { text: "สินค้า A", margin: [5, 6, 5, 6] },
-                //   { text: "2", alignment: "right", margin: [5, 6, 5, 6] },
-                //   { text: "100.00", alignment: "right", margin: [5, 6, 5, 6] },
-                //   { text: "200.00", alignment: "right", margin: [5, 6, 5, 6] },
-                // ],
+
 
               ],
             },
@@ -231,8 +260,12 @@ export abstract class reportService {
                   [
                     "qr code:",
                     {
-                      text: "-",
-                      bold: true,
+                      image: bankQrcodeBase64,
+                      width:80,
+                      height: 80,
+                      margin: [0, 0, 0, 5],
+                      alignment: "left",
+
                     },
                   ],
 
