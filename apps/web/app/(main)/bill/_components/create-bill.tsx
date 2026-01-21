@@ -41,7 +41,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BackspaceIcon,
-  CalendarIcon,
+
   CaretDownIcon,
   FloppyDiskBackIcon,
   PlusCircleIcon,

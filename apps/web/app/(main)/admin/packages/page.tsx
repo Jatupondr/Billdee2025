@@ -1,9 +1,10 @@
 import React from 'react'
+import Packages from '../_components/packages'
 
-const page = () => {
+const Page = () => {
   return (
-    <div>page</div>
+    <Packages />
   )
 }
 
-export default page
+export default Page

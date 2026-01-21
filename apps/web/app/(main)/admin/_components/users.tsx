@@ -17,7 +17,9 @@ import {
   MagnifyingGlass,
   MagnifyingGlassIcon,
   SpinnerGapIcon,
+  DotsThreeVerticalIcon,
 } from "@phosphor-icons/react";
+
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -27,6 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import ModalBanUser from "./modal-ban-user";
+import ModalUnbanUser from "./modal-unban-user";
 
 interface User {
   id: string;
@@ -35,12 +40,22 @@ interface User {
   role?: string;
   createdAt: string;
   updatedAt: string;
+  banned: boolean;
 }
 
 const Users = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [openBanUserDialog, setOpenBanUserDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [openUnbanUserDialog, setOpenUnbanUserDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  const handleOpenBanUserModal = (user: User) => {
+    setSelectedUserId(user.id);
+    setSelectedUser(user);
+    setOpenBanUserDialog(true);
+  };
   const {
     data: users,
     isLoading,
@@ -131,15 +146,51 @@ const Users = () => {
     {
       header: "จัดการ",
       accessorKey: "",
-      size: 120,
       cell: ({ row }) => (
-        <div className="flex gap-2">
-          <Button size="icon" variant="outline">
-            <EyeIcon size={20} weight="bold" />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+
+            render={<Button
+              variant="outline"
+              className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+              size="icon"
+            >
+              <DotsThreeVerticalIcon size={24} weight="bold" />
+            </Button>} />
+
+
+
+
+          <DropdownMenuContent className="w-40" align="start">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-xs font-normal tracking-widest">
+                จัดการผู้ใช้งาน
+              </DropdownMenuLabel>
+              {row.original.banned ? (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedUser(row.original);
+                    setOpenUnbanUserDialog(true);
+                  }}
+                  className="text-green-600 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+
+                  ยกเลิกการแบน
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => handleOpenBanUserModal(row.original)}
+                  className="text-red-600 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+
+                  แบนผู้ใช้
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu >
       ),
-    },
+    }
   ];
 
   if (error) {
@@ -149,7 +200,6 @@ const Users = () => {
       </div>
     );
   }
-  console.log("users", users);
 
   const mapUser =
     users?.filter((user) => {
@@ -222,6 +272,9 @@ const Users = () => {
             </div>
           </CardContent>
         </Card>
+        <ModalBanUser isOpen={openBanUserDialog} onClose={() => setOpenBanUserDialog(false)} user={selectedUserId ? users?.find((user) => user.id === selectedUserId) : null} />
+        <ModalUnbanUser isOpen={openUnbanUserDialog} onClose={() => setOpenUnbanUserDialog(false)} user={selectedUser ? users?.find((user) => user.id === selectedUser.id) : null} />
+
       </div>
     </>
   );

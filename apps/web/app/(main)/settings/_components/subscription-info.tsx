@@ -8,7 +8,8 @@ import { authClient } from "@/lib/auth-client";
 import { useQuery } from "@tanstack/react-query";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import CancelSubscriptionDialog from "./cancel-sub-dialog";
 
 
 
@@ -25,6 +26,7 @@ import { useEffect } from "react";
 
 export default function SubscriptionInfo() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
+  const [openCancelSubscriptionDialog, setOpenCancelSubscriptionDialog] = useState(false);
   console.log("session", session);
 
   const getSubscriptionById = async (subscriptionId: string) => {
@@ -33,7 +35,7 @@ export default function SubscriptionInfo() {
   };
 
   const { data: subscriptionData, isLoading } = useQuery<any>({
-    queryKey: ["subscription", session?.user?.id],
+    queryKey: ["subscription"],
     queryFn: () => getSubscriptionById(session?.user?.id || ""),
     enabled: !!session?.user?.id,
   });
@@ -44,18 +46,9 @@ export default function SubscriptionInfo() {
   const dateTotalDays = Math.ceil(dateTotal / (1000 * 60 * 60 * 24));
   const isExpired = dateTotalDays <= 0;
   console.log("dateTotalDays", dateTotalDays);
-  //if dateTotalDays is less than 0, then set dateTotalDays to 0 call api to cancel subscription
-  // const cancelSubscription = async () => {
-  //   const response = await api.post(`/subscriptions/cancel`, {
-  //     subscriptionId: subscriptionData?.data?._id,
-  //   });
-  //   return response.data;
-  // };
-  // useEffect(() => {
-  //   if (dateTotalDays < 0) {
-  //     cancelSubscription();
-  //   }
-  // }, [dateTotalDays]);
+
+
+
 
 
 
@@ -81,8 +74,8 @@ export default function SubscriptionInfo() {
                   <p className="text-2xl font-normal tracking-widest text-zinc-900 dark:text-zinc-200"> เเพ็คเกจ: PRO</p>
                   <p
                     className={`text-lg font-normal tracking-widest ${isExpired
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-green-600 dark:text-green-400"
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-green-600 dark:text-green-400"
                       }`}
                   >
                     เหลืออีก: {isExpired ? "หมดอายุ กรุณาชำระเงิน" : `${dateTotalDays} วัน`}
@@ -107,7 +100,7 @@ export default function SubscriptionInfo() {
                   })}
                   </p>
 
-                  <Button variant="destructive" size="sm" className="cursor-pointer tracking-widest font-normal">ยกเลิกการสมัคร</Button>
+                  <Button onClick={() => setOpenCancelSubscriptionDialog(true)} variant="destructive" size="sm" className="cursor-pointer tracking-widest font-normal">ยกเลิกการสมัคร</Button>
 
                 </div>
               </>
@@ -212,6 +205,7 @@ export default function SubscriptionInfo() {
         </Button>
 
       </div>
+      <CancelSubscriptionDialog open={openCancelSubscriptionDialog} onOpenChange={setOpenCancelSubscriptionDialog} subscriptionId={subscriptionData?.data?._id} />
 
     </div >
   );

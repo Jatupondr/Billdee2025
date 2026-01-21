@@ -55,13 +55,15 @@ const Setting = () => {
               <UserCircleIcon size={120} weight="duotone" />
               ข้อมูลผู้ใช้
             </TabsTrigger>
-            <TabsTrigger
-              className="cursor-pointer text-lg font-normal tracking-widest"
-              value="password-info"
-            >
-              <LockKeyIcon size={120} weight="duotone" />
-              แก้ไขรหัสผ่าน
-            </TabsTrigger>
+            {accounts.providerId === "credential" && (
+              <TabsTrigger
+                className="cursor-pointer text-lg font-normal tracking-widest"
+                value="password-info"
+              >
+                <LockKeyIcon size={120} weight="duotone" />
+                แก้ไขรหัสผ่าน
+              </TabsTrigger>
+            )}
             <TabsTrigger
               className="cursor-pointer text-lg font-normal tracking-widest"
               value="subscription-info"

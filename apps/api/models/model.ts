@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 
 const userSchema = new Schema(
   {
-    _id: { type: String },
+
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     emailVerified: { type: Boolean, required: true },
@@ -24,7 +24,7 @@ const userSchema = new Schema(
 
 const sessionSchema = new Schema(
   {
-    _id: { type: String },
+
     expiresAt: { type: Date, required: true },
     token: { type: String, required: true, unique: true },
     createdAt: { type: Date, required: true },
@@ -40,7 +40,7 @@ const sessionSchema = new Schema(
 
 const accountSchema = new Schema(
   {
-    _id: { type: String },
+
     accountId: { type: String, required: true },
     providerId: { type: String, required: true },
     userId: { type: String, ref: "User", required: true },
@@ -59,7 +59,7 @@ const accountSchema = new Schema(
 
 const verificationSchema = new Schema(
   {
-    _id: { type: String },
+
     identifier: { type: String, required: true },
     value: { type: String, required: true },
     expiresAt: { type: Date, required: true },
@@ -155,7 +155,7 @@ const OrganizationSchema = new Schema(
 const memberSchema = new Schema(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -490,7 +490,7 @@ const subscriptionSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["paid", "unpaid", "expired"],
+      enum: ["paid", "unpaid", "expired" , "canceled"],
       default: "paid",
     },
     startDate: {
@@ -507,7 +507,7 @@ const subscriptionSchema = new Schema(
       required: true,
     },
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
