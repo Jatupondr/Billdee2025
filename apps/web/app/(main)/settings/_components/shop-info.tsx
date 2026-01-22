@@ -21,10 +21,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { useForm, revalidateLogic } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import * as v from "valibot";
 import { THAI_BANKS } from "./thbank";
+import { FileDropzone } from "@/components/dropzone";
 
 export const formSchema = v.object({
   name: v.pipe(
@@ -110,7 +111,66 @@ const defaultValues: orgData = {
 
 export default function ShopInfo() {
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
-  console.log("organizations", activeOrg);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [fileProgresses, setFileProgresses] = useState<Record<string, number>>(
+    {}
+  );
+  const fileMode = "single" as const; // กำหนด mode เป็น single
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+
+    // ตรวจสอบว่าเป็น single mode หรือไม่
+    // ใน single mode ถ้ามีไฟล์อยู่แล้ว ให้ replace ไฟล์เดิม
+    if (fileMode === "single" && uploadedFiles.length > 0) {
+      // Single mode: replace ไฟล์เดิม
+      setUploadedFiles(newFiles);
+      setFileProgresses({}); // เคลียร์ progress เก่า
+    } else {
+      // Multiple mode หรือยังไม่มีไฟล์: เพิ่มไฟล์เข้าไป
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+
+    newFiles.forEach((file) => {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+        setFileProgresses((prev) => ({
+          ...prev,
+          [file.name]: Math.min(progress, 100),
+        }));
+      }, 300);
+    });
+  };
+
+  const handleBoxClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    // FileDropzone จะจัดการ drop เองผ่าน handleDropWrapper
+  };
+
+  const removeFile = (filename: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.name !== filename));
+    setFileProgresses((prev) => {
+      const newProgresses = { ...prev };
+      delete newProgresses[filename];
+      return newProgresses;
+    });
+  };
 
   const form = useForm({
     defaultValues: defaultValues,
@@ -443,6 +503,38 @@ export default function ShopInfo() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
             <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
+              โปรไฟล์ร้านค้า
+            </h2>
+            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest">
+              รายละเอียดเกี่ยวกับโปรไฟล์ร้านค้าของคุณ
+            </p>
+          </div>
+          <div className="sm:max-w-3xl md:col-span-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
+              <div className="col-span-full ">
+
+                <FileDropzone
+                  fileInputRef={fileInputRef}
+                  handleBoxClick={handleBoxClick}
+                  handleDragOver={handleDragOver}
+                  handleDrop={handleDrop}
+                  handleFileSelect={handleFileSelect}
+                  uploadedFiles={uploadedFiles}
+                  onRemoveFile={removeFile}
+                  mode={fileMode}
+                  label="อัพโหลดรูปภาพโปรไฟล์ร้านค้า"
+                />
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <Separator className="my-8" />
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+          <div>
+            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
               ที่อยู่ร้านค้า
             </h2>
             <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest   ">
@@ -552,7 +644,7 @@ export default function ShopInfo() {
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
                             className="font-normal tracking-widest"
-                              aria-invalid={
+                            aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
@@ -759,7 +851,7 @@ export default function ShopInfo() {
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
                             className="font-normal tracking-widest"
-                              aria-invalid={
+                            aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
@@ -796,7 +888,7 @@ export default function ShopInfo() {
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
 
-                              aria-invalid={
+                            aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
@@ -839,7 +931,7 @@ export default function ShopInfo() {
             บันทึกข้อมูล
           </Button>
         </div>
-      </form>
-    </div>
+      </form >
+    </div >
   );
 }
