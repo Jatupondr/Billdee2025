@@ -180,42 +180,43 @@ export default function ShopInfo() {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        await authClient.organization.update(
-          {
-            data: {
-              name: value.name,
-              slug: value.slug,
-              phone: value.phone,
-              taxId: value.taxId,
-              email: value.email,
-              note: value.note,
-              address: value.address,
-              province: value.province,
-              district: value.district,
-              subDistrict: value.subDistrict,
-              postalCode: value.postalCode,
-              account_no: value.account_no,
-              account_name: value.account_name,
-              prompt_pay: value.prompt_pay,
-              bank_name: value.bank_name,
-            },
-            organizationId: activeOrg?.id || "",
-          },
-          {
-            onSuccess: (data) => {
-              if (data) {
-                toast.success("สำเร็จ", {
-                  description: "แก้ไขข้อมูลร้านค้าสำเร็จ",
-                });
-              }
-            },
-            onError: (error) => {
-              toast.error(error.error.message || error.error.statusText, {
-                description: "กรุณาลองใหม่อีกครั้ง",
-              });
-            },
-          }
-        );
+        console.log("uploadedFiles", uploadedFiles);
+        // await authClient.organization.update(
+        //   {
+        //     data: {
+        //       name: value.name,
+        //       slug: value.slug,
+        //       phone: value.phone,
+        //       taxId: value.taxId,
+        //       email: value.email,
+        //       note: value.note,
+        //       address: value.address,
+        //       province: value.province,
+        //       district: value.district,
+        //       subDistrict: value.subDistrict,
+        //       postalCode: value.postalCode,
+        //       account_no: value.account_no,
+        //       account_name: value.account_name,
+        //       prompt_pay: value.prompt_pay,
+        //       bank_name: value.bank_name,
+        //     },
+        //     organizationId: activeOrg?.id || "",
+        //   },
+        //   {
+        //     onSuccess: (data) => {
+        //       if (data) {
+        //         toast.success("สำเร็จ", {
+        //           description: "แก้ไขข้อมูลร้านค้าสำเร็จ",
+        //         });
+        //       }
+        //     },
+        //     onError: (error) => {
+        //       toast.error(error.error.message || error.error.statusText, {
+        //         description: "กรุณาลองใหม่อีกครั้ง",
+        //       });
+        //     },
+        //   }
+        // );
       },
     },
   });
