@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BackspaceIcon, CaretDownIcon, FloppyDiskBackIcon, PlusCircleIcon, TrashSimpleIcon } from '@phosphor-icons/react'
@@ -43,6 +43,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { FileDropzone } from '@/components/dropzone';
 
 
 export const billExpenseSchema = v.object({
@@ -89,12 +90,73 @@ const defaultValues: billExpenseData = {
 
 const CreateBillExp = () => {
   const router = useRouter();
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [openDate, setOpenDate] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [fileProgresses, setFileProgresses] = useState<Record<string, number>>(
+    {}
+  );
+  const fileMode = "single" as const; // กำหนด mode เป็น single
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+
+    // ตรวจสอบว่าเป็น single mode หรือไม่
+    // ใน single mode ถ้ามีไฟล์อยู่แล้ว ให้ replace ไฟล์เดิม
+    if (fileMode === "single" && uploadedFiles.length > 0) {
+      // Single mode: replace ไฟล์เดิม
+      setUploadedFiles(newFiles);
+      setFileProgresses({}); // เคลียร์ progress เก่า
+    } else {
+      // Multiple mode หรือยังไม่มีไฟล์: เพิ่มไฟล์เข้าไป
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+
+    newFiles.forEach((file) => {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+        setFileProgresses((prev) => ({
+          ...prev,
+          [file.name]: Math.min(progress, 100),
+        }));
+      }, 300);
+    });
+  };
+
+  const handleBoxClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    // FileDropzone จะจัดการ drop เองผ่าน handleDropWrapper
+  };
+
+  const removeFile = (filename: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.name !== filename));
+    setFileProgresses((prev) => {
+      const newProgresses = { ...prev };
+      delete newProgresses[filename];
+      return newProgresses;
+    });
+  };
 
   const getCustomers = async (search: string) => {
     const response = await api.get(
@@ -154,6 +216,7 @@ const CreateBillExp = () => {
           0,
         );
 
+
         const formattedData = {
           billExpenseNumber: lastexp?.data?.billExpenseNumber,
           date: value.date || new Date().toISOString(),
@@ -163,8 +226,9 @@ const CreateBillExp = () => {
           items: value.items,
           organizationId: activeOrg?.id,
           total: subtotal,
+          name: value.name,
+          userId: session?.user?.id,
         };
-        console.log(formattedData);
 
         createBillMutation.mutate(formattedData);
       },
@@ -228,7 +292,7 @@ const CreateBillExp = () => {
               variant="outline"
               size="sm"
               className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
-              onClick={() => router.push("/bill")}
+              onClick={() => router.push("/bill-expense")}
             >
               <BackspaceIcon size={32} weight="fill" className="" />
               ย้อนกลับ
@@ -286,7 +350,10 @@ const CreateBillExp = () => {
                                   selectedCustomer._id || "",
                                 );
 
+                              } else {
+                                form.setFieldValue("customerId", "");
                               }
+
                             }}
                           >
                             <ComboboxInput
@@ -306,7 +373,9 @@ const CreateBillExp = () => {
                               className="font-normal tracking-widest"
                             />
                             <ComboboxContent>
-                              <ComboboxEmpty>ไม่พบซัพลายเออร์</ComboboxEmpty>
+                              <ComboboxEmpty className="font-normal tracking-widest ">
+                                ไม่พบซัพลายเออร์
+                              </ComboboxEmpty>
                               <ComboboxList>
                                 {(item) => (
                                   <ComboboxItem key={item} value={item}>
@@ -559,6 +628,17 @@ const CreateBillExp = () => {
                 </form.Field>
               </TableBody>
             </Table>
+            <FileDropzone
+              fileInputRef={fileInputRef}
+              handleBoxClick={handleBoxClick}
+              handleDragOver={handleDragOver}
+              handleDrop={handleDrop}
+              handleFileSelect={handleFileSelect}
+              uploadedFiles={uploadedFiles}
+              onRemoveFile={removeFile}
+              mode={fileMode}
+              label="อัพโหลดรูปภาพสลีป"
+            />
 
             <form.Field name="description">
               {(field) => (
@@ -578,6 +658,37 @@ const CreateBillExp = () => {
                 </Field>
               )}
             </form.Field>
+
+
+            {/* สรุปยอด */}
+            <form.Subscribe
+              selector={(state) => ({ items: state.values.items || [] })}
+            >
+              {({ items }) => {
+                const total = items.reduce(
+                  (sum: number, item: any) => sum + (item.total || 0),
+                  0,
+                );
+                return (
+                  <div className="flex justify-end mt-4">
+                    <Card className="border border-border/50 bg-accent/20">
+                      <CardContent className="p-4">
+                        <div className="space-y-2 min-w-[200px]">
+                          <div className="flex justify-between">
+                            <span className="text-lg font-normal tracking-widest">
+                              ยอดรวม:
+                            </span>
+                            <span className="text-lg font-normal tracking-widest text-primary">
+                              {total.toFixed(2)} บาท
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              }}
+            </form.Subscribe>
           </form>
         </CardContent>
       </Card >

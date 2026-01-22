@@ -87,6 +87,7 @@ interface EditBillExpProps {
 
 const EditBillExp = ({ id }: EditBillExpProps) => {
   const router = useRouter();
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [openDate, setOpenDate] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -179,6 +180,8 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
           items: value.items,
           organizationId: activeOrg?.id,
           total: subtotal,
+          userId: session?.user?.id,
+
         };
 
         updateBillExpenseMutation.mutate(formattedData);
@@ -365,6 +368,8 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
                                   "customerId",
                                   selectedCustomer._id || "",
                                 );
+                              } else {
+                                form.setFieldValue("customerId", "");
                               }
                             }}
                           >

@@ -22,6 +22,7 @@ export namespace ExpModel {
 
       })
     ),
+    name: t.Optional(t.String()),
     customerId: t.String(),
     description: t.String(),
     slipUrl: t.Any(),
@@ -30,6 +31,7 @@ export namespace ExpModel {
       minLength: 1,
       error: "OrganizationId is required",
     }),
+    userId: t.Optional(t.String()),
 
   });
   export const expUpdateDto = t.Object({
@@ -53,6 +55,7 @@ export namespace ExpModel {
 
       })
     ),
+    name: t.Optional(t.String()),
     customerId: t.String(),
     description: t.String(),
     slipUrl: t.Any(),
@@ -61,6 +64,7 @@ export namespace ExpModel {
       minLength: 1,
       error: "OrganizationId is required",
     }),
+    userId: t.Optional(t.String()),
 
   });
 

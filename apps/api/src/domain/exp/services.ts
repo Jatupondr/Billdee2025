@@ -10,12 +10,26 @@ export abstract class expService {
     try {
       console.log("DTO in service:", dto);
       const date = new Date(dto.date);
+      let customerId: string;
+
+      if (dto.customerId === "") {
+        //create customer
+        const newCustomer = await Customer.create({
+          name: dto.name,
+          organizationId: dto.organizationId,
+          typeCustomer: "supplier",
+          userId: dto.userId,
+        });
+        customerId = newCustomer._id.toString();
+      } else {
+        customerId = dto.customerId;
+      }
 
       const exp = await Exp.create({
         ...dto,
         // products: dto.products,
+        customerId: customerId,
         organizationId: dto.organizationId,
-
         date: date,
       });
 
@@ -104,10 +118,24 @@ export abstract class expService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
+      let customerId: string;
+      if (dto.customerId === "") {
+        //create customer
+        const newCustomer = await Customer.create({
+          name: dto.name,
+          organizationId: dto.organizationId,
+          typeCustomer: "supplier",
+          userId: dto.userId,
+        });
+        customerId = newCustomer._id.toString();
+      } else {
+        customerId = dto.customerId;
+      }
       const updatedExp = await Exp.findOneAndUpdate(
         { _id: id },
         {
           ...dto,
+          customerId: customerId,
         },
         { new: true }
       )
