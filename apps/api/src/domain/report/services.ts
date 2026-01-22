@@ -1,5 +1,5 @@
 
-import { Bill } from "../../../models/model";
+import { Bill, BillTemplate } from "../../../models/model";
 import generatePayload from "promptpay-qr";
 const PdfPrinter = require("pdfmake/src/printer");
 export abstract class reportService {
@@ -9,7 +9,10 @@ export abstract class reportService {
       .populate("customerId", "name email phone address district subDistrict province postalCode")
       .populate("userId", "name email")
       // .populate("products.productId", "name")
-      .populate("organizationId", "name  phone address district subDistrict province postalCode account_name account_no bank_name prompt_pay")
+      .populate("organizationId", "_id  name  phone address district subDistrict province postalCode account_name account_no bank_name prompt_pay")
+      .lean();
+      // find bill template
+      const billTemplate = await BillTemplate.findOne({ organizationId: billdata?.organizationId._id })
       .lean();
 
       if (!billdata) {
@@ -41,9 +44,9 @@ export abstract class reportService {
       }
 
       const docDefinition = {
-        pageSize: "A4",
-        pageMargins: [26, 26, 36, 36],
-        defaultStyle: { font: "THSarabunNew", fontSize: 14 },
+        pageSize: billTemplate?.typePage || "A4",
+        pageMargins: billTemplate?.pageMargins || [26, 26, 26, 26],
+        defaultStyle: { font: "THSarabunNew", fontSize: billTemplate?.fontSize || 14 },
         info: {
           title: `${billdata.billNumber}-ใบเสร็จรับเงิน`,
           author: "billdee",
@@ -57,13 +60,13 @@ export abstract class reportService {
               {
                 text: `หน้า ${currentPage} / ${pageCount}`,
                 alignment: "left",
-                fontSize: 12,
+                fontSize: billTemplate?.fontSize || 12,
                 width: "50%",
               },
               {
                 text: "ออกแบบรายงานด้วยระบบ billdee",
                 alignment: "right",
-                fontSize: 12,
+                fontSize: billTemplate?.fontSize || 12,
                 width: "50%",
               },
             ],
@@ -74,7 +77,7 @@ export abstract class reportService {
           {
             text: "ใบเสร็จรับเงิน",
             style: "header",
-            color:  "#000000",
+            color: billTemplate?.themcolor || "#000000",
             fontSize: 28,
             bold: true,
             alignment: "center" as const,
@@ -88,17 +91,17 @@ export abstract class reportService {
                   {
                     text: billdata?.organizationId?.name + "\n" || "-" ,
                     bold: true,
-                    fontSize: 18,
+                    fontSize: billTemplate?.fontSize || 18,
                   },
                   {
                     text: "ที่อยู่: " + billdata?.organizationId?.address + " " + billdata?.organizationId?.subDistrict + " " + billdata?.organizationId?.district + " " + billdata?.organizationId?.province + " " +  billdata?.organizationId?.postalCode + "\n" || "-" ,
                     bold: true,
-                    fontSize: 12,
+                    fontSize: billTemplate?.fontSize || 12,
                   },
                   {
                     text: "เบอร์โทร: " + billdata?.organizationId?.phone + "\n" || "-" ,
                     bold: true,
-                    fontSize: 12,
+                    fontSize: billTemplate?.fontSize || 12,
                   },
 
 
@@ -129,17 +132,17 @@ export abstract class reportService {
                   {
                     text: "ลูกค้า: " + billdata?.customerId?.name + "\n" || "-" ,
                     bold: true,
-                    fontSize: 18,
+                    fontSize: billTemplate?.fontSize || 18,
                   },
                   {
                     text: "ที่อยู่: " + billdata?.customerId?.address + " " + billdata?.customerId?.subDistrict + " " + billdata?.customerId?.district + " " + billdata?.customerId?.province + " " +  billdata?.customerId?.postalCode + "\n" || "-" ,
                     bold: true,
-                    fontSize: 12,
+                    fontSize: billTemplate?.fontSize || 12,
                   },
                   {
                     text: "เบอร์โทร: " + billdata?.customerId?.phone + "\n" || "-" ,
                     bold: true,
-                    fontSize: 12,
+                    fontSize: billTemplate?.fontSize || 12,
                   },
 
 
@@ -153,66 +156,79 @@ export abstract class reportService {
             table: {
               headerRows: 1,
               widths: [50, "*", 50, 80, 80],
+
               body: [
                 // ===== Header =====
                 [
                   {
                     text: "ลำดับ",
                     style: "tableHeader",
-                    fillColor: "#000000",
-                    color: "#ffffff",
-                    alignment: "left",
-                    margin: [5, 2, 5, 2],
+                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: "#111111",
+                    bold: true,
+                    alignment: "center",
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "รายการ",
                     style: "tableHeader",
-                    fillColor: "#000000",
-                    color: "#FFFFFF",
-                    margin: [5, 2, 5, 2],
+                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: "#111111",
+                    bold: true,
+                    alignment: "left",
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "จำนวน",
                     style: "tableHeader",
-                    fillColor: "#000000",
-                    color: "#ffffff",
+                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: "#111111",
+                    bold: true,
                     alignment: "right",
-                    margin: [5, 2, 5, 2],
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "ราคา",
                     style: "tableHeader",
-                    fillColor: "#000000",
-                    color: "#ffffff",
+                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: "#111111",
+                    bold: true,
                     alignment: "right",
-                    margin: [5, 2, 5, 2],
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "รวม",
                     style: "tableHeader",
-                    fillColor: "#000000",
-                    color: "#ffffff",
+                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: "#111111",
+                    bold: true,
                     alignment: "right",
-                    margin: [5, 2, 5, 2],
+                      margin: [2, 2, 2, 2],
                   },
                 ],
 
+
                 // ===== Items =====
                 ...billdata?.products?.map((product: any) => [
-                  { text: product.no, margin: [5, 6, 5, 6] },
-                  { text: product.name, margin: [5, 6, 5, 6] },
+                  { text: product.no, margin: [2, 2, 2, 2] },
+                  { text: product.name, margin: [2, 2, 2, 2] },
                   { text: product.quantity.toLocaleString("th-TH", {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
-                  }) || "0", alignment: "right", margin: [5, 6, 5, 6] },
+                  }) || "0", alignment: "right", margin: [2, 2, 2, 2] },
                   { text: product.price.toLocaleString("th-TH", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  }) || "0.00", alignment: "right", margin: [5, 6, 5, 6] },
+                  }) || "0.00", alignment: "right", margin: [2, 2, 2, 2] },
                   { text: product.total.toLocaleString("th-TH", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  }) || "0.00", alignment: "right", margin: [5, 6, 5, 6] },
+                  }) || "0.00", alignment: "right", margin: [2, 2, 2, 2] },
                 ]),
 
 
@@ -246,7 +262,7 @@ export abstract class reportService {
                     {
                       text:   billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no || "-",
                       bold: true,
-                      fontSize: 16,
+                      fontSize: billTemplate?.fontSize || 16,
                     },
                   ],
 
@@ -352,7 +368,7 @@ export abstract class reportService {
           {
             text: "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
-            fontSize: 18,
+            fontSize: billTemplate?.fontSize || 18,
             alignment: "center" as const,
           },
 
@@ -360,7 +376,7 @@ export abstract class reportService {
             text: "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
 
-            fontSize: 16,
+            fontSize: billTemplate?.fontSize ||   16,
             alignment: "center" as const,
           },
 

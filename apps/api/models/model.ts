@@ -522,6 +522,72 @@ const subscriptionSchema = new Schema(
   }
 );
 
+const expSchema = new Schema(
+  {
+    billExpenseNumber: {
+      type: String,
+      required: true,
+    },
+    date: {
+      type: Date,
+      required: true,
+    },
+    customerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+    items: [
+      {
+        no: {
+          type: Number,
+        },
+
+        name: {
+          type: String,
+        },
+        quantity: {
+          type: Number,
+          default: 1,
+        },
+
+        price: {
+          type: Number,
+        },
+
+
+        total: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    description: {
+      type: String,
+    },
+    slipUrl: {
+      type: String,
+    },
+    total: {
+      type: Number,
+
+    },
+  },
+  {
+    collection: "exp",
+    timestamps: true,
+  }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -534,6 +600,7 @@ const Bill = model("Bill", billSchemaq);
 const BillTemplate = model("BillTemplate", billTemplateSchema);
 const Affiliate = model("Affiliate", affiliateSchema);
 const Subscription = model("Subscription", subscriptionSchema);
+const Exp = model("Exp", expSchema);
 export {
   User,
   Session,
@@ -547,4 +614,5 @@ export {
   BillTemplate,
   Affiliate,
   Subscription,
+  Exp,
 };

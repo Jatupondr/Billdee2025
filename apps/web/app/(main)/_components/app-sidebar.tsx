@@ -19,6 +19,7 @@ import {
   ReceiptIcon,
   ShieldCheckIcon,
   PackageIcon,
+  WalletIcon,
 } from "@phosphor-icons/react";
 import { SidebarOptInForm } from "./sidebar-opt-in-form";
 import { NavMainAdmin } from "./nav-main-admin";
@@ -50,6 +51,12 @@ const data = {
       title: "ออกบิล",
       url: "/bill",
       icon: ReceiptIcon,
+      isActive: false,
+    },
+    {
+      title: "บิลค่าใช้จ่าย",
+      url: "/bill-expense",
+      icon: WalletIcon,
       isActive: false,
     },
 

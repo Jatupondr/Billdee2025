@@ -41,7 +41,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BackspaceIcon,
-
   CaretDownIcon,
   FloppyDiskBackIcon,
   PlusCircleIcon,
@@ -136,8 +135,6 @@ const CreateBill = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
-  const [searchProduct, setSearchProduct] = useState("");
-  const debouncedSearchProduct = useDebounce(searchProduct, 500);
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   const getCustomers = async (search: string) => {
@@ -173,9 +170,17 @@ const CreateBill = () => {
     return response.data;
   };
 
+  // สินค้าแนะนำ - ไม่มี search (โหลดครั้งเดียว)
   const { data: productsData, isLoading: isLoadingProducts } = useQuery<any>({
-    queryKey: ["products", debouncedSearchProduct],
-    queryFn: () => getProducts(debouncedSearchProduct),
+    queryKey: ["products-recommended", activeOrg?.id],
+    queryFn: () => getProducts(""),
+    enabled: !!activeOrg?.id,
+  });
+
+  // สินค้าสำหรับ Combobox - โหลดทั้งหมดครั้งเดียว ให้ filter ฝั่ง client
+  const { data: comboboxProductsData } = useQuery<any>({
+    queryKey: ["products-combobox", activeOrg?.id],
+    queryFn: () => getProducts(""),
     enabled: !!activeOrg?.id,
   });
 
@@ -256,8 +261,10 @@ const CreateBill = () => {
     },
   });
   const customerData = customersData?.rows.map((item: any) => item.name) ?? [];
+
+  // สินค้าสำหรับ Combobox (ค้นหาแยก)
   const productData =
-    productsData?.rows.map((item: any) => ({
+    comboboxProductsData?.rows.map((item: any) => ({
       id: item.id,
       name: item.name,
       price: item.price ?? 0,
@@ -475,10 +482,10 @@ const CreateBill = () => {
                                 >
                                   {date
                                     ? date.toLocaleDateString("th-TH", {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                    })
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      })
                                     : "เลือกวันที่"}
                                   <CaretDownIcon
                                     className="ml-2 h-4 w-4 opacity-50"
@@ -570,7 +577,15 @@ const CreateBill = () => {
                                 ที่อยู่:
                               </span>
                               <span className="text-sm font-normal tracking-wide">
-                                {selectedCustomer.address + ", แขวง/ตำบล: " + selectedCustomer.district + ",  เขต/อำเภอ: " + selectedCustomer.subDistrict + ", จังหวัด: " + selectedCustomer.province + ", รหัสไปรษณีย์: " + selectedCustomer.postalCode}
+                                {selectedCustomer.address +
+                                  ", แขวง/ตำบล: " +
+                                  selectedCustomer.district +
+                                  ",  เขต/อำเภอ: " +
+                                  selectedCustomer.subDistrict +
+                                  ", จังหวัด: " +
+                                  selectedCustomer.province +
+                                  ", รหัสไปรษณีย์: " +
+                                  selectedCustomer.postalCode}
                               </span>
                             </div>
                           )}
@@ -767,7 +782,6 @@ const CreateBill = () => {
                                       items={productData.map(
                                         (p: any) => p.name,
                                       )}
-                                      value={nameField.state.value ?? ""}
                                       onValueChange={(value: any) => {
                                         nameField.handleChange(value);
                                         const selectedProduct =
@@ -790,7 +804,7 @@ const CreateBill = () => {
                                           const currentQty =
                                             form.getFieldValue(
                                               `products[${index}].quantity`,
-                                            ) || 0;
+                                            ) || 1;
                                           form.setFieldValue(
                                             `products[${index}].total`,
                                             selectedProduct.price * currentQty,
@@ -800,13 +814,12 @@ const CreateBill = () => {
                                     >
                                       <ComboboxInput
                                         value={nameField.state.value ?? ""}
-                                        placeholder="เลือกหรือค้นหาสินค้า"
                                         onChange={(e) => {
                                           nameField.handleChange(
                                             e.target.value,
                                           );
-                                          setSearchProduct(e.target.value);
                                         }}
+                                        placeholder="เลือกหรือค้นหาสินค้า"
                                         className="h-9 font-normal tracking-widest"
                                       />
                                       <ComboboxContent>

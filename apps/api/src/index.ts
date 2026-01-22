@@ -12,6 +12,7 @@ import { billTemplate } from "./domain/bill-tem";
 import { affiliate } from "./domain/affiliate";
 import { subscription } from "./domain/subscription";
 import { report } from "./domain/report";
+import { exp } from "./domain/exp";
 
 const app = new Elysia({
   prefix: "/api",
@@ -78,6 +79,7 @@ const app = new Elysia({
   .use(affiliate)
   .use(subscription)
   .use(report)
+  .use(exp)
   .listen(3001);
 
 console.log(
