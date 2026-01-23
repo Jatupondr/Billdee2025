@@ -3,13 +3,13 @@ WORKDIR /app
 
 # Copy workspace configs
 COPY package.json bun.lockb* turbo.json ./
-COPY apps/app/package.json ./apps/app/
+COPY apps/web/package.json ./apps/web/
 RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
-WORKDIR /app/apps/app
+WORKDIR /app/apps/web
 
 # ✅ ตั้งค่า ENV และ ARG ก่อน build
 ARG NEXT_PUBLIC_API_URL=https://api.billdee.net/api
@@ -29,9 +29,9 @@ FROM oven/bun:1.3.1 AS runner
 WORKDIR /app
 
 # Copy from builder
-COPY --from=builder /app/apps/app/.next/standalone ./
-COPY --from=builder /app/apps/app/.next/static ./apps/app/.next/static
-COPY --from=builder /app/apps/app/public ./apps/app/public
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
 
 # ✅ Runtime ENV
 ENV NODE_ENV=production
@@ -43,4 +43,4 @@ ENV NEXT_PUBLIC_WEB_URL=https://billdee.net
 ENV AUTH_URL=https://billdee.net/auth
 
 EXPOSE 3000
-CMD ["bun", "apps/app/server.js"]
+CMD ["bun", "apps/web/server.js"]
