@@ -11,6 +11,7 @@ COPY packages/typescript-config/package.json ./packages/typescript-config/
 COPY packages/ui/package.json ./packages/ui/
 
 # Install all dependencies (including workspace dependencies)
+# Don't set NODE_ENV=production yet, we need devDependencies for build
 RUN bun install --frozen-lockfile
 
 # Copy all source files
@@ -18,6 +19,7 @@ COPY . .
 
 # Build the web app
 WORKDIR /app/apps/web
+# Set NODE_ENV=production only for the build step
 ENV NODE_ENV=production
 # Set default env vars if not provided (can be overridden at build time)
 ARG NEXT_PUBLIC_API_URL=""
