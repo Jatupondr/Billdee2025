@@ -3,7 +3,14 @@ WORKDIR /app
 
 # Copy workspace configs
 COPY package.json bun.lockb* turbo.json ./
+
+# Copy workspace package.json files (needed for dependency resolution)
 COPY apps/web/package.json ./apps/web/
+COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/ui/package.json ./packages/ui/
+
+# Install dependencies
 RUN bun install --frozen-lockfile
 
 # Copy source code
@@ -21,8 +28,10 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL}
 ENV AUTH_URL=${AUTH_URL}
+ENV NODE_ENV=production
 
-# ✅ ใช้ค่าพวกนี้ตอน build
+# ✅ Build Next.js app
+RUN bun run build
 
 # ---------------------------------------------
 FROM oven/bun:1.3.1 AS runner
