@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import RegisterComponent from '../_components/register-component'
 
 const Page = () => {
   return (
-    <RegisterComponent />
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterComponent />
+    </Suspense>
   )
 }
 

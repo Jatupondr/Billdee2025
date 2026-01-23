@@ -86,13 +86,13 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
             ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
+                .map(([key, itemConfig]) => {
+                  const color =
+                    itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+                    itemConfig.color
+                  return color ? `  --color-${key}: ${color};` : null
+                })
+                .join("\n")}
 }
 `
           )
@@ -103,6 +103,36 @@ ${colorConfig
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
+
+type TooltipContentProps = {
+  active?: boolean;
+  payload?: Array<{
+    value?: any;
+    name?: string;
+    dataKey?: string | number;
+    type?: string;
+    color?: string;
+    payload?: any;
+    [key: string]: any;
+  }>;
+  label?: any;
+  labelFormatter?: (label: any, payload: any[]) => React.ReactNode;
+  formatter?: (
+    value: any,
+    name: any,
+    item: any,
+    index: number,
+    payload: any
+  ) => React.ReactNode;
+  className?: string;
+  indicator?: "line" | "dot" | "dashed";
+  hideLabel?: boolean;
+  hideIndicator?: boolean;
+  labelClassName?: string;
+  color?: string;
+  nameKey?: string;
+  labelKey?: string;
+};
 
 function ChartTooltipContent({
   active,
@@ -118,7 +148,7 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+}: TooltipContentProps &
   React.ComponentProps<"div"> & {
     hideLabel?: boolean
     hideIndicator?: boolean
@@ -173,7 +203,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "border-border/50 bg-background gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl grid min-w-[8rem] items-start",
+        "border-border/50 bg-background gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl grid min-w-32 items-start",
         className
       )}
     >
@@ -252,6 +282,20 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend
 
+type LegendContentProps = {
+  className?: string;
+  hideIcon?: boolean;
+  payload?: Array<{
+    value?: any;
+    dataKey?: string | number;
+    type?: string;
+    color?: string;
+    [key: string]: any;
+  }>;
+  verticalAlign?: "top" | "bottom";
+  nameKey?: string;
+};
+
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -259,7 +303,7 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+  LegendContentProps & {
     hideIcon?: boolean
     nameKey?: string
   }) {
@@ -319,8 +363,8 @@ function getPayloadConfigFromPayload(
 
   const payloadPayload =
     "payload" in payload &&
-    typeof payload.payload === "object" &&
-    payload.payload !== null
+      typeof payload.payload === "object" &&
+      payload.payload !== null
       ? payload.payload
       : undefined
 

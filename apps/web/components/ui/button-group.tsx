@@ -26,7 +26,7 @@ function ButtonGroup({
   className,
   orientation,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
+}: Omit<React.HTMLAttributes<HTMLDivElement>, "data-orientation"> & VariantProps<typeof buttonGroupVariants>) {
   return (
     <div
       role="group"

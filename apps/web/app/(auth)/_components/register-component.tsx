@@ -79,7 +79,8 @@ const defaultValues: loginData = {
 const RegisterComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [referralCode, setReferralCode] = useState<string>("");
+  const referralCodeParam = searchParams.get("referalCode");
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
@@ -96,7 +97,7 @@ const RegisterComponent = () => {
             email: value.email.trim(),
             password: value.password.trim(),
             name: value.name.trim(),
-            referralCode: referralCode || "",
+            referralCode: referralCodeParam || "",
             phoneNumber: "",
             callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}`,
           },
@@ -122,12 +123,7 @@ const RegisterComponent = () => {
     },
   });
 
-  useEffect(() => {
-    const referralCodeParam = searchParams.get("referalCode");
-    if (referralCodeParam) {
-      setReferralCode(referralCodeParam);
-    }
-  }, [searchParams]);
+
 
   return (
     <>
@@ -170,7 +166,7 @@ const RegisterComponent = () => {
               <span className="sr-only">Acme Inc.</span>
             </a>
             <h1 className="text-4xl font-normal tracking-widest text-caption ">
-              Billdee บิลดี {referralCode}
+              Billdee บิลดี
             </h1>
             <FieldDescription className=" text-xl font-normal tracking-widest">
               สมัครสมาชิก

@@ -1,4 +1,4 @@
-import { ComponentExample } from "@/components/component-example";
+
 
 import type { Metadata } from "next";
 import Main from "./_components/main";

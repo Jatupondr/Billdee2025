@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
-function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
+function FieldSet({ className, ...props }: Omit<React.HTMLAttributes<HTMLFieldSetElement>, "data-slot">) {
   return (
     <fieldset
       data-slot="field-set"
@@ -24,7 +24,7 @@ function FieldLegend({
   className,
   variant = "legend",
   ...props
-}: React.ComponentProps<"legend"> & { variant?: "legend" | "label" }) {
+}: Omit<React.HTMLAttributes<HTMLLegendElement>, "data-slot"> & { variant?: "legend" | "label" }) {
   return (
     <legend
       data-slot="field-legend"
@@ -38,7 +38,7 @@ function FieldLegend({
   );
 }
 
-function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
+function FieldGroup({ className, ...props }: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot">) {
   return (
     <div
       data-slot="field-group"
@@ -73,7 +73,7 @@ function Field({
   className,
   orientation = "vertical",
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+}: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot"> & VariantProps<typeof fieldVariants>) {
   return (
     <div
       role="group"
@@ -85,7 +85,7 @@ function Field({
   );
 }
 
-function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
+function FieldContent({ className, ...props }: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot">) {
   return (
     <div
       data-slot="field-content"
@@ -106,7 +106,7 @@ function FieldLabel({
     <Label
       data-slot="field-label"
       className={cn(
-        "has-data-checked:bg-primary/5 has-data-checked:border-primary/50 dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-xl has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 group/field-label peer/field-label flex w-fit leading-snug",
+        "has-data-checked:bg-primary/5 has-data-checked:border-primary/50 dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-xl has-[>[data-slot=field]]:border *:data-[slot=field]:p-4 group/field-label peer/field-label flex w-fit leading-snug",
         "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col",
         className
       )}
@@ -115,7 +115,7 @@ function FieldLabel({
   );
 }
 
-function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
+function FieldTitle({ className, ...props }: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot">) {
   return (
     <div
       data-slot="field-label"
@@ -128,7 +128,7 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
+function FieldDescription({ className, ...props }: Omit<React.HTMLAttributes<HTMLParagraphElement>, "data-slot">) {
   return (
     <p
       data-slot="field-description"
@@ -147,7 +147,7 @@ function FieldSeparator({
   children,
   className,
   ...props
-}: React.ComponentProps<"div"> & {
+}: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot"> & {
   children?: React.ReactNode;
 }) {
   return (
@@ -178,7 +178,7 @@ function FieldError({
   children,
   errors,
   ...props
-}: React.ComponentProps<"div"> & {
+}: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot"> & {
   errors?: Array<{ message?: string } | undefined>;
 }) {
   const content = useMemo(() => {

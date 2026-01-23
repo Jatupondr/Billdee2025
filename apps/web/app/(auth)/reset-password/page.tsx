@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import React from 'react'
+import React, { Suspense } from 'react'
 import ResetPasswordComponent from '../_components/reset-password';
 
 export const metadata: Metadata = {
@@ -41,7 +41,11 @@ export const metadata: Metadata = {
 
 const Page = () => {
   return (
-    <ResetPasswordComponent />
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordComponent />
+
+    </Suspense>
+
   )
 }
 

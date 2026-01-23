@@ -7,8 +7,25 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
+    "ignore": [
+      "node_modules/**",
+      ".next/**",
+      "dist/**",
+      "build/**",
+      "public/**",
+      "**/components/ui/**",
+      "./components/ui/**",
+      "components/ui/**"
+    ]
   },
+  "overrides": [
+    {
+      "include": ["components/ui/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
