@@ -4,11 +4,7 @@ WORKDIR /app
 # Copy workspace configs
 COPY package.json bun.lockb* turbo.json ./
 
-# Copy workspace package.json files (needed for dependency resolution)
-COPY apps/web/package.json ./apps/web/
-COPY packages/eslint-config/package.json ./packages/eslint-config/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-COPY packages/ui/package.json ./packages/ui/
+
 
 # Install dependencies
 RUN bun install --frozen-lockfile
