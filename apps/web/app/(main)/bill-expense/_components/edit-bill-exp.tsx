@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardHeader,
@@ -56,6 +56,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FileDropzone } from "@/components/dropzone";
 
 export const billExpenseSchema = v.object({
   billExpenseNumber: v.string("กรุณาใส่เลขที่บิลค่าใช้จ่าย"),
@@ -94,6 +95,66 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [fileProgresses, setFileProgresses] = useState<Record<string, number>>(
+    {}
+  );
+  const fileMode = "single" as const; // กำหนด mode เป็น single
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+
+    // ตรวจสอบว่าเป็น single mode หรือไม่
+    // ใน single mode ถ้ามีไฟล์อยู่แล้ว ให้ replace ไฟล์เดิม
+    if (fileMode === "single" && uploadedFiles.length > 0) {
+      // Single mode: replace ไฟล์เดิม
+      setUploadedFiles(newFiles);
+      setFileProgresses({}); // เคลียร์ progress เก่า
+    } else {
+      // Multiple mode หรือยังไม่มีไฟล์: เพิ่มไฟล์เข้าไป
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+
+    newFiles.forEach((file) => {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+        setFileProgresses((prev) => ({
+          ...prev,
+          [file.name]: Math.min(progress, 100),
+        }));
+      }, 300);
+    });
+  };
+
+  const handleBoxClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    // FileDropzone จะจัดการ drop เองผ่าน handleDropWrapper
+  };
+
+  const removeFile = (filename: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.name !== filename));
+    setFileProgresses((prev) => {
+      const newProgresses = { ...prev };
+      delete newProgresses[filename];
+      return newProgresses;
+    });
+  };
 
   // ดึงข้อมูลบิลค่าใช้จ่ายที่จะแก้ไข
   const getBillExpenseById = async (billId: string) => {
@@ -165,6 +226,59 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
     validationLogic: revalidateLogic(),
     validators: {
       onSubmitAsync: async ({ value }) => {
+
+        let slipUrl = value.slipUrl || "";
+
+        // upload image to cloudinary (ถ้ามีไฟล์ใหม่)
+        if (uploadedFiles.length > 0 && uploadedFiles[0]) {
+          try {
+            const formData = new FormData();
+            formData.append("file", uploadedFiles[0]);
+            formData.append("width", "800");
+            formData.append("quality", "auto");
+
+            const response = await api.post("/cloudinary/upload", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+
+            if (response?.data?.url) {
+              slipUrl = response.data.url;
+
+              // ลบไฟล์เก่า (ถ้ามี) - ใช้ try-catch เพื่อไม่ให้ส่งผลต่อการอัพโหลดไฟล์ใหม่
+              if (value.slipUrl) {
+                try {
+                  await api.delete("/cloudinary/delete-by-url", {
+                    data: {
+                      url: value.slipUrl,
+                    },
+                  });
+                } catch (deleteError) {
+                  // Log error แต่ไม่ throw เพื่อไม่ให้ส่งผลต่อการอัพโหลด
+                  console.warn("Failed to delete old logo:", deleteError);
+
+                }
+              }
+            } else {
+              toast.error("อัพโหลดรูปภาพไม่สำเร็จ", {
+                description: "ไม่ได้รับ URL จากเซิร์ฟเวอร์",
+                position: "bottom-right",
+              });
+
+              return;
+            }
+          } catch (uploadError: any) {
+            toast.error("อัพโหลดรูปภาพไม่สำเร็จ", {
+              description: uploadError?.response?.data?.message || "กรุณาลองใหม่อีกครั้ง",
+              position: "bottom-right",
+            });
+
+            return;
+          }
+        }
+
+
         const subtotal = (value.items || []).reduce(
           (sum: number, item: any) => sum + (item.total || 0),
           0,
@@ -176,7 +290,7 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
           name: value.name,
           customerId: value.customerId,
           description: value.description,
-          slipUrl: value.slipUrl,
+          slipUrl: slipUrl,
           items: value.items,
           organizationId: activeOrg?.id,
           total: subtotal,
@@ -677,6 +791,35 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
                 </form.Field>
               </TableBody>
             </Table>
+            {/* preview slip url */}
+            <form.Subscribe selector={(state) => state.values.slipUrl || ""}>
+              {(slipUrl) => (
+                slipUrl ? (
+                  <div className="flex flex-col gap-2 justify-start mt-4">
+                    <label className="text-sm font-normal tracking-widest text-zinc-900 dark:text-zinc-100">หลักฐานการชำระเงิน</label>
+                    <img src={slipUrl} alt="slip" width={800} height={400} className="object-cover rounded-lg" />
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 justify-start mt-4">
+                    <label className="text-sm font-normal tracking-widest text-zinc-900 dark:text-zinc-100">หลักฐานการชำระเงิน</label>
+                    <p className="text-sm font-normal tracking-widest text-zinc-900 dark:text-zinc-100">ไม่มีหลักฐานการชำระเงิน</p>
+                  </div>
+                )
+              )}
+            </form.Subscribe>
+
+
+            <FileDropzone
+              fileInputRef={fileInputRef}
+              handleBoxClick={handleBoxClick}
+              handleDragOver={handleDragOver}
+              handleDrop={handleDrop}
+              handleFileSelect={handleFileSelect}
+              uploadedFiles={uploadedFiles}
+              onRemoveFile={removeFile}
+              mode={fileMode}
+              label="อัพโหลดรูปภาพสลีป"
+            />
 
             {/* สรุปยอด */}
             <form.Subscribe

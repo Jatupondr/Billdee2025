@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import * as v from "valibot";
 import { THAI_BANKS } from "./thbank";
 import { FileDropzone } from "@/components/dropzone";
+import api from "@/hooks/axios";
 
 export const formSchema = v.object({
   name: v.pipe(
@@ -88,6 +89,7 @@ export const formSchema = v.object({
     v.string(""),
     v.maxLength(100, "Bank name must be at most 100 characters.")
   ),
+  logo: v.optional(v.string("")),
 });
 
 type orgData = v.InferOutput<typeof formSchema>;
@@ -107,6 +109,7 @@ const defaultValues: orgData = {
   account_name: "",
   prompt_pay: "",
   bank_name: "",
+  logo: "",
 };
 
 export default function ShopInfo() {
@@ -116,6 +119,7 @@ export default function ShopInfo() {
   const [fileProgresses, setFileProgresses] = useState<Record<string, number>>(
     {}
   );
+  const [uploading, setUploading] = useState(false);
   const fileMode = "single" as const; // กำหนด mode เป็น single
 
   const handleFileSelect = (files: FileList | null) => {
@@ -180,43 +184,100 @@ export default function ShopInfo() {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        console.log("uploadedFiles", uploadedFiles);
-        // await authClient.organization.update(
-        //   {
-        //     data: {
-        //       name: value.name,
-        //       slug: value.slug,
-        //       phone: value.phone,
-        //       taxId: value.taxId,
-        //       email: value.email,
-        //       note: value.note,
-        //       address: value.address,
-        //       province: value.province,
-        //       district: value.district,
-        //       subDistrict: value.subDistrict,
-        //       postalCode: value.postalCode,
-        //       account_no: value.account_no,
-        //       account_name: value.account_name,
-        //       prompt_pay: value.prompt_pay,
-        //       bank_name: value.bank_name,
-        //     },
-        //     organizationId: activeOrg?.id || "",
-        //   },
-        //   {
-        //     onSuccess: (data) => {
-        //       if (data) {
-        //         toast.success("สำเร็จ", {
-        //           description: "แก้ไขข้อมูลร้านค้าสำเร็จ",
-        //         });
-        //       }
-        //     },
-        //     onError: (error) => {
-        //       toast.error(error.error.message || error.error.statusText, {
-        //         description: "กรุณาลองใหม่อีกครั้ง",
-        //       });
-        //     },
-        //   }
-        // );
+        setUploading(true);
+        let logo = value.logo || "";
+
+        // upload image to cloudinary (ถ้ามีไฟล์ใหม่)
+        if (uploadedFiles.length > 0 && uploadedFiles[0]) {
+          try {
+            const formData = new FormData();
+            formData.append("file", uploadedFiles[0]);
+            formData.append("width", "800");
+            formData.append("quality", "auto");
+
+            const response = await api.post("/cloudinary/upload", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+
+            if (response?.data?.url) {
+              logo = response.data.url;
+
+              // ลบไฟล์เก่า (ถ้ามี) - ใช้ try-catch เพื่อไม่ให้ส่งผลต่อการอัพโหลดไฟล์ใหม่
+              if (value.logo) {
+                try {
+                  await api.delete("/cloudinary/delete-by-url", {
+                    data: {
+                      url: value.logo,
+                    },
+                  });
+                } catch (deleteError) {
+                  // Log error แต่ไม่ throw เพื่อไม่ให้ส่งผลต่อการอัพโหลด
+                  console.warn("Failed to delete old logo:", deleteError);
+                  setUploading(false);
+                }
+              }
+            } else {
+              toast.error("อัพโหลดรูปภาพไม่สำเร็จ", {
+                description: "ไม่ได้รับ URL จากเซิร์ฟเวอร์",
+                position: "bottom-right",
+              });
+              setUploading(false);
+              return;
+            }
+          } catch (uploadError: any) {
+            toast.error("อัพโหลดรูปภาพไม่สำเร็จ", {
+              description: uploadError?.response?.data?.message || "กรุณาลองใหม่อีกครั้ง",
+              position: "bottom-right",
+            });
+            setUploading(false);
+            return;
+          }
+        }
+
+
+
+
+        await authClient.organization.update(
+          {
+            data: {
+              name: value.name,
+              slug: value.slug,
+              phone: value.phone,
+              taxId: value.taxId,
+              email: value.email,
+              logo: logo,
+              note: value.note,
+              address: value.address,
+              province: value.province,
+              district: value.district,
+              subDistrict: value.subDistrict,
+              postalCode: value.postalCode,
+              account_no: value.account_no,
+              account_name: value.account_name,
+              prompt_pay: value.prompt_pay,
+              bank_name: value.bank_name,
+            },
+            organizationId: activeOrg?.id || "",
+          },
+          {
+            onSuccess: (data) => {
+              if (data) {
+                toast.success("สำเร็จ", {
+                  description: "แก้ไขข้อมูลร้านค้าสำเร็จ",
+                });
+              }
+              setUploading(false);
+            },
+            onError: (error) => {
+              toast.error(error.error.message || error.error.statusText, {
+                description: "กรุณาลองใหม่อีกครั้ง",
+              });
+              setUploading(false);
+            },
+          }
+        );
       },
     },
   });
@@ -237,6 +298,7 @@ export default function ShopInfo() {
       form.setFieldValue("account_name", activeOrg.account_name || "");
       form.setFieldValue("prompt_pay", activeOrg.prompt_pay || "");
       form.setFieldValue("bank_name", activeOrg.bank_name || "");
+      form.setFieldValue("logo", activeOrg.logo || "");
     }
   }, [activeOrg]);
 
@@ -513,6 +575,12 @@ export default function ShopInfo() {
           <div className="sm:max-w-3xl md:col-span-2">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">
               <div className="col-span-full ">
+                {/* show logo */}
+                {activeOrg?.logo && (
+                  <div className="flex items-center justify-start mb-4">
+                    <img src={activeOrg.logo} alt="logo" className="rounded-full object-cover size-24" />
+                  </div>
+                )}
 
                 <FileDropzone
                   fileInputRef={fileInputRef}
@@ -927,9 +995,10 @@ export default function ShopInfo() {
             type="submit"
             size="lg"
             form="form-organization"
+            disabled={uploading}
             className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
           >
-            บันทึกข้อมูล
+            {uploading ? "กำลังบันทึกข้อมูล..." : "บันทึกข้อมูล"}
           </Button>
         </div>
       </form >

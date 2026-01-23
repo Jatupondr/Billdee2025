@@ -216,13 +216,29 @@ const CreateBillExp = () => {
           0,
         );
 
+        let slipUrl = "";
+        if (uploadedFiles.length > 0 && uploadedFiles[0]) {
+          const formData = new FormData();
+          formData.append("file", uploadedFiles[0]);
+          formData.append("width", "800");
+          formData.append("quality", "auto");
+          const response = await api.post("/cloudinary/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          if (response.data) {
+            slipUrl = response.data.url;
+          }
+        }
+
 
         const formattedData = {
           billExpenseNumber: lastexp?.data?.billExpenseNumber,
           date: value.date || new Date().toISOString(),
           customerId: value.customerId,
           description: value.description,
-          slipUrl: value.slipUrl,
+          slipUrl: slipUrl,
           items: value.items,
           organizationId: activeOrg?.id,
           total: subtotal,

@@ -140,7 +140,7 @@ export abstract class expService {
         { new: true }
       )
         .populate("customerId", "name email phone address")
-        .populate("userId", "name email")
+
         .lean();
 
       if (!updatedExp) {

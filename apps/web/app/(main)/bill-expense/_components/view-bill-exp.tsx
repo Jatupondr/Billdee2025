@@ -121,6 +121,7 @@ const ViewBillExp = ({ id }: ViewBillExpProps) => {
                 type="button"
                 variant="default"
                 size="sm"
+
                 className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 onClick={() => router.push(`/bill-expense/${id}/edit`)}
               >
@@ -139,7 +140,7 @@ const ViewBillExp = ({ id }: ViewBillExpProps) => {
                   ซัพลายเออร์/ผู้รับเงิน
                 </label>
                 <p className="text-base font-normal tracking-widest">
-                  {billExp.name}
+                  {billExp.customerId?.name}
                 </p>
               </div>
               <div>
@@ -219,6 +220,12 @@ const ViewBillExp = ({ id }: ViewBillExpProps) => {
                 )}
               </TableBody>
             </Table>
+            {billExp.slipUrl && (
+              <div className="flex flex-col gap-2 justify-start mt-4">
+                <label className="text-sm font-normal tracking-widest text-zinc-900 dark:text-zinc-100">หลักฐานการชำระเงิน</label>
+                <img src={billExp.slipUrl} alt="slip" width={800} height={800} className="object-cover rounded-lg" />
+              </div>
+            )}
 
             {/* สรุปยอด */}
             <div className="flex justify-end mt-4">

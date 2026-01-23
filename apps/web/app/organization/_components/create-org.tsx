@@ -16,15 +16,7 @@ export const formSchema = v.object({
     v.nonEmpty("กรุณากรอกชื่อร้านค้า"),
     v.maxLength(255, "ชื่อร้านค้าต้องไม่เกิน 255 ตัวอักษร"),
   ),
-  slug: v.pipe(
-    v.string("กรุณากรอกชื่อโดเมนร้านค้า"),
-    v.nonEmpty("กรุณากรอกชื่อโดเมนร้านค้า"),
-    v.regex(
-      /^[a-zA-Z-]+$/,
-      "ชื่อโดเมนร้านค้าต้องเป็นภาษาอังกฤษและขีด (-) เท่านั้น",
-    ),
-    v.maxLength(100, "ชื่อโดเมนร้านค้าต้องไม่เกิน 100 ตัวอักษร"),
-  ),
+  slug: v.optional(v.string("")),
 });
 
 type formOrgData = v.InferOutput<typeof formSchema>;
@@ -47,7 +39,7 @@ const CreateOrg = () => {
         await authClient.organization.create(
           {
             name: value.fullName, // required
-            slug: value.slug, // required
+            slug: value.slug || "", // required
             logo: "",
             // metadata,
             userId: session?.user.id,

@@ -13,6 +13,7 @@ import { affiliate } from "./domain/affiliate";
 import { subscription } from "./domain/subscription";
 import { report } from "./domain/report";
 import { exp } from "./domain/exp";
+import { cloudinary } from "./domain/cloudinary";
 
 const app = new Elysia({
   prefix: "/api",
@@ -80,6 +81,7 @@ const app = new Elysia({
   .use(subscription)
   .use(report)
   .use(exp)
+  .use(cloudinary)
   .listen(3001);
 
 console.log(
