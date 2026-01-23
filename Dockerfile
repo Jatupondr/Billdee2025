@@ -4,9 +4,11 @@ WORKDIR /app
 # Copy root package files
 COPY package.json bun.lockb* turbo.json ./
 
-# Copy package.json files for workspaces (needed for dependency resolution)
+# Copy package.json files for all workspaces (needed for dependency resolution)
 COPY apps/web/package.json ./apps/web/
-COPY packages ./packages
+COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/ui/package.json ./packages/ui/
 
 # Install all dependencies (including workspace dependencies)
 RUN bun install --frozen-lockfile
@@ -16,7 +18,15 @@ COPY . .
 
 # Build the web app
 WORKDIR /app/apps/web
-RUN bunx next build
+ENV NODE_ENV=production
+# Set default env vars if not provided (can be overridden at build time)
+ARG NEXT_PUBLIC_API_URL=""
+ARG NEXT_PUBLIC_APP_URL=""
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+
+# Build with verbose output to see errors
+RUN set -x && bunx next build
 
 FROM oven/bun:1.3.1 AS runner
 WORKDIR /app
