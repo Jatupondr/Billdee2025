@@ -96,13 +96,13 @@ const SiteHeader = () => {
           <CheckCircleIcon />
           บัญชีผู้ใช้
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
           onClick={() => router.push("/affiliate")}
         >
           <CreditCardIcon />
           affiliate
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2 font-normal tracking-widest"
           onClick={() => router.push("/settings?tab=subscription-info")}
