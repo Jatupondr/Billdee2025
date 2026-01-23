@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   typedRoutes: true,
   reactCompiler: true,
+  output: "standalone", // Required for Docker deployment
   // Allow loading images from any https host (for Google and others)
   images: {
     remotePatterns: [
