@@ -4,12 +4,16 @@ WORKDIR /app
 # Copy workspace configs
 COPY package.json bun.lockb* turbo.json ./
 
+# Copy workspace package.json files (required for Bun to resolve dependencies)
+COPY apps/web/package.json ./apps/web/
+COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/ui/package.json ./packages/ui/
 
-
-# Install dependencies
+# Install dependencies (Bun needs package.json files to resolve workspace deps)
 RUN bun install --frozen-lockfile
 
-# Copy source code
+# Copy remaining source code
 COPY . .
 
 WORKDIR /app/apps/web
