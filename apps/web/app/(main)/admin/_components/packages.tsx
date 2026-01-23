@@ -1,7 +1,7 @@
 "use client";
 import { DataTable } from '@/components/data-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/hooks/axios';
@@ -15,6 +15,8 @@ import CreatePackModal from './create-pack-modal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import CancelSubscriptionDialog from '../../settings/_components/cancel-sub-dialog';
+import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 
 interface Package {
   _id: string;
@@ -38,6 +40,8 @@ interface Package {
 }
 
 const Packages = () => {
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
@@ -199,6 +203,13 @@ const Packages = () => {
     }
 
   ];
+  useEffect(() => {
+    if (session?.user?.role !== "admin") {
+      router.push("/");
+    }
+
+
+  }, [session]);
   return (
     <>
       <Card>

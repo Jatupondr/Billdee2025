@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { ColumnDef } from "@tanstack/react-table";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +32,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ModalBanUser from "./modal-ban-user";
 import ModalUnbanUser from "./modal-unban-user";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -50,6 +51,11 @@ const Users = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [openUnbanUserDialog, setOpenUnbanUserDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const router = useRouter();
+
+  const { data: session } = authClient.useSession();
+
+
 
   const handleOpenBanUserModal = (user: User) => {
     setSelectedUserId(user.id);
@@ -206,6 +212,14 @@ const Users = () => {
       const matchesRole = roleFilter === "all" || user.role === roleFilter;
       return matchesRole;
     }) || [];
+
+  useEffect(() => {
+    if (session?.user?.role !== "admin") {
+      router.push("/");
+    }
+
+
+  }, [session]);
 
   return (
     <>

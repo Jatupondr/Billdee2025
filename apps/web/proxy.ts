@@ -4,6 +4,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 export function proxy(req: NextRequest) {
   const session = getSessionCookie(req);
+  console.log("session", session);
   if (!session) return NextResponse.redirect(new URL("/login", req.url));
   return NextResponse.next();
 }
