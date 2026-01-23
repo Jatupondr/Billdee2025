@@ -23,9 +23,6 @@ ENV NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL}
 ENV AUTH_URL=${AUTH_URL}
 
 # ✅ ใช้ค่าพวกนี้ตอน build
-RUN echo "Using API URL: $NEXT_PUBLIC_API_URL"
-RUN bunx prisma generate || echo "skip prisma"
-RUN bunx next build
 
 # ---------------------------------------------
 FROM oven/bun:1.3.1 AS runner
