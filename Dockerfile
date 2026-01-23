@@ -1,52 +1,49 @@
 FROM oven/bun:1.3.1 AS builder
 WORKDIR /app
 
-# Copy root package files
-COPY package.json turbo.json ./
+# Copy workspace configs
+COPY package.json bun.lockb* turbo.json ./
+COPY apps/app/package.json ./apps/app/
+RUN bun install --frozen-lockfile
 
-# Copy lockfile if exists (optional, will regenerate if needed)
-COPY bun.lock* ./
+# Copy source code
+COPY . .
 
-# Copy all workspace package.json files
-COPY apps/web/package.json ./apps/web/
-COPY packages/eslint-config/package.json ./packages/eslint-config/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-COPY packages/ui/package.json ./packages/ui/
+WORKDIR /app/apps/app
 
-# Copy package source files (needed for workspace dependencies)
-COPY packages ./packages
+# ✅ ตั้งค่า ENV และ ARG ก่อน build
+ARG NEXT_PUBLIC_API_URL=https://api.billdee.net/api
+ARG NEXT_PUBLIC_APP_URL=https://billdee.net
+ARG NEXT_PUBLIC_WEB_URL=https://billdee.net
+ARG AUTH_URL=https://billdee.net/auth
 
-# Install dependencies
-# Install without --frozen-lockfile to allow Bun to resolve workspace dependencies
-RUN bun install
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL}
+ENV AUTH_URL=${AUTH_URL}
 
-# Copy remaining source code
-COPY apps ./apps
+# ✅ ใช้ค่าพวกนี้ตอน build
+RUN echo "Using API URL: $NEXT_PUBLIC_API_URL"
+RUN bunx prisma generate || echo "skip prisma"
+RUN bunx next build
 
-# Build Next.js
-WORKDIR /app/apps/web
-
-ENV NODE_ENV=production
-ARG NEXT_PUBLIC_API_URL=""
-ARG NEXT_PUBLIC_APP_URL=""
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-
-# Build
-RUN bun run build
-
+# ---------------------------------------------
 FROM oven/bun:1.3.1 AS runner
 WORKDIR /app
 
+# Copy from builder
+COPY --from=builder /app/apps/app/.next/standalone ./
+COPY --from=builder /app/apps/app/.next/static ./apps/app/.next/static
+COPY --from=builder /app/apps/app/public ./apps/app/public
+
+# ✅ Runtime ENV
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-# Copy standalone output
-COPY --from=builder --chown=bun:bun /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=bun:bun /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder --chown=bun:bun /app/apps/web/public ./apps/web/public
+ENV HOSTNAME=0.0.0.0
+ENV NEXT_PUBLIC_API_URL=https://api.billdee.net/api
+ENV NEXT_PUBLIC_APP_URL=https://billdee.net
+ENV NEXT_PUBLIC_WEB_URL=https://billdee.net
+ENV AUTH_URL=https://billdee.net/auth
 
 EXPOSE 3000
-
-CMD ["bun", "apps/web/server.js"]
+CMD ["bun", "apps/app/server.js"]
