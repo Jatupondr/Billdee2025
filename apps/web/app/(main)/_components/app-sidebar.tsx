@@ -110,7 +110,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = authClient.useSession();
-  console.log("session", session);
+
 
   const getSubscriptionById = async (subscriptionId: string) => {
     const response = await api.get(`/subscriptions/${subscriptionId}`);

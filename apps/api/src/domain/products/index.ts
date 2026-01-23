@@ -142,7 +142,7 @@ export const product = new Elysia({ prefix: "/products" })
     async (c) => {
       const { params, set } = c;
       try {
-        console.log("data ==>", params.id);
+
 
         const response = await productService.delete(params.id);
         set.status = 200;

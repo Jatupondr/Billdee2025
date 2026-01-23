@@ -23,6 +23,7 @@ export namespace BillModel {
         name: t.String(),
         quantity: t.Number(),
         price: t.Number(),
+        cost: t.Optional(t.Number()),
         total: t.Number(),
         note: t.Optional(t.String()),
       })
@@ -64,6 +65,7 @@ export namespace BillModel {
         name: t.String(),
         quantity: t.Number(),
         price: t.Number(),
+        cost: t.Optional(t.Number()),
         total: t.Number(),
         note: t.Optional(t.String()),
       })

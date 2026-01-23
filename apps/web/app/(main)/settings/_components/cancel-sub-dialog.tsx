@@ -30,11 +30,11 @@ const CancelSubscriptionDialog = ({
   onOpenChange,
   subscriptionId,
 }: CancelSubscriptionDialogProps) => {
-  console.log("CancelSubscriptionDialog render", subscriptionId);
+
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // Reset confirmation input when dialog opens/closes
+
 
 
   const deleteProductMutation = useMutation({

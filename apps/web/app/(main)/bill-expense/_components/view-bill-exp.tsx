@@ -40,7 +40,6 @@ const ViewBillExp = ({ id }: ViewBillExpProps) => {
     queryFn: () => getBillExpenseById(id),
     enabled: !!id,
   });
-  console.log("billExpenseData", billExpenseData);
 
   const ListTable = ["ลำดับ", "ชื่อรายการ", "จำนวน", "ราคา", "ราคารวม"];
 

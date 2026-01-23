@@ -212,7 +212,7 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
     async (c) => {
       const { params, set } = c;
       try {
-        console.log("data ==>", params.id);
+
 
         const response = await subscriptionService.delete(params.id);
         set.status = 200;

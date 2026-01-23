@@ -102,7 +102,7 @@ const RegisterComponent = () => {
           },
           {
             onSuccess: (data) => {
-              console.log("Login successful:", data);
+
 
               if (data) {
                 toast.success("สมัครสมาชิกสำเร็จ", {

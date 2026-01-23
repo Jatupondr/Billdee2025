@@ -2,7 +2,7 @@ import { status } from "elysia";
 import mongoose from "mongoose";
 
 import { OverviewModel } from "./model";
-import { Bill, Product } from "../../../models/model";
+import { Bill, Exp, Product } from "../../../models/model";
 
 export abstract class overviewService {
   static async findAll(query: OverviewModel.overviewQuery) {
@@ -15,12 +15,20 @@ export abstract class overviewService {
         },
         isDeleted: false,
       };
+
       const bills = await Bill.find(findQuery).lean();
       const total = bills.reduce((acc, bill) => acc + bill.total, 0);
       const totalCost = bills.reduce((acc, bill) => acc + bill.cost, 0);
       const totalProfit = total - totalCost;
-      const exp = 0;
-
+      const exps = await Exp.find({
+        organizationId: query.organizationId,
+        date: {
+          $gte: query.startDate,
+          $lte: query.endDate,
+        },
+        isDeleted: false,
+      }).lean();
+      const exp = exps.reduce((acc, exp) => acc + (exp.total || 0), 0);
       return {
         data: {
           total,
@@ -76,7 +84,7 @@ export abstract class overviewService {
           $limit: 10,
         },
       ]);
-      console.log("customers ==>", customers);
+
 
       const customersData = customers.map((customer) => {
         return {

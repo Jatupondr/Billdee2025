@@ -31,7 +31,7 @@ const Affiliate = () => {
     },
     enabled: !!session?.user?.id,
   });
-  console.log("affiliateData", affiliateData);
+
 
   const updateAffiliateMutation = useMutation({
     mutationFn: async (data: any) => {

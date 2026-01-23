@@ -69,7 +69,6 @@ const EditCustomerModal = ({
   onOpenChange,
   customer,
 }: EditCustomerModalProps) => {
-  console.log("customer ==>", customer);
   const queryClient = useQueryClient();
 
   const updateCustomerMutation = useMutation({

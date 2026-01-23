@@ -105,7 +105,7 @@ const CreateProductModal = ({
     validators: {
       onSubmit: productSchema,
       onSubmitAsync: async ({ value }) => {
-        console.log(value);
+
         createProductMutation.mutate(value);
       },
     },

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
-import { PencilIcon, PlusCircleIcon, EyeIcon } from "@phosphor-icons/react";
+import { PencilIcon, PlusCircleIcon, EyeIcon, TrashIcon } from "@phosphor-icons/react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import React, { useState } from "react";
@@ -19,14 +19,16 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import api from "@/hooks/axios";
 import { useQuery } from "@tanstack/react-query";
+import DeleteBillExpDialog from "./delete-bill-exp-dialog";
 const BillExpense = () => {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const debouncedSearch = useDebounce(search, 500);
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
-
+  const [selectedBillExp, setSelectedBillExp] = useState<any>(null);
   const getBills = async (page: number, pageSize: number, search: string) => {
     const response = await api.get(
       `/exp?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`,
@@ -39,7 +41,7 @@ const BillExpense = () => {
     queryFn: () => getBills(page, pageSize, debouncedSearch),
     enabled: !!activeOrg?.id,
   });
-  console.log("billsExpenseData", billsExpenseData);
+
 
   const columns: ColumnDef<any>[] = [
     {
@@ -128,7 +130,21 @@ const BillExpense = () => {
           >
             <PencilIcon size={18} weight="duotone" />
           </Button>
-        </div>
+
+          <Button
+            variant="destructive"
+            size="icon"
+            className="cursor-pointer active:scale-95 duration-200 ease-in-out"
+            onClick={() => {
+              setDeleteDialogOpen(true);
+              setSelectedBillExp(row.original);
+            }
+            }
+          >
+            <TrashIcon size={18} weight="duotone" />
+          </Button>
+
+        </div >
       ),
     },
   ];
@@ -182,6 +198,11 @@ const BillExpense = () => {
             />
           </CardContent>
         </Card>
+        <DeleteBillExpDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          billExp={selectedBillExp}
+        />
       </div>
     </>
   );

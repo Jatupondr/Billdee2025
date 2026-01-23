@@ -17,14 +17,13 @@ const Dashboard = () => {
     to: new Date(),
   });
 
-  console.log("dateRange -a", dateRange.from.toISOString());
-  console.log("dateRange -b", dateRange.to.toISOString());
+
 
   return (
     <>
-      <div className="flex  justify-between gap-4 mx-auto mb-4">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-normal tracking-widest  dark:text-zinc-300 font-normal tracking-widest">
+      <div className="flex flex-col md:flex-row justify-between gap-4 mx-auto mb-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-normal tracking-widest  dark:text-zinc-300 ">
             ยินดีต้อนรับกลับ คุณ{session?.user?.name}
           </h1>
           <p className="text-base text-muted-foreground dark:text-zinc-300  mt-2 font-normal tracking-widest">Dashboard สรุปข้อมูลร้านค้า</p>

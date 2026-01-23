@@ -146,6 +146,7 @@ const CreateBill = () => {
   const { data: customersData, isLoading } = useQuery<any>({
     queryKey: ["customers", debouncedSearch],
     queryFn: () => getCustomers(debouncedSearch),
+    enabled: !!activeOrg?.id,
   });
 
   const getLastBillNumber = async (organizationId: string, userId: string) => {
@@ -254,7 +255,7 @@ const CreateBill = () => {
           organizationId: activeOrg?.id,
           userId: session?.user.id,
         };
-        console.log(formattedData);
+
 
         createBillMutation.mutate(formattedData);
       },
@@ -328,12 +329,12 @@ const CreateBill = () => {
     ]);
     toast.success("เคลียร์รายการสินค้าทั้งหมดแล้ว");
   };
-  //productsData filter isRecommended is true
+
   const recommendedProducts = productsData?.rows.filter(
     (item: any) => item.isRecommended === true,
   );
 
-  console.log("recommendedProducts ==>", recommendedProducts);
+
 
   return (
     <>
@@ -414,6 +415,10 @@ const CreateBill = () => {
                                   "address_customer",
                                   selectedCustomer.address || "",
                                 );
+                              } else {
+                                form.setFieldValue("customerId", "");
+                                form.setFieldValue("phone_customer", "");
+                                form.setFieldValue("address_customer", "");
                               }
                             }}
                           >
@@ -482,10 +487,10 @@ const CreateBill = () => {
                                 >
                                   {date
                                     ? date.toLocaleDateString("th-TH", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                      })
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    })
                                     : "เลือกวันที่"}
                                   <CaretDownIcon
                                     className="ml-2 h-4 w-4 opacity-50"
@@ -794,6 +799,10 @@ const CreateBill = () => {
                                             index + 1,
                                           );
                                           form.setFieldValue(
+                                            `products[${index}].productId`,
+                                            selectedProduct._id || "",
+                                          );
+                                          form.setFieldValue(
                                             `products[${index}].price`,
                                             selectedProduct.price,
                                           );
@@ -808,6 +817,11 @@ const CreateBill = () => {
                                           form.setFieldValue(
                                             `products[${index}].total`,
                                             selectedProduct.price * currentQty,
+                                          );
+                                        } else {
+                                          form.setFieldValue(
+                                            `products[${index}].productId`,
+                                            "",
                                           );
                                         }
                                       }}
@@ -927,25 +941,27 @@ const CreateBill = () => {
                             </form.Field>
                             <form.Field name={`products[${index}].total`}>
                               {(totalField) => (
-                                <TableCell className="w-32 text-right flex items-center justify-end gap-2">
-                                  <span className="text-base font-normal tracking-widest">
-                                    {(totalField.state.value || 0).toFixed(2)}
-                                  </span>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => removeProduct(index)}
-                                    disabled={field.state.value.length <= 1}
-                                    className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
-                                  >
-                                    <TrashSimpleIcon
-                                      size={18}
-                                      weight="duotone"
-                                      color="white"
-                                      className="text-red-400"
-                                    />
-                                  </Button>
+                                <TableCell className="w-56 min-w-56 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <span className="text-base font-normal tracking-widest whitespace-nowrap">
+                                      {(totalField.state.value || 0).toFixed(2)}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => removeProduct(index)}
+                                      disabled={field.state.value.length <= 1}
+                                      className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
+                                    >
+                                      <TrashSimpleIcon
+                                        size={18}
+                                        weight="duotone"
+                                        color="white"
+                                        className="text-red-400"
+                                      />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               )}
                             </form.Field>

@@ -89,6 +89,7 @@ export const billSchema = v.object({
   discountPercent: v.optional(v.number(), 0),
   taxPercent: v.optional(v.number(), 7),
   includeVat: v.optional(v.boolean(), false),
+  cost: v.optional(v.number(), 0),
   billNote: v.optional(v.string(), ""),
   total: v.optional(v.number(), 0),
   discount: v.optional(v.number(), 0),
@@ -104,12 +105,9 @@ interface EditBillProps {
 const EditBill = ({ id }: EditBillProps) => {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [openDate, setOpenDate] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
-  const [searchProduct, setSearchProduct] = useState("");
-  const debouncedSearchProduct = useDebounce(searchProduct, 500);
   const { data: session } = authClient.useSession();
   const { data: activeOrg } = authClient.useActiveOrganization();
 
@@ -144,9 +142,17 @@ const EditBill = ({ id }: EditBillProps) => {
     return response.data;
   };
 
+  // สินค้าแนะนำ - ไม่มี search (โหลดครั้งเดียว)
   const { data: productsData, isLoading: isLoadingProducts } = useQuery<any>({
-    queryKey: ["products", debouncedSearchProduct],
-    queryFn: () => getProducts(debouncedSearchProduct),
+    queryKey: ["products-recommended", activeOrg?.id],
+    queryFn: () => getProducts(""),
+    enabled: !!activeOrg?.id,
+  });
+
+  // สินค้าสำหรับ Combobox - โหลดทั้งหมดครั้งเดียว ให้ filter ฝั่ง client
+  const { data: comboboxProductsData } = useQuery<any>({
+    queryKey: ["products-combobox", activeOrg?.id],
+    queryFn: () => getProducts(""),
     enabled: !!activeOrg?.id,
   });
 
@@ -203,6 +209,7 @@ const EditBill = ({ id }: EditBillProps) => {
 
     validators: {
       onSubmitAsync: async ({ value }: { value: any }) => {
+        // คำนวณค่าต่างๆ ก่อน submit
         const subtotal = (value.products || []).reduce(
           (sum: number, item: any) => sum + (item.total || 0),
           0,
@@ -213,14 +220,17 @@ const EditBill = ({ id }: EditBillProps) => {
           ? (afterDiscount * (value.taxPercent || 7)) / 100
           : 0;
         const totalAmount = afterDiscount + taxAmount;
-
+        const costAmount = (value.products || []).reduce(
+          (sum: number, item: any) => sum + (item.cost || 0),
+          0,
+        );
         const formattedData: any = {
           billNumber: value.billNumber,
           date: value.date || new Date().toISOString(),
           name_customer: value.name_customer,
           phone_customer: value.phone_customer,
           address_customer: value.address_customer,
-          customerId: value.customerId?._id.toString(),
+          customerId: value.customerId || "",
           products: (value.products || []).map((product: any, idx: number) => ({
             no: product.no || idx + 1,
             productId: product.productId || undefined,
@@ -234,6 +244,7 @@ const EditBill = ({ id }: EditBillProps) => {
           discountPercent: value.discountPercent || 0,
           taxPercent: value.taxPercent || 7,
           includeVat: value.includeVat || false,
+          cost: costAmount,
           total: totalAmount,
           discount: discountAmount,
           vat: taxAmount,
@@ -242,7 +253,7 @@ const EditBill = ({ id }: EditBillProps) => {
           userId: session?.user.id,
         };
 
-        console.log("value", formattedData);
+
 
         updateBillMutation.mutate(formattedData);
       },
@@ -256,7 +267,7 @@ const EditBill = ({ id }: EditBillProps) => {
       form.setFieldValue("name_customer", bill.name_customer || "");
       form.setFieldValue("billNumber", bill.billNumber || "");
       form.setFieldValue("date", bill.date || "");
-      form.setFieldValue("customerId", bill.customerId || "");
+      form.setFieldValue("customerId", bill.customerId?._id || bill.customerId || "");
       form.setFieldValue("phone_customer", bill.phone_customer || "");
       form.setFieldValue("address_customer", bill.address_customer || "");
       form.setFieldValue("products", bill.products || []);
@@ -272,9 +283,11 @@ const EditBill = ({ id }: EditBillProps) => {
   }, [billData]);
 
   const customerData = customersData?.rows.map((item: any) => item.name) ?? [];
+
+  // สินค้าสำหรับ Combobox (ค้นหาแยก)
   const productData =
-    productsData?.rows.map((item: any) => ({
-      id: item.id,
+    comboboxProductsData?.rows.map((item: any) => ({
+      _id: item._id || item.id,
       name: item.name,
       price: item.price ?? 0,
       cost: item.cost ?? 0,
@@ -504,15 +517,15 @@ const EditBill = ({ id }: EditBillProps) => {
                                 <Button
                                   variant="outline"
                                   id={field.name}
-                                  className="w-full justify-between font-normal ont-normal tracking-widest"
+                                  className="w-full justify-between font-normal tracking-widest "
                                   type="button"
                                 >
                                   {date
                                     ? date.toLocaleDateString("th-TH", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                      })
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    })
                                     : "เลือกวันที่"}
                                   <CaretDownIcon
                                     className="ml-2 h-4 w-4 opacity-50"
@@ -536,7 +549,6 @@ const EditBill = ({ id }: EditBillProps) => {
                                       .toISOString()
                                       .split("T")[0];
                                     field.handleChange(dateString);
-                                    setOpenDate(false);
                                   }
                                 }}
                               />
@@ -603,8 +615,16 @@ const EditBill = ({ id }: EditBillProps) => {
                               <span className="text-sm font-normal tracking-widest text-muted-foreground">
                                 ที่อยู่:
                               </span>
-                              <span className="text-sm font-normal tracking-widest">
-                                {selectedCustomer.address}
+                              <span className="text-sm font-normal tracking-wide">
+                                {selectedCustomer.address +
+                                  ", แขวง/ตำบล: " +
+                                  selectedCustomer.district +
+                                  ",  เขต/อำเภอ: " +
+                                  selectedCustomer.subDistrict +
+                                  ", จังหวัด: " +
+                                  selectedCustomer.province +
+                                  ", รหัสไปรษณีย์: " +
+                                  selectedCustomer.postalCode}
                               </span>
                             </div>
                           )}
@@ -771,7 +791,7 @@ const EditBill = ({ id }: EditBillProps) => {
             ) : null}
 
             <Table>
-              <TableHeader className="bg-zinc-100 dark:bg-zinc-600">
+              <TableHeader className="bg-accent">
                 <TableRow>
                   {ListTable.map((header, idx: number) => (
                     <TableHead
@@ -801,7 +821,6 @@ const EditBill = ({ id }: EditBillProps) => {
                                       items={productData.map(
                                         (p: any) => p.name,
                                       )}
-                                      value={nameField.state.value ?? ""}
                                       onValueChange={(value: any) => {
                                         nameField.handleChange(value);
                                         const selectedProduct =
@@ -814,6 +833,10 @@ const EditBill = ({ id }: EditBillProps) => {
                                             index + 1,
                                           );
                                           form.setFieldValue(
+                                            `products[${index}].productId`,
+                                            selectedProduct._id || "",
+                                          );
+                                          form.setFieldValue(
                                             `products[${index}].price`,
                                             selectedProduct.price,
                                           );
@@ -824,23 +847,27 @@ const EditBill = ({ id }: EditBillProps) => {
                                           const currentQty =
                                             form.getFieldValue(
                                               `products[${index}].quantity`,
-                                            ) || 0;
+                                            ) || 1;
                                           form.setFieldValue(
                                             `products[${index}].total`,
                                             selectedProduct.price * currentQty,
+                                          );
+                                        } else {
+                                          form.setFieldValue(
+                                            `products[${index}].productId`,
+                                            "",
                                           );
                                         }
                                       }}
                                     >
                                       <ComboboxInput
                                         value={nameField.state.value ?? ""}
-                                        placeholder="เลือกหรือค้นหาสินค้า"
                                         onChange={(e) => {
                                           nameField.handleChange(
                                             e.target.value,
                                           );
-                                          setSearchProduct(e.target.value);
                                         }}
+                                        placeholder="เลือกหรือค้นหาสินค้า"
                                         className="h-9 font-normal tracking-widest"
                                       />
                                       <ComboboxContent>
@@ -932,25 +959,27 @@ const EditBill = ({ id }: EditBillProps) => {
                             </form.Field>
                             <form.Field name={`products[${index}].total`}>
                               {(totalField) => (
-                                <TableCell className="w-32 text-right flex items-center justify-end gap-2 font-normal tracking-widest">
-                                  <span className="text-base font-medium">
-                                    {(totalField.state.value || 0).toFixed(2)}
-                                  </span>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => removeProduct(index)}
-                                    disabled={field.state.value.length <= 1}
-                                    className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
-                                  >
-                                    <TrashSimpleIcon
-                                      size={18}
-                                      weight="duotone"
-                                      color="white"
-                                      className="text-red-400"
-                                    />
-                                  </Button>
+                                <TableCell className="w-56 min-w-56 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <span className="text-base font-normal tracking-widest  whitespace-nowrap">
+                                      {(totalField.state.value || 0).toFixed(2)}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => removeProduct(index)}
+                                      disabled={field.state.value.length <= 1}
+                                      className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
+                                    >
+                                      <TrashSimpleIcon
+                                        size={18}
+                                        weight="duotone"
+                                        color="white"
+                                        className="text-red-400"
+                                      />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               )}
                             </form.Field>
@@ -1102,7 +1131,7 @@ const EditBill = ({ id }: EditBillProps) => {
             </form.Subscribe>
           </form>
         </CardContent>
-      </Card>
+      </Card >
     </>
   );
 };

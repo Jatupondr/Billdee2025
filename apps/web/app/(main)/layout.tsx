@@ -20,8 +20,8 @@ export default function MainLayout({
           </div>
 
           {/* Main Content */}
-          <main className=" flex-1  bg-[#f4f6f9] dark:bg-zinc-900">
-            <div className="p-6">{children}</div>
+          <main className=" flex-1  bg-[#f4f6f9] dark:bg-zinc-900 h-full">
+            <div className="p-4 sm:p-5 md:p-6 lg:p-6">{children}</div>
           </main>
         </SidebarInset>
       </SidebarProvider>

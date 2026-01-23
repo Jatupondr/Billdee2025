@@ -173,7 +173,7 @@ export const exp = new Elysia({ prefix: "/exp" })
     async (c) => {
       const { params, set } = c;
       try {
-        console.log("data ==>", params.id);
+
 
         const response = await expService.delete(params.id);
         set.status = 200;

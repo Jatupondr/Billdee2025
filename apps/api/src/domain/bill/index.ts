@@ -172,7 +172,7 @@ export const bill = new Elysia({ prefix: "/bills" })
     async (c) => {
       const { params, set } = c;
       try {
-        console.log("data ==>", params.id);
+
 
         const response = await billService.delete(params.id);
         set.status = 200;

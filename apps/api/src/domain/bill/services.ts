@@ -1,17 +1,62 @@
 import { status } from "elysia";
 import mongoose from "mongoose";
 import { BillModel } from "./model";
-import { Bill } from "../../../models/model";
+import { Bill, Customer, Product } from "../../../models/model";
 
 export abstract class billService {
   static async create(dto: BillModel.billCreateDto) {
     try {
-      console.log("DTO in service:", dto);
+
       const date = new Date(dto.date);
+      let customerId = dto.customerId;
+
+      if (dto.customerId =="") {
+        // create customer
+        const customer = await Customer.create({
+          name: dto.name_customer,
+          organizationId: dto.organizationId,
+          userId: dto.userId,
+          typeCustomer: "customer",
+        });
+        customerId = customer._id.toString();
+      }
+
+      // check if dto.products is not empty if not productId is create product
+      let products = [];
+      if (dto.products.length > 0) {
+        for (const product of dto.products) {
+          let productId = product.productId;
+
+          if (!productId || productId === "") {
+            // create new product
+            const newProduct = await Product.create({
+              name: product.name,
+              organizationId: dto.organizationId,
+              userId: dto.userId,
+              price: product.price,
+              cost: product.cost || 0
+            });
+            productId = newProduct._id.toString();
+          }
+
+          // add product to products array with correct productId
+          products.push({
+            no: product.no,
+            productId: productId,
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            cost: product.cost || 0,
+            total: product.total,
+            note: product.note,
+          });
+        }
+      }
 
       const bill = await Bill.create({
         ...dto,
-        // products: dto.products,
+        products: products,
+        customerId: customerId,
         organizationId: dto.organizationId,
         userId: dto.userId,
         date: date,
@@ -96,10 +141,56 @@ export abstract class billService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
+      let customerId = dto.customerId;
+
+      if (dto.customerId =="") {
+        // create customer
+        const customer = await Customer.create({
+          name: dto.name_customer,
+          organizationId: dto.organizationId,
+          userId: dto.userId,
+          typeCustomer: "customer",
+        });
+        customerId = customer._id.toString();
+      }
+
+      // check if dto.products is not empty if not productId is create product
+      let products = [];
+      if (dto.products.length > 0) {
+        for (const product of dto.products) {
+          let productId = product.productId;
+
+          if (!productId || productId === "") {
+            // create new product
+            const newProduct = await Product.create({
+              name: product.name,
+              organizationId: dto.organizationId,
+              userId: dto.userId,
+              price: product.price,
+              cost: product.cost || 0
+            });
+            productId = newProduct._id.toString();
+          }
+
+          // add product to products array with correct productId
+          products.push({
+            no: product.no,
+            productId: productId,
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            cost: product.cost || 0,
+            total: product.total,
+            note: product.note,
+          });
+        }
+      }
       const updatedBill = await Bill.findOneAndUpdate(
         { _id: id },
         {
           ...dto,
+          products: products,
+          customerId: customerId,
         },
         { new: true }
       )

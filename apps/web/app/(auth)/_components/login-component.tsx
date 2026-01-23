@@ -67,7 +67,7 @@ const LoginComponent = () => {
           },
           {
             onSuccess: (data) => {
-              console.log("Login successful:", data);
+
 
               if (data) {
                 toast.success("เข้าสู่ระบบสำเร็จ", {
@@ -269,7 +269,7 @@ const LoginComponent = () => {
                         )}
                         <FieldDescription className=" text-right font-normal tracking-widest">
                           <a
-                            href="/forgot"
+                            href="/forgot-password"
                             className="text-sm font-normal tracking-widest"
                           >
                             ลืมรหัสผ่าน?

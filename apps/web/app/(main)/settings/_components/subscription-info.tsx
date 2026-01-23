@@ -12,22 +12,10 @@ import { useEffect, useState } from "react";
 import CancelSubscriptionDialog from "./cancel-sub-dialog";
 
 
-
-
-
-
-
-
-
-// Sample billing data
-
-
-
-
 export default function SubscriptionInfo() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const [openCancelSubscriptionDialog, setOpenCancelSubscriptionDialog] = useState(false);
-  console.log("session", session);
+
 
   const getSubscriptionById = async (subscriptionId: string) => {
     const response = await api.get(`/subscriptions/${subscriptionId}`);
@@ -39,13 +27,12 @@ export default function SubscriptionInfo() {
     queryFn: () => getSubscriptionById(session?.user?.id || ""),
     enabled: !!session?.user?.id,
   });
-  console.log("subscriptionData", subscriptionData);
 
-  // คำนวณวันที่สิ้นสุดของการสมัครสมาชิก
+
+
   const dateTotal = new Date(subscriptionData?.data?.endDate).getTime() - new Date().getTime();
   const dateTotalDays = Math.ceil(dateTotal / (1000 * 60 * 60 * 24));
   const isExpired = dateTotalDays <= 0;
-  console.log("dateTotalDays", dateTotalDays);
 
 
 

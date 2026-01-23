@@ -27,7 +27,7 @@ const OverviewAffiliate = ({ id, code }: OverviewAffiliateProps) => {
     },
     enabled: !!id && !!code,
   });
-  console.log("listAffiliate", listAffiliate);
+
 
   const columns: ColumnDef<any>[] = [
     {

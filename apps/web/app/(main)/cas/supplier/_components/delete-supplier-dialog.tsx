@@ -34,19 +34,10 @@ const DeleteSupplierDialog = ({
   onOpenChange,
   supplier,
 }: DeleteSupplierDialogProps) => {
-  console.log("DeleteSupplierDialog render", supplier);
 
   const queryClient = useQueryClient();
-  const [confirmName, setConfirmName] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
 
-  // Reset confirmation input when dialog opens/closes
-  useEffect(() => {
-    if (!open) {
-      setConfirmName("");
-      setIsCopied(false);
-    }
-  }, [open]);
+
 
   const deleteSupplierMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -58,7 +49,7 @@ const DeleteSupplierDialog = ({
       toast.success("ลบซัพพลายเออร์สำเร็จ", {
         position: "bottom-right",
       });
-      setConfirmName("");
+
       onOpenChange(false);
     },
     onError: (error: any) => {

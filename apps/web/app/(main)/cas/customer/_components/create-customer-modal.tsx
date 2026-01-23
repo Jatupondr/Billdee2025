@@ -75,7 +75,7 @@ const CreateCustomerModal = ({
 }: CreateCustomerModalProps) => {
   const { data: activeOrg } = authClient.useActiveOrganization();
   const { data: session, isPending: sessionPending } = authClient.useSession();
-  console.log("Session:", session);
+
 
   const queryClient = useQueryClient();
 
@@ -280,7 +280,7 @@ const CreateCustomerModal = ({
                             }
                             placeholder="เขต/อำเภอ"
                             className="font-normal tracking-widest"
-                            />
+                          />
                         </InputGroup>
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />

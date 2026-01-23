@@ -34,7 +34,7 @@ const DeleteCustomerDialog = ({
   onOpenChange,
   customer,
 }: DeleteCustomerDialogProps) => {
-  console.log("DeleteCustomerDialog render", customer);
+
 
   const queryClient = useQueryClient();
   const [confirmName, setConfirmName] = useState("");

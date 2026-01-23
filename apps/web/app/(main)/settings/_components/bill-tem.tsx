@@ -93,7 +93,7 @@ export default function BillTem() {
     },
     enabled: !!activeOrg?.id,
   });
-  console.log("billTemplate", billTemplate);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const pdfMakeRef = useRef<any>(null);
@@ -145,7 +145,7 @@ export default function BillTem() {
             left: parseInt(value.marginLeft),
           },
         };
-        console.log("formatData", formatData);
+
         updateBillTemplateMutation.mutate(formatData);
       },
     },
@@ -529,10 +529,9 @@ export default function BillTem() {
                             onClick={() => field.handleChange("basic")}
                             className={`
                               group relative h-36 rounded-2xl border-2 transition-all duration-300 ease-out
-                              ${
-                                field.state.value === "basic"
-                                  ? "border-primary bg-linear-to-br from-primary/10 via-primary/5 to-transparent shadow-lg shadow-primary/20 scale-[1.02]"
-                                  : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40 hover:shadow-md hover:scale-[1.01]"
+                              ${field.state.value === "basic"
+                                ? "border-primary bg-linear-to-br from-primary/10 via-primary/5 to-transparent shadow-lg shadow-primary/20 scale-[1.02]"
+                                : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40 hover:shadow-md hover:scale-[1.01]"
                               }
                             `}
                           >
@@ -540,19 +539,17 @@ export default function BillTem() {
                               <div
                                 className={`
                                 w-16 h-16 rounded-xl flex items-center justify-center transition-all duration-300
-                                ${
-                                  field.state.value === "basic"
+                                ${field.state.value === "basic"
                                     ? "bg-primary/10"
                                     : "bg-muted group-hover:bg-primary/5"
-                                }
+                                  }
                               `}
                               >
                                 <svg
-                                  className={`w-8 h-8 transition-colors ${
-                                    field.state.value === "basic"
+                                  className={`w-8 h-8 transition-colors ${field.state.value === "basic"
                                       ? "text-primary"
                                       : "text-muted-foreground group-hover:text-primary"
-                                  }`}
+                                    }`}
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -566,11 +563,10 @@ export default function BillTem() {
                                 </svg>
                               </div>
                               <span
-                                className={`text-2xl font-semibold transition-colors ${
-                                  field.state.value === "basic"
+                                className={`text-2xl font-semibold transition-colors ${field.state.value === "basic"
                                     ? "text-primary"
                                     : "text-foreground group-hover:text-primary"
-                                }`}
+                                  }`}
                               >
                                 พื้นฐาน
                               </span>
@@ -822,20 +818,18 @@ export default function BillTem() {
                               onClick={() => field.handleChange(size as any)}
                               className={`
                                 h-20 rounded-lg border-2 transition-all duration-200
-                                ${
-                                  field.state.value === size
-                                    ? "border-primary bg-primary/10 shadow-md"
-                                    : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
+                                ${field.state.value === size
+                                  ? "border-primary bg-primary/10 shadow-md"
+                                  : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
                                 }
                               `}
                             >
                               <div className="flex flex-col items-center justify-center h-full">
                                 <span
-                                  className={`text-lg font-semibold ${
-                                    field.state.value === size
+                                  className={`text-lg font-semibold ${field.state.value === size
                                       ? "text-primary"
                                       : "text-foreground"
-                                  }`}
+                                    }`}
                                 >
                                   {size}
                                 </span>
@@ -867,27 +861,24 @@ export default function BillTem() {
                             onClick={() => field.handleChange("portrait")}
                             className={`
                               h-32 rounded-lg border-2 transition-all duration-200
-                              ${
-                                field.state.value === "portrait"
-                                  ? "border-primary bg-primary/10 shadow-md"
-                                  : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
+                              ${field.state.value === "portrait"
+                                ? "border-primary bg-primary/10 shadow-md"
+                                : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
                               }
                             `}
                           >
                             <div className="flex flex-col items-center justify-center h-full space-y-2">
                               <div
-                                className={`w-12 h-16 border-2 rounded ${
-                                  field.state.value === "portrait"
+                                className={`w-12 h-16 border-2 rounded ${field.state.value === "portrait"
                                     ? "border-primary"
                                     : "border-muted-foreground"
-                                }`}
+                                  }`}
                               />
                               <span
-                                className={`text-base font-medium ${
-                                  field.state.value === "portrait"
+                                className={`text-base font-medium ${field.state.value === "portrait"
                                     ? "text-primary"
                                     : "text-foreground"
-                                }`}
+                                  }`}
                               >
                                 แนวตั้ง
                               </span>
@@ -898,27 +889,24 @@ export default function BillTem() {
                             onClick={() => field.handleChange("landscape")}
                             className={`
                               h-32 rounded-lg border-2 transition-all duration-200
-                              ${
-                                field.state.value === "landscape"
-                                  ? "border-primary bg-primary/10 shadow-md"
-                                  : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
+                              ${field.state.value === "landscape"
+                                ? "border-primary bg-primary/10 shadow-md"
+                                : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
                               }
                             `}
                           >
                             <div className="flex flex-col items-center justify-center h-full space-y-2">
                               <div
-                                className={`w-16 h-12 border-2 rounded ${
-                                  field.state.value === "landscape"
+                                className={`w-16 h-12 border-2 rounded ${field.state.value === "landscape"
                                     ? "border-primary"
                                     : "border-muted-foreground"
-                                }`}
+                                  }`}
                               />
                               <span
-                                className={`text-base font-medium ${
-                                  field.state.value === "landscape"
+                                className={`text-base font-medium ${field.state.value === "landscape"
                                     ? "text-primary"
                                     : "text-foreground"
-                                }`}
+                                  }`}
                               >
                                 แนวนอน
                               </span>

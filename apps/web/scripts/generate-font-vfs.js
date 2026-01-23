@@ -16,9 +16,7 @@ window.pdfMake.vfs['THSarabunNew.ttf'] = '${base64Font}';
 `;
 
   fs.writeFileSync(outputPath, vfsContent);
-  console.log("✅ Generated vfs_fonts.js successfully!");
-  console.log(`📁 Output: ${outputPath}`);
-  console.log(`📏 Size: ${(base64Font.length / 1024).toFixed(2)} KB`);
+
 } catch (error) {
   console.error("❌ Error:", error.message);
   process.exit(1);

@@ -49,7 +49,7 @@ const defaultValues: orgData = {
 
 export default function PasswordInfo() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
-  console.log("session", session);
+
 
   const form = useForm({
     defaultValues: defaultValues,
@@ -59,7 +59,7 @@ export default function PasswordInfo() {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        console.log("value", value);
+
         await authClient.changePassword({
           newPassword: value.newPassword, // required
           currentPassword: value.password, // required
@@ -67,13 +67,13 @@ export default function PasswordInfo() {
         },
           {
             onSuccess: (data) => {
-              console.log("data", data);
+
               toast.success("สำเร็จ", {
                 description: "แก้ไขรหัสผ่านสำเร็จ",
               });
             },
             onError: (error) => {
-              console.log("error", error);
+
               toast.error("เกิดข้อผิดพลาด", {
                 description: error.error.message || "ไม่สามารถแก้ไขรหัสผ่านได้",
               });
@@ -83,11 +83,7 @@ export default function PasswordInfo() {
       },
     },
   });
-  // useEffect(() => {
-  //   if (session) {
-  //     form.setFieldValue("name", session.user.name);
-  //   }
-  // }, [session]);
+
 
   const router = useRouter();
   return (

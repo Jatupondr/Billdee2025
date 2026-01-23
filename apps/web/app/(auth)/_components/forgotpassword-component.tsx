@@ -18,12 +18,13 @@ import {
 } from "@/components/ui/input-group";
 import { toast } from "sonner";
 import { EnvelopeSimpleIcon, SignInIcon } from "@phosphor-icons/react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 export const formSchema = v.object({
   email: v.pipe(
     v.string("กรุณากรอกอีเมล"),
-    v.nonEmpty("กรุณากรอกอีเมล"),
-    v.maxLength(255, "อีเมลยาวเกินไป"),
-    v.email("รูปแบบอีเมลไม่ถูกต้อง")
+
+
   ),
 });
 
@@ -32,6 +33,7 @@ const defaultValues: loginData = {
   email: "",
 };
 const ForgotPasswordComponent = () => {
+  const router = useRouter();
   const formForgotPassword = useForm({
     defaultValues: defaultValues,
     validationLogic: revalidateLogic(),
@@ -40,20 +42,30 @@ const ForgotPasswordComponent = () => {
       onDynamic: formSchema,
       onSubmit: formSchema,
       onSubmitAsync: async ({ value }) => {
-        toast("You submitted the following values:", {
-          description: (
-            <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-              <code>{JSON.stringify(value, null, 2)}</code>
-            </pre>
-          ),
-          position: "bottom-right",
-          classNames: {
-            content: "flex flex-col gap-2",
+
+        await authClient?.requestPasswordReset(
+          {
+            email: value.email.trim(),
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
           },
-          style: {
-            "--border-radius": "calc(var(--radius)  + 4px)",
-          } as React.CSSProperties,
-        });
+          {
+            onSuccess: () => {
+              toast.success("รีเซ็ตรหัสผ่านสำเร็จ", {
+                description: "กรุณาตรวจสอบอีเมลของคุณเพื่อรีเซ็ตรหัสผ่าน",
+              });
+
+            },
+            onError: (error) => {
+              const errorMessage =
+                error.error?.message ||
+                error.error?.statusText ||
+                "An error occurred during reset password";
+              toast.error("รีเซ็ตรหัสผ่านไม่สำเร็จ", {
+                description: errorMessage,
+              });
+            },
+          }
+        );
       },
     },
   });
@@ -106,7 +118,7 @@ const ForgotPasswordComponent = () => {
             </FieldDescription>
           </div>
           <form
-            id="form-login"
+            id="form-forgot-password"
             onSubmit={(e) => {
               e.preventDefault();
               formForgotPassword.handleSubmit();
@@ -130,13 +142,15 @@ const ForgotPasswordComponent = () => {
                             name={field.name}
                             value={field.state.value}
                             onBlur={field.handleBlur}
+
                             onChange={(e) => field.handleChange(e.target.value)}
+                            autoComplete="email"
                             aria-invalid={
                               field.state.meta.isTouched &&
                               !field.state.meta.isValid
                             }
                             placeholder="อีเมลหรือชื่อผู้ใช้"
-                            autoComplete="email"
+
                           />
                           <InputGroupAddon>
                             <EnvelopeSimpleIcon
@@ -161,11 +175,8 @@ const ForgotPasswordComponent = () => {
           <Field>
             <Button
               type="submit"
-              form="form-login"
+              form="form-forgot-password"
               className="active:scale-95 duration-300 cursor-pointer flex justify-center gap-2 py-3 px-2 h-9 w-full"
-              onClick={() => {
-                formForgotPassword.reset();
-              }}
             >
               <SignInIcon
                 size={32}

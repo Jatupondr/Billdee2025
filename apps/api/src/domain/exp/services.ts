@@ -8,7 +8,7 @@ import { Exp, Customer } from "../../../models/model";
 export abstract class expService {
   static async create(dto: ExpModel.expCreateDto) {
     try {
-      console.log("DTO in service:", dto);
+
       const date = new Date(dto.date);
       let customerId: string;
 

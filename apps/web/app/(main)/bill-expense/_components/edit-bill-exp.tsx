@@ -169,7 +169,7 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
       enabled: !!id,
     });
 
-  console.log("billExpenseData:", billExpenseData);
+
 
   const getCustomers = async (search: string) => {
     const response = await api.get(
@@ -358,7 +358,7 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
   useEffect(() => {
     if (billExpenseData?.data) {
       const billExp = billExpenseData.data;
-      console.log("billExpenseData:", billExp); // Debug log
+
 
       form.setFieldValue("billExpenseNumber", billExp.billExpenseNumber || "");
       form.setFieldValue(
@@ -484,6 +484,7 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
                                 );
                               } else {
                                 form.setFieldValue("customerId", "");
+                                form.setFieldValue("name", "");
                               }
                             }}
                           >
@@ -752,25 +753,27 @@ const EditBillExp = ({ id }: EditBillExpProps) => {
                             </form.Field>
                             <form.Field name={`items[${index}].total`}>
                               {(totalField) => (
-                                <TableCell className="w-32 text-right flex items-center justify-end gap-2">
-                                  <span className="text-base font-normal tracking-widest">
-                                    {(totalField.state.value || 0).toFixed(2)}
-                                  </span>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => removeProduct(index)}
-                                    disabled={field.state.value.length <= 1}
-                                    className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
-                                  >
-                                    <TrashSimpleIcon
-                                      size={18}
-                                      weight="duotone"
-                                      color="white"
-                                      className="text-red-400"
-                                    />
-                                  </Button>
+                                <TableCell className="w-56 min-w-56 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <span className="text-base font-normal tracking-widest whitespace-nowrap">
+                                      {(totalField.state.value || 0).toFixed(2)}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => removeProduct(index)}
+                                      disabled={field.state.value.length <= 1}
+                                      className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
+                                    >
+                                      <TrashSimpleIcon
+                                        size={18}
+                                        weight="duotone"
+                                        color="white"
+                                        className="text-red-400"
+                                      />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               )}
                             </form.Field>

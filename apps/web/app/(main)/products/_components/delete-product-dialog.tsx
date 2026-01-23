@@ -34,19 +34,12 @@ const DeleteProductDialog = ({
   onOpenChange,
   product,
 }: DeleteProductDialogProps) => {
-  console.log("DeleteProductDialog render", product);
+
 
   const queryClient = useQueryClient();
-  const [confirmName, setConfirmName] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
 
-  // Reset confirmation input when dialog opens/closes
-  useEffect(() => {
-    if (!open) {
-      setConfirmName("");
-      setIsCopied(false);
-    }
-  }, [open]);
+
+
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -58,7 +51,7 @@ const DeleteProductDialog = ({
       toast.success("ลบสินค้าสำเร็จ", {
         position: "bottom-right",
       });
-      setConfirmName("");
+
       onOpenChange(false);
     },
     onError: (error: any) => {
