@@ -50,6 +50,7 @@ export const productSchema = v.object({
   district: v.optional(v.string()),
   subDistrict: v.optional(v.string()),
   postalCode: v.optional(v.string()),
+  taxId: v.optional(v.string()),
 });
 
 type ProductData = v.InferOutput<typeof productSchema>;
@@ -62,6 +63,7 @@ const defaultValues: ProductData = {
   district: "",
   subDistrict: "",
   postalCode: "",
+  taxId: "",
 };
 
 interface CreateCustomerModalProps {
@@ -156,6 +158,36 @@ const CreateCustomerModal = ({
                             !field.state.meta.isValid
                           }
                           placeholder="ชื่อลูกค้า"
+                          className="font-normal tracking-widest"
+                        />
+                      </InputGroup>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <formCustomers.Field
+                name="taxId"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">เลขประจำตัวผู้เสียภาษี</FieldLabel>
+                      <InputGroup className="h-12">
+                        <InputGroupInput
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid
+                          }
+                          placeholder="เลขประจำตัวผู้เสียภาษี"
                           className="font-normal tracking-widest"
                         />
                       </InputGroup>

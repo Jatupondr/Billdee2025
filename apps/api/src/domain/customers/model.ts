@@ -15,6 +15,7 @@ export namespace CustomerModel {
     district: t.Optional(t.String()),
     subDistrict: t.Optional(t.String()),
     postalCode: t.Optional(t.String()),
+    taxId: t.Optional(t.String()),
     phone: t.Optional(t.String()),
     organizationId: t.String({
       minLength: 1,
@@ -35,6 +36,7 @@ export namespace CustomerModel {
     district: t.Optional(t.String()),
     subDistrict: t.Optional(t.String()),
     postalCode: t.Optional(t.String()),
+    taxId: t.Optional(t.String()),
     phone: t.Optional(t.String()),
     organizationId: t.Optional(t.String({ minLength: 1 })),
     userId: t.Optional(t.String({ minLength: 1 })),
@@ -52,6 +54,7 @@ export namespace CustomerModel {
     district: t.Optional(t.String()),
     subDistrict: t.Optional(t.String()),
     postalCode: t.Optional(t.String()),
+    taxId: t.Optional(t.String()),
     phone: t.Optional(t.String()),
     organizationId: t.Any(),
     createdAt: t.Date(),

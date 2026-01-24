@@ -240,6 +240,9 @@ const customerSchemaq = new Schema(
     postalCode: {
       type: String,
     },
+    taxId: {
+      type: String,
+    },
 
     phone: {
       type: String,

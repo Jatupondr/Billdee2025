@@ -43,6 +43,7 @@ export const customerSchema = v.object({
   district: v.optional(v.string()),
   subDistrict: v.optional(v.string()),
   postalCode: v.optional(v.string()),
+  taxId: v.optional(v.string()),
 });
 
 type CustomerData = v.InferOutput<typeof customerSchema>;
@@ -101,6 +102,7 @@ const EditCustomerModal = ({
       district: "",
       subDistrict: "",
       postalCode: "",
+      taxId: "",
     },
     validationLogic: revalidateLogic(),
     validators: {
@@ -121,6 +123,7 @@ const EditCustomerModal = ({
       formCustomers.setFieldValue("district", customer.district || "");
       formCustomers.setFieldValue("subDistrict", customer.subDistrict || "");
       formCustomers.setFieldValue("postalCode", customer.postalCode || "");
+      formCustomers.setFieldValue("taxId", customer.taxId || "");
     }
   }, [customer, open]);
 
@@ -168,6 +171,36 @@ const EditCustomerModal = ({
                         <InputGroupAddon>
                           <PackageIcon size={32} className="size-5" />
                         </InputGroupAddon>
+                      </InputGroup>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <formCustomers.Field
+                name="taxId"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">เลขประจำตัวผู้เสียภาษี</FieldLabel>
+                      <InputGroup className="h-12">
+                        <InputGroupInput
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid
+                          }
+                          placeholder="เลขประจำตัวผู้เสียภาษี"
+                          className="font-normal tracking-widest"
+                        />
                       </InputGroup>
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />

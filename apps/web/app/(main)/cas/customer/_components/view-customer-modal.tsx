@@ -53,6 +53,16 @@ const ViewCustomerModal = ({
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-normal tracking-widest text-muted-foreground">
+                  เลขประจำตัวผู้เสียภาษี
+                </label>
+                <p className="text-base font-normal tracking-widest">
+                  {customer.taxId || "-"}
+                </p>
+              </div>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-normal tracking-widest text-muted-foreground">
                 ที่อยู่
