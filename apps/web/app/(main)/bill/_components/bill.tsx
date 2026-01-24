@@ -305,7 +305,7 @@ const Bill = () => {
   });
 
   const handleCreateBill = () => {
-    if (billsData?.rows?.length < 10 && subscriptionData?.data?.plan !== "pro" || subscriptionData?.data === null) {
+    if (subscriptionData?.data?.plan === "pro" || billsData?.rows?.length <= 10) {
       router.push("/bill/create");
     } else {
       setShowSubproDialogOpen(true);
