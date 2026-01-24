@@ -431,6 +431,40 @@ const billTemplateSchema = new Schema(
         left: 60,
       },
     },
+    isWatermark: {
+      type: Boolean,
+      default: false,
+    },
+    watermarkText: {
+      type: String,
+      default: null,
+    },
+    isLogoWatermark: {
+      type: Boolean,
+      default: false,
+    },
+    tableHeaderColor: {
+      type: String,
+      default: null,
+    },
+    tableHeaderTextColor: {
+      type: String,
+      default: null,
+    },
+    watermarkAngle: {
+      type: String,
+      enum: ["topToBottom", "bottomToTop"],
+      default: "topToBottom",
+    },
+    watermarkColor: {
+      type: String,
+      default: null,
+    },
+    watermarkFontSize: {
+      type: Number,
+      default: 35,
+    },
+
     organizationId: {
       type: String,
       ref: "Organization",

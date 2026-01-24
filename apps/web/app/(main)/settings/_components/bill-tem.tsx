@@ -67,6 +67,10 @@ export const formSchema = v.object({
     v.maxLength(10, "Margin must be at most 10 characters."),
   ),
   isWatermark: v.optional(v.boolean()),
+  watermarkText: v.optional(v.string()),
+  watermarkAngle: v.optional(v.picklist(["topToBottom", "bottomToTop"])),
+  watermarkColor: v.optional(v.string()),
+  isLogoWatermark: v.optional(v.boolean()),
   tableHeaderColor: v.optional(v.string()),
   tableHeaderTextColor: v.optional(v.string()),
 });
@@ -86,8 +90,11 @@ const defaultValues: orgData = {
   marginRight: "40",
   tableHeaderColor: "#000000",
   tableHeaderTextColor: "#FFFFFF",
-
   isWatermark: false,
+  watermarkText: "",
+  watermarkAngle: "topToBottom",
+  watermarkColor: "#cccccc",
+  isLogoWatermark: false,
 };
 
 export default function BillTem() {
@@ -155,12 +162,44 @@ export default function BillTem() {
           tableHeaderColor: value.tableHeaderColor,
           tableHeaderTextColor: value.tableHeaderTextColor,
           isWatermark: value.isWatermark,
+          watermarkText: value.watermarkText,
+          watermarkAngle: value.watermarkAngle,
+          watermarkColor: value.watermarkColor,
+          isLogoWatermark: value.isLogoWatermark,
         };
 
         updateBillTemplateMutation.mutate(formatData);
       },
     },
   });
+
+  const [logoBase64, setLogoBase64] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    const convertToBase64 = async (imageUrl: string) => {
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLogoBase64(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error("Failed to convert logo to base64:", error);
+        setLogoBase64(null);
+      }
+    };
+
+    if (activeOrg?.logo) {
+      convertToBase64(activeOrg.logo);
+    } else {
+      setLogoBase64(null);
+    }
+  }, [activeOrg?.logo]);
+
+
 
   const createDocDefinition = useCallback((values: orgData) => {
     const margins = [
@@ -170,7 +209,8 @@ export default function BillTem() {
       parseInt(values.marginBottom) || 26,
     ];
 
-    // Basic Template - Simple and Clean
+
+
     if (values.templateType === "basic") {
       return {
         pageSize: values.pageSize || "A4",
@@ -200,6 +240,26 @@ export default function BillTem() {
             margin: [36, 10, 36, 0],
           };
         },
+        watermark: values.isWatermark && values.watermarkText ? {
+          text: values.watermarkText,
+          color: values.watermarkColor || "#cccccc",
+          opacity: 0.15,
+          fontSize: 50,
+          bold: true,
+          angle: values.watermarkAngle === "bottomToTop" ? -45 : 45,
+        } : undefined,
+        background: values.isLogoWatermark && logoBase64 ? function (currentPage: number, pageSize: any) {
+          return {
+            image: logoBase64,
+            width: 150,
+            height: 150,
+            opacity: 0.08,
+            absolutePosition: {
+              x: (pageSize.width - 150) / 2,
+              y: (pageSize.height - 150) / 2,
+            },
+          };
+        } : undefined,
         content: [
           {
             text: "ใบเสร็จรับเงิน",
@@ -436,7 +496,7 @@ export default function BillTem() {
         },
       };
     }
-  }, []);
+  }, [logoBase64]);
 
   const generatePDF = useCallback(
     async (values: orgData) => {
@@ -469,24 +529,24 @@ export default function BillTem() {
       form.setFieldValue("foterText", billTemplate.footerText);
       form.setFieldValue("footerSubText", billTemplate.footerSubText || "");
       form.setFieldValue("themcolor", billTemplate.themcolor || "");
-      form.setFieldValue("fontSize", billTemplate.fontSize.toString() || "");
-      form.setFieldValue("pageSize", billTemplate.typePage || "");
-      form.setFieldValue("pageOrientation", billTemplate.pageOrientation || "");
+      form.setFieldValue("fontSize", billTemplate.fontSize?.toString() || "14");
+      form.setFieldValue("pageSize", billTemplate.typePage || "A4");
+      form.setFieldValue("pageOrientation", billTemplate.pageOrientation || "portrait");
       form.setFieldValue(
         "marginTop",
-        billTemplate.pageMargins.top.toString() || "",
+        billTemplate.pageMargins?.top?.toString() || "40",
       );
       form.setFieldValue(
         "marginBottom",
-        billTemplate.pageMargins.bottom.toString() || "",
+        billTemplate.pageMargins?.bottom?.toString() || "40",
       );
       form.setFieldValue(
         "marginLeft",
-        billTemplate.pageMargins.left.toString() || "",
+        billTemplate.pageMargins?.left?.toString() || "40",
       );
       form.setFieldValue(
         "marginRight",
-        billTemplate.pageMargins.right.toString() || "",
+        billTemplate.pageMargins?.right?.toString() || "40",
       );
       form.setFieldValue(
         "tableHeaderColor",
@@ -498,7 +558,23 @@ export default function BillTem() {
       );
       form.setFieldValue(
         "isWatermark",
-        billTemplate.isWatermark || false,
+        billTemplate.isWatermark ?? false,
+      );
+      form.setFieldValue(
+        "watermarkText",
+        billTemplate.watermarkText || "",
+      );
+      form.setFieldValue(
+        "watermarkAngle",
+        billTemplate.watermarkAngle || "topToBottom",
+      );
+      form.setFieldValue(
+        "watermarkColor",
+        billTemplate.watermarkColor || "#cccccc",
+      );
+      form.setFieldValue(
+        "isLogoWatermark",
+        billTemplate.isLogoWatermark ?? false,
       );
 
       // Generate PDF with loaded data
@@ -967,6 +1043,12 @@ export default function BillTem() {
                   }}
                 />
               </div>
+              <Separator className="my-2" />
+              <div className="col-span-full">
+                <h3 className="font-normal text-foreground text-base mb-3">
+                  ตั้งค่าลายน้ำ
+                </h3>
+              </div>
               <div className="col-span-full">
                 <form.Field
                   name="isWatermark"
@@ -976,15 +1058,172 @@ export default function BillTem() {
                         <div className="flex items-center justify-between">
                           <div>
                             <FieldLabel htmlFor={field.name} className="text-base font-normal">
-                              ลายน้ำ (Watermark)
+                              ลายน้ำข้อความ (Text Watermark)
                             </FieldLabel>
                             <FieldDescription className="text-base font-normal">
-                              แสดงลายน้ำบนใบเสร็จรับเงินจะเป็นโลโก้ของร้านค้า
+                              แสดงข้อความลายน้ำบนใบเสร็จรับเงิน
                             </FieldDescription>
                           </div>
                           <Switch
                             id={field.name}
-                            checked={field.state.value || false}
+                            checked={field.state.value ?? false}
+                            onCheckedChange={(checked) => field.handleChange(checked)}
+                          />
+                        </div>
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <form.Subscribe selector={(state) => state.values.isWatermark}>
+                {(isWatermark) =>
+                  isWatermark && (
+                    <>
+                      <div className="col-span-full">
+                        <form.Field
+                          name="watermarkText"
+                          children={(field) => {
+                            return (
+                              <Field className="gap-2">
+                                <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                                  ข้อความลายน้ำ
+                                </FieldLabel>
+                                <InputGroup>
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value || ""}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    placeholder="เช่น ชื่อร้านค้า, SAMPLE, DRAFT"
+                                  />
+                                </InputGroup>
+                                <FieldDescription>
+                                  ข้อความที่จะแสดงเป็นลายน้ำบนใบเสร็จ
+                                </FieldDescription>
+                              </Field>
+                            );
+                          }}
+                        />
+                      </div>
+                      <div className="col-span-full">
+                        <form.Field
+                          name="watermarkAngle"
+                          children={(field) => {
+                            return (
+                              <Field className="gap-2">
+                                <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                                  แนวลายน้ำ
+                                </FieldLabel>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => field.handleChange("topToBottom")}
+                                    className={`
+                                      h-20 rounded-lg border-2 transition-all duration-200
+                                      ${field.state.value === "topToBottom"
+                                        ? "border-primary bg-primary/10 shadow-md"
+                                        : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
+                                      }
+                                    `}
+                                  >
+                                    <div className="flex flex-col items-center justify-center h-full space-y-1">
+                                      <svg
+                                        className={`w-8 h-8 transform rotate-45 ${field.state.value === "topToBottom" ? "text-primary" : "text-muted-foreground"}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                      </svg>
+                                      <span className={`text-sm font-medium ${field.state.value === "topToBottom" ? "text-primary" : "text-foreground"}`}>
+                                        บนมาล่าง
+                                      </span>
+                                    </div>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => field.handleChange("bottomToTop")}
+                                    className={`
+                                      h-20 rounded-lg border-2 transition-all duration-200
+                                      ${field.state.value === "bottomToTop"
+                                        ? "border-primary bg-primary/10 shadow-md"
+                                        : "border-border/60 bg-white dark:bg-zinc-900 hover:border-primary/40"
+                                      }
+                                    `}
+                                  >
+                                    <div className="flex flex-col items-center justify-center h-full space-y-1">
+                                      <svg
+                                        className={`w-8 h-8 transform -rotate-45 ${field.state.value === "bottomToTop" ? "text-primary" : "text-muted-foreground"}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                      </svg>
+                                      <span className={`text-sm font-medium ${field.state.value === "bottomToTop" ? "text-primary" : "text-foreground"}`}>
+                                        ล่างขึ้นบน
+                                      </span>
+                                    </div>
+                                  </button>
+                                </div>
+                                <FieldDescription>
+                                  เลือกทิศทางการแสดงลายน้ำ
+                                </FieldDescription>
+                              </Field>
+                            );
+                          }}
+                        />
+                      </div>
+                      <div className="col-span-full">
+                        <form.Field
+                          name="watermarkColor"
+                          children={(field) => {
+                            return (
+                              <Field className="gap-2">
+                                <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                                  สีลายน้ำ
+                                </FieldLabel>
+                                <InputGroup>
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    type="color"
+                                    value={field.state.value || "#cccccc"}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                  />
+                                </InputGroup>
+                                <FieldDescription>
+                                  เลือกสีของลายน้ำ (แนะนำสีอ่อน)
+                                </FieldDescription>
+                              </Field>
+                            );
+                          }}
+                        />
+                      </div>
+                    </>
+                  )
+                }
+              </form.Subscribe>
+              <div className="col-span-full">
+                <form.Field
+                  name="isLogoWatermark"
+                  children={(field) => {
+                    return (
+                      <Field className="gap-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                              โลโก้พื้นหลัง (Logo Background)
+                            </FieldLabel>
+                            <FieldDescription className="text-base font-normal">
+                              แสดงโลโก้ร้านค้าเป็นพื้นหลังบนใบเสร็จรับเงิน
+                            </FieldDescription>
+                          </div>
+                          <Switch
+                            id={field.name}
+                            checked={field.state.value ?? false}
                             onCheckedChange={(checked) => field.handleChange(checked)}
                           />
                         </div>

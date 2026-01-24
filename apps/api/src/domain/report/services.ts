@@ -1,7 +1,22 @@
 
-import { Bill, BillTemplate } from "../../../models/model";
+import { Bill, BillTemplate, Organization } from "../../../models/model";
 import generatePayload from "promptpay-qr";
 const PdfPrinter = require("pdfmake/src/printer");
+
+// Helper function to convert image URL to base64
+async function getImageBase64(imageUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(imageUrl);
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    const contentType = response.headers.get("content-type") || "image/png";
+    return `data:${contentType};base64,${base64}`;
+  } catch (error) {
+    console.error("Failed to convert image to base64:", error);
+    return null;
+  }
+}
+
 export abstract class reportService {
   static async receipt(id: string, set: any, query: any) {
     try {
@@ -9,10 +24,10 @@ export abstract class reportService {
       .populate("customerId", "name email phone address district subDistrict province postalCode")
       .populate("userId", "name email")
       // .populate("products.productId", "name")
-      .populate("organizationId", "_id  name  phone address district subDistrict province postalCode account_name account_no bank_name prompt_pay")
+      .populate("organizationId", "_id name logo phone address district subDistrict province postalCode account_name account_no bank_name prompt_pay")
       .lean();
       // find bill template
-      const billTemplate = await BillTemplate.findOne({ organizationId: billdata?.organizationId._id })
+      const billTemplate: any = await BillTemplate.findOne({ organizationId: billdata?.organizationId._id })
       .lean();
 
       if (!billdata) {
@@ -43,7 +58,13 @@ export abstract class reportService {
         }
       }
 
-      const docDefinition = {
+      // Get logo base64 for watermark background
+      let logoBase64: string | null = null;
+      if (billTemplate?.isLogoWatermark && billdata?.organizationId?.logo) {
+        logoBase64 = await getImageBase64(billdata.organizationId.logo);
+      }
+
+      const docDefinition: any = {
         pageSize: billTemplate?.typePage || "A4",
         pageMargins: billTemplate?.pageMargins || [26, 26, 26, 26],
         defaultStyle: { font: "THSarabunNew", fontSize: billTemplate?.fontSize || 14 },
@@ -54,6 +75,32 @@ export abstract class reportService {
           keywords: `ใบเสร็จรับเงิน, ${billdata.billNumber}`,
           filename: `${billdata.billNumber}-ใบเสร็จรับเงิน.pdf`,
         },
+        // Text Watermark
+        ...(billTemplate?.isWatermark && billTemplate?.watermarkText ? {
+          watermark: {
+            text: billTemplate.watermarkText,
+            color: billTemplate.watermarkColor || "#cccccc",
+            opacity: 0.15,
+            fontSize: 50,
+            bold: true,
+            angle: billTemplate.watermarkAngle === "bottomToTop" ? -45 : 45,
+          }
+        } : {}),
+        // Logo Background Watermark
+        ...(billTemplate?.isLogoWatermark && logoBase64 ? {
+          background: function (currentPage: number, pageSize: any) {
+            return {
+              image: logoBase64,
+              width: 150,
+              height: 150,
+              opacity: 0.08,
+              absolutePosition: {
+                x: (pageSize.width - 150) / 2,
+                y: (pageSize.height - 150) / 2,
+              },
+            };
+          }
+        } : {}),
         footer: function (currentPage: number, pageCount: number) {
           return {
             columns: [
@@ -175,9 +222,9 @@ export abstract class reportService {
                   {
                     text: "ลำดับ",
                     style: "tableHeader",
-                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillColor: billTemplate?.tableHeaderColor || billTemplate?.themcolor || "#22c55e",
                     fillOpacity: 0.22,
-                    color: "#111111",
+                    color: billTemplate?.tableHeaderTextColor || "#111111",
                     bold: true,
                     alignment: "center",
                     margin: [2, 2, 2, 2],
@@ -185,9 +232,9 @@ export abstract class reportService {
                   {
                     text: "รายการ",
                     style: "tableHeader",
-                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillColor: billTemplate?.tableHeaderColor || billTemplate?.themcolor || "#22c55e",
                     fillOpacity: 0.22,
-                    color: "#111111",
+                    color: billTemplate?.tableHeaderTextColor || "#111111",
                     bold: true,
                     alignment: "left",
                     margin: [2, 2, 2, 2],
@@ -195,9 +242,9 @@ export abstract class reportService {
                   {
                     text: "จำนวน",
                     style: "tableHeader",
-                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillColor: billTemplate?.tableHeaderColor || billTemplate?.themcolor || "#22c55e",
                     fillOpacity: 0.22,
-                    color: "#111111",
+                    color: billTemplate?.tableHeaderTextColor || "#111111",
                     bold: true,
                     alignment: "right",
                     margin: [2, 2, 2, 2],
@@ -205,9 +252,9 @@ export abstract class reportService {
                   {
                     text: "ราคา",
                     style: "tableHeader",
-                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillColor: billTemplate?.tableHeaderColor || billTemplate?.themcolor || "#22c55e",
                     fillOpacity: 0.22,
-                    color: "#111111",
+                    color: billTemplate?.tableHeaderTextColor || "#111111",
                     bold: true,
                     alignment: "right",
                     margin: [2, 2, 2, 2],
@@ -215,12 +262,12 @@ export abstract class reportService {
                   {
                     text: "รวม",
                     style: "tableHeader",
-                    fillColor: billTemplate?.themcolor || "#22c55e",
+                    fillColor: billTemplate?.tableHeaderColor || billTemplate?.themcolor || "#22c55e",
                     fillOpacity: 0.22,
-                    color: "#111111",
+                    color: billTemplate?.tableHeaderTextColor || "#111111",
                     bold: true,
                     alignment: "right",
-                      margin: [2, 2, 2, 2],
+                    margin: [2, 2, 2, 2],
                   },
                 ],
 
@@ -379,17 +426,16 @@ export abstract class reportService {
 
 
           {
-            text: "ขอบคุณสำหรับการสั่งซื้อ",
+            text: billTemplate?.footerText || "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
             fontSize: 16,
             alignment: "center" as const,
           },
 
           {
-            text: "เรียบลูกค้าที่เคารพ กรุณาถ่ายวิดีโอตั้งแต่แกะเทปเปิดลัง ตรวจเช็คสินค้า (ไซส์ น้ำหนัก สภาพ ฯลฯ) ในคลิปเดียวไม่ตัดต่อ และไม่วางทิ้งไว้ก่อนเปิด หากไม่มีคลิปตั้งแต่ต้น ทางร้านขอสงวนสิทธิ์ในการดูแลทุกกรณี",
+            text: billTemplate?.footerSubText || "เรียนลูกค้าที่เคารพ กรุณาถ่ายวิดีโอตั้งแต่แกะเทปเปิดลัง ตรวจเช็คสินค้า (ไซส์ น้ำหนัก สภาพ ฯลฯ) ในคลิปเดียวไม่ตัดต่อ และไม่วางทิ้งไว้ก่อนเปิด หากไม่มีคลิปตั้งแต่ต้น ทางร้านขอสงวนสิทธิ์ในการดูแลทุกกรณี",
             style: "footer",
-
-            fontSize:   13,
+            fontSize: 13,
             alignment: "center" as const,
           },
 

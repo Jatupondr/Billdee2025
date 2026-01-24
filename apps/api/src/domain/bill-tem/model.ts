@@ -26,6 +26,17 @@ export namespace BillTemplateModel {
       bottom: t.Optional(t.Number()),
       left: t.Optional(t.Number()),
     })),
+    isWatermark: t.Optional(t.Boolean()),
+    tableHeaderColor: t.Optional(t.String()),
+    tableHeaderTextColor: t.Optional(t.String()),
+    watermarkText: t.Optional(t.String()),
+    watermarkColor: t.Optional(t.String()),
+    watermarkAngle: t.Optional(t.String({
+      enum: ["topToBottom", "bottomToTop"],
+      error: "Watermark angle must be topToBottom or bottomToTop",
+    })),
+    isLogoWatermark: t.Optional(t.Boolean()),
+
     organizationId: t.String({
       minLength: 1,
       error: "OrganizationId is required",
