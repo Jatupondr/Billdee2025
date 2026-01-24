@@ -55,7 +55,7 @@ export default function SubscriptionInfo() {
         <div className="sm:max-w-3xl md:col-span-2">
           <div className="grid grid-cols-1 gap-6">
             {/* Plan Card */}
-            {subscriptionData?.data.plan === "pro" && subscriptionData?.data?.status === "paid" ? (
+            {subscriptionData?.data?.plan === "pro" && subscriptionData?.data?.status === "paid" && subscriptionData?.data !== null ? (
               <>
                 <div className="flex flex-col items-start gap-2">
                   <p className="text-2xl font-normal tracking-widest text-zinc-900 dark:text-zinc-200"> เเพ็คเกจ: PRO</p>

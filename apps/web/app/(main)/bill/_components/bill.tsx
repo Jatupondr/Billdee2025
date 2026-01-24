@@ -23,13 +23,14 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
 import { authClient } from "@/lib/auth-client";
 import api from "@/hooks/axios";
 import { useRouter } from "next/navigation";
 import DeleteBillDialog from "./delete-bill-dialog";
+import ShowSubproDialog from "./show-subpro-dialog";
 
 interface Bill {
   _id: string;
@@ -47,11 +48,13 @@ const Bill = () => {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showSubproDialogOpen, setShowSubproDialogOpen] = useState(false);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+  // const { data: session, isPending: isLoadingSession } = authClient.useSession();
 
   const getBills = async (page: number, pageSize: number, search: string) => {
     const response = await api.get(
@@ -285,10 +288,20 @@ const Bill = () => {
     },
   ];
 
-  const { data: billsData, isLoading } = useQuery<any>({
+  const { data: billsData, isLoading: isLoadingBills } = useQuery<any>({
     queryKey: ["bills", debouncedSearch, page, pageSize],
     queryFn: () => getBills(page, pageSize, debouncedSearch),
   });
+
+
+
+  const handleCreateBill = () => {
+    if (billsData?.rows?.length < 1) {
+      router.push("/bill/create");
+    } else {
+      setShowSubproDialogOpen(true);
+    }
+  };
 
   return (
     <>
@@ -307,7 +320,7 @@ const Bill = () => {
               <Button
                 size="lg"
                 className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
-                onClick={() => router.push("/bill/create")}
+                onClick={() => handleCreateBill()}
               >
                 <PlusCircleIcon size={36} weight="bold" />
                 สร้างบิลใหม่
@@ -320,7 +333,7 @@ const Bill = () => {
               />
             </div>
 
-            {isLoading ? (
+            {isLoadingBills ? (
               <div className="w-full space-y-4">
                 <div className="space-y-2">
                   <Skeleton className="h-10 w-full" />
@@ -353,6 +366,10 @@ const Bill = () => {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         bill={selectedBill}
+      />
+      <ShowSubproDialog
+        open={showSubproDialogOpen}
+        onOpenChange={setShowSubproDialogOpen}
       />
     </>
   );

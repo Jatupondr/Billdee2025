@@ -125,7 +125,7 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
     {
       params: BaseResponse.ParamsId,
       response: {
-         200: BaseResponse.success(SubscriptionModel.subscriptionResponseDto),
+        //  200: BaseResponse.success(SubscriptionModel.subscriptionResponseDto),
         400: BaseResponse.badRequest,
         403: BaseResponse.forbidden,
         401: BaseResponse.unauthorized,

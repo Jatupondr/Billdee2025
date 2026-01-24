@@ -158,9 +158,7 @@ export abstract class subscriptionService {
         throw status(400, "id is invalid not ObjectId");
       }
         const subscription = await Subscription.findOne({ userId: id, isDeleted: false, status: "paid" }).lean();
-      if (!subscription) {
-        throw status(404, "Subscription not found");
-      }
+
       return subscription;
     } catch (error) {
       throw error;
