@@ -54,7 +54,7 @@ const Bill = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
-  // const { data: session, isPending: isLoadingSession } = authClient.useSession();
+  const { data: session, isPending: isLoadingSession } = authClient.useSession();
 
   const getBills = async (page: number, pageSize: number, search: string) => {
     const response = await api.get(
@@ -293,15 +293,29 @@ const Bill = () => {
     queryFn: () => getBills(page, pageSize, debouncedSearch),
   });
 
+  const getSubscriptionById = async (subscriptionId: string) => {
+    const response = await api.get(`/subscriptions/${subscriptionId}`);
+    return response.data;
+  };
 
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery<any>({
+    queryKey: ["subscription"],
+    queryFn: () => getSubscriptionById(session?.user?.id || ""),
+    enabled: !!session?.user?.id,
+  });
 
   const handleCreateBill = () => {
-    if (billsData?.rows?.length < 1) {
+    if (billsData?.rows?.length < 10 && subscriptionData?.data?.plan !== "pro" || subscriptionData?.data === null) {
       router.push("/bill/create");
     } else {
       setShowSubproDialogOpen(true);
     }
   };
+  // useEffect(() => {
+  //   if (subscriptionData?.data?.plan !== "pro" || subscriptionData?.data === null) {
+  //     setShowSubproDialogOpen(true);
+  //   }
+  // }, [subscriptionData]);
 
   return (
     <>
