@@ -226,7 +226,7 @@ const CreateBill = () => {
           : 0;
         const totalAmount = parseFloat((afterDiscount + taxAmount).toFixed(2));
         const costAmount = (value.products || []).reduce(
-          (sum: number, item: any) => sum + (item.cost || 0),
+          (sum: number, item: any) => sum + (item.cost * item.quantity || 0),
           0,
         );
         const formattedData = {
@@ -259,6 +259,7 @@ const CreateBill = () => {
         };
 
 
+
         createBillMutation.mutate(formattedData);
       },
     },
@@ -268,7 +269,7 @@ const CreateBill = () => {
   // สินค้าสำหรับ Combobox (ค้นหาแยก)
   const productData =
     comboboxProductsData?.rows.map((item: any) => ({
-      id: item.id,
+      _id: item._id,
       name: item.name,
       price: item.price ?? 0,
       cost: item.cost ?? 0,
@@ -1047,7 +1048,10 @@ const CreateBill = () => {
                           ยอดรวมก่อนส่วนลด
                         </span>
                         <span className="text-base font-normal tracking-widest">
-                          {subtotal.toFixed(2)}
+                          {subtotal.toLocaleString("th-TH", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </span>
                       </div>
 
@@ -1077,7 +1081,10 @@ const CreateBill = () => {
                           จำนวนส่วนลด
                         </span>
                         <span className="text-base font-normal tracking-widest">
-                          {discountAmount.toFixed(2)}
+                          {discountAmount.toLocaleString("th-TH", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </span>
                       </div>
 
@@ -1087,7 +1094,10 @@ const CreateBill = () => {
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="text-base font-normal tracking-widest">
-                            {taxAmount.toFixed(2)}
+                            {taxAmount.toLocaleString("th-TH", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </span>
                           <form.Field name="includeVat">
                             {(field) => (
@@ -1107,7 +1117,10 @@ const CreateBill = () => {
                           รวมสุทธิ
                         </span>
                         <span className="text-xl font-normal tracking-widest">
-                          {total.toFixed(2)}
+                          {total.toLocaleString("th-TH", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </span>
                       </div>
                     </div>

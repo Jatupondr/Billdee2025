@@ -221,7 +221,7 @@ const EditBill = ({ id }: EditBillProps) => {
           : 0;
         const totalAmount = afterDiscount + taxAmount;
         const costAmount = (value.products || []).reduce(
-          (sum: number, item: any) => sum + (item.cost || 0),
+          (sum: number, item: any) => sum + (item.cost * item.quantity || 0),
           0,
         );
         const formattedData: any = {
@@ -287,7 +287,7 @@ const EditBill = ({ id }: EditBillProps) => {
   // สินค้าสำหรับ Combobox (ค้นหาแยก)
   const productData =
     comboboxProductsData?.rows.map((item: any) => ({
-      _id: item._id || item.id,
+      _id: item._id,
       name: item.name,
       price: item.price ?? 0,
       cost: item.cost ?? 0,
