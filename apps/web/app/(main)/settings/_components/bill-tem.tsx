@@ -10,6 +10,7 @@ import {
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import api from "@/hooks/axios";
 import { authClient } from "@/lib/auth-client";
@@ -65,21 +66,28 @@ export const formSchema = v.object({
     v.string(""),
     v.maxLength(10, "Margin must be at most 10 characters."),
   ),
+  isWatermark: v.optional(v.boolean()),
+  tableHeaderColor: v.optional(v.string()),
+  tableHeaderTextColor: v.optional(v.string()),
 });
 
 type orgData = v.InferOutput<typeof formSchema>;
 const defaultValues: orgData = {
   templateType: "basic",
-  foterText: "",
-  footerSubText: "",
+  foterText: "ขอบพระคุณลูกค้าที่ไว้วางใจและเลือกซื้อสินค้าจากเรา",
+  footerSubText: "เรียบลูกค้าที่เคารพ กรุณาถ่ายวิดีโอตั้งแต่แกะเทปเปิดลัง ตรวจเช็คสินค้า (ไซส์ น้ำหนัก สภาพ ฯลฯ) ในคลิปเดียวไม่ตัดต่อ และไม่วางทิ้งไว้ก่อนเปิด หากไม่มีคลิปตั้งแต่ต้น ทางร้านขอสงวนสิทธิ์ในการดูแลทุกกรณี",
   themcolor: "",
-  fontSize: "",
+  fontSize: "14",
   pageSize: "A4",
   pageOrientation: "portrait",
-  marginTop: "",
-  marginBottom: "",
-  marginLeft: "",
-  marginRight: "",
+  marginTop: "40",
+  marginBottom: "40",
+  marginLeft: "40",
+  marginRight: "40",
+  tableHeaderColor: "#000000",
+  tableHeaderTextColor: "#FFFFFF",
+
+  isWatermark: false,
 };
 
 export default function BillTem() {
@@ -144,6 +152,9 @@ export default function BillTem() {
             bottom: parseInt(value.marginBottom),
             left: parseInt(value.marginLeft),
           },
+          tableHeaderColor: value.tableHeaderColor,
+          tableHeaderTextColor: value.tableHeaderTextColor,
+          isWatermark: value.isWatermark,
         };
 
         updateBillTemplateMutation.mutate(formatData);
@@ -153,10 +164,10 @@ export default function BillTem() {
 
   const createDocDefinition = useCallback((values: orgData) => {
     const margins = [
-      parseInt(values.marginLeft) || 40,
-      parseInt(values.marginTop) || 60,
-      parseInt(values.marginRight) || 40,
-      parseInt(values.marginBottom) || 60,
+      parseInt(values.marginLeft) || 26,
+      parseInt(values.marginTop) || 26,
+      parseInt(values.marginRight) || 26,
+      parseInt(values.marginBottom) || 26,
     ];
 
     // Basic Template - Simple and Clean
@@ -165,6 +176,30 @@ export default function BillTem() {
         pageSize: values.pageSize || "A4",
         pageOrientation: values.pageOrientation || "portrait",
         pageMargins: margins,
+        info: {
+          title: "RE-001-ใบเสร็จรับเงิน",
+          author: "billdee",
+          subject: "ใบเสร็จรับเงิน",
+        },
+        footer: function (currentPage: number, pageCount: number) {
+          return {
+            columns: [
+              {
+                text: `หน้า ${currentPage} / ${pageCount}`,
+                alignment: "left",
+                fontSize: parseInt(values.fontSize) || 12,
+                width: "50%",
+              },
+              {
+                text: "ออกแบบรายงานด้วยระบบ billdee",
+                alignment: "right",
+                fontSize: parseInt(values.fontSize) || 12,
+                width: "50%",
+              },
+            ],
+            margin: [36, 10, 36, 0],
+          };
+        },
         content: [
           {
             text: "ใบเสร็จรับเงิน",
@@ -183,10 +218,18 @@ export default function BillTem() {
                   {
                     text: "บริษัท ตัวอย่าง จำกัด\n",
                     bold: true,
-                    fontSize: 18,
+                    fontSize: parseInt(values.fontSize) || 18,
                   },
-                  "123 กรุงเทพมหานคร 10110\n",
-                  "โทร: 02-123-4567",
+                  {
+                    text: "ที่อยู่: 123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 12,
+                  },
+                  {
+                    text: "เบอร์โทร: 02-123-4567\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 12,
+                  },
                 ],
               },
               {
@@ -207,65 +250,109 @@ export default function BillTem() {
           },
           { text: "\n" },
           {
+            columns: [
+              {
+                width: "*",
+                text: [
+                  {
+                    text: "ลูกค้า: คุณทดสอบ ระบบ\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 18,
+                  },
+                  {
+                    text: "ที่อยู่: 456 ถนนพหลโยธิน แขวงสามเสนใน เขตพญาไท กรุงเทพฯ 10400\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 12,
+                  },
+                  {
+                    text: "เบอร์โทร: 081-234-5678\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 12,
+                  },
+                ],
+              },
+            ],
+          },
+          {
             table: {
               headerRows: 1,
-              widths: ["*", 50, 80, 80],
+              widths: [50, "*", 50, 80, 80],
               body: [
                 // ===== Header =====
                 [
                   {
+                    text: "ลำดับ",
+                    style: "tableHeader",
+                    fillColor: values.tableHeaderColor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: values.tableHeaderTextColor || "#111111",
+                    bold: true,
+                    alignment: "center",
+                    margin: [2, 2, 2, 2],
+                  },
+                  {
                     text: "รายการ",
                     style: "tableHeader",
-                    fontSize: parseInt(values.fontSize) || 12,
-                    fillColor: values.themcolor || "#444444",
-                    color: "#FFFFFF",
-
-                    margin: [5, 2, 5, 2],
+                    fillColor: values.tableHeaderColor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: values.tableHeaderTextColor || "#111111",
+                    bold: true,
+                    alignment: "left",
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "จำนวน",
                     style: "tableHeader",
-                    fillColor: values.themcolor || "#000000",
-                    color: "#ffffff",
+                    fillColor: values.tableHeaderColor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: values.tableHeaderTextColor || "#111111",
+                    bold: true,
                     alignment: "right",
-                    margin: [5, 2, 5, 2],
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "ราคา",
                     style: "tableHeader",
-                    fillColor: values.themcolor || "#000000",
-                    color: "#ffffff",
+                    fillColor: values.tableHeaderColor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: values.tableHeaderTextColor || "#111111",
+                    bold: true,
                     alignment: "right",
-                    margin: [5, 2, 5, 2],
+                    margin: [2, 2, 2, 2],
                   },
                   {
                     text: "รวม",
                     style: "tableHeader",
-                    fillColor: values.themcolor || "#000000",
-                    color: "#ffffff",
+                    fillColor: values.tableHeaderColor || "#22c55e",
+                    fillOpacity: 0.22,
+                    color: values.tableHeaderTextColor || "#111111",
+                    bold: true,
                     alignment: "right",
-                    margin: [5, 2, 5, 2],
+                    margin: [2, 2, 2, 2],
                   },
                 ],
 
                 // ===== Items =====
                 [
-                  { text: "สินค้า A", margin: [5, 6, 5, 6] },
-                  { text: "2", alignment: "right", margin: [5, 6, 5, 6] },
-                  { text: "100.00", alignment: "right", margin: [5, 6, 5, 6] },
-                  { text: "200.00", alignment: "right", margin: [5, 6, 5, 6] },
+                  { text: "1", alignment: "center", margin: [2, 2, 2, 2] },
+                  { text: "สินค้า A", margin: [2, 2, 2, 2] },
+                  { text: "2", alignment: "right", margin: [2, 2, 2, 2] },
+                  { text: "100.00", alignment: "right", margin: [2, 2, 2, 2] },
+                  { text: "200.00", alignment: "right", margin: [2, 2, 2, 2] },
                 ],
                 [
-                  { text: "สินค้า B", margin: [5, 6, 5, 6] },
-                  { text: "1", alignment: "right", margin: [5, 6, 5, 6] },
-                  { text: "500.00", alignment: "right", margin: [5, 6, 5, 6] },
-                  { text: "500.00", alignment: "right", margin: [5, 6, 5, 6] },
+                  { text: "2", alignment: "center", margin: [2, 2, 2, 2] },
+                  { text: "สินค้า B", margin: [2, 2, 2, 2] },
+                  { text: "1", alignment: "right", margin: [2, 2, 2, 2] },
+                  { text: "500.00", alignment: "right", margin: [2, 2, 2, 2] },
+                  { text: "500.00", alignment: "right", margin: [2, 2, 2, 2] },
                 ],
                 [
-                  { text: "สินค้า C", margin: [5, 6, 5, 6] },
-                  { text: "3", alignment: "right", margin: [5, 6, 5, 6] },
-                  { text: "50.00", alignment: "right", margin: [5, 6, 5, 6] },
-                  { text: "150.00", alignment: "right", margin: [5, 6, 5, 6] },
+                  { text: "3", alignment: "center", margin: [2, 2, 2, 2] },
+                  { text: "สินค้า C", margin: [2, 2, 2, 2] },
+                  { text: "3", alignment: "right", margin: [2, 2, 2, 2] },
+                  { text: "50.00", alignment: "right", margin: [2, 2, 2, 2] },
+                  { text: "150.00", alignment: "right", margin: [2, 2, 2, 2] },
                 ],
               ],
             },
@@ -274,40 +361,74 @@ export default function BillTem() {
           { text: "\n" },
           {
             columns: [
-              { width: "*", text: "" },
+              {
+                width: "*",
+                table: {
+                  widths: ["auto", "auto"],
+                  body: [
+                    [
+                      "หมายเหตุ:",
+                      { text: "ขอบคุณที่ใช้บริการ", bold: true },
+                    ],
+                    [
+                      "ชื่อบัญชี:",
+                      { text: "บริษัท ตัวอย่าง จำกัด", bold: true },
+                    ],
+                    [
+                      "ธนาคาร:",
+                      { text: "กสิกรไทย เลขที่: 123-4-56789-0", bold: true, fontSize: parseInt(values.fontSize) || 16 },
+                    ],
+                    [
+                      "พร้อมเพย์:",
+                      { text: "0812345678", bold: true },
+                    ],
+                  ],
+                },
+                layout: "noBorders",
+              },
               {
                 width: "auto",
                 table: {
                   widths: ["auto", "auto"],
                   body: [
-                    ["ส่วนลด:", { text: "850.00 บาท", bold: true }],
-                    ["ภาษีมูลค่าเพิ่ม:", { text: "850.00 บาท", bold: true }],
-                    ["ยอดรวม:", { text: "850.00 บาท", bold: true }],
+                    [
+                      "ยอดรวม:",
+                      { text: "850.00", bold: true },
+                    ],
+                    [
+                      "ส่วนลด:",
+                      { text: "0.00", bold: true },
+                    ],
+                    [
+                      "ภาษีมูลค่าเพิ่ม:",
+                      { text: "0.00", bold: true },
+                    ],
+                    [
+                      "ยอดสุทธิ:",
+                      { text: "850.00", bold: true },
+                    ],
                   ],
                 },
                 layout: "noBorders",
               },
             ],
           },
-
           { text: "\n" },
           {
-            text: values.foterText || "Thank you for your business",
+            text: values.foterText || "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
-            fontSize: 18,
+            fontSize: 16,
             alignment: "center" as const,
           },
-
           {
-            text: values.footerSubText || "Thank you for your business",
+            text: values.footerSubText || "เรียนลูกค้าที่เคารพ กรุณาตรวจสอบสินค้าก่อนรับ",
             style: "footer",
-
-            fontSize: 16,
+            fontSize: 13,
             alignment: "center" as const,
           },
         ],
         defaultStyle: {
-          fontSize: parseInt(values.fontSize) || 16,
+          fontSize: parseInt(values.fontSize) || 14,
           font: "THSarabunNew",
         },
         styles: {
@@ -366,6 +487,18 @@ export default function BillTem() {
       form.setFieldValue(
         "marginRight",
         billTemplate.pageMargins.right.toString() || "",
+      );
+      form.setFieldValue(
+        "tableHeaderColor",
+        billTemplate.tableHeaderColor || "#000000",
+      );
+      form.setFieldValue(
+        "tableHeaderTextColor",
+        billTemplate.tableHeaderTextColor || "#FFFFFF",
+      );
+      form.setFieldValue(
+        "isWatermark",
+        billTemplate.isWatermark || false,
       );
 
       // Generate PDF with loaded data
@@ -547,8 +680,8 @@ export default function BillTem() {
                               >
                                 <svg
                                   className={`w-8 h-8 transition-colors ${field.state.value === "basic"
-                                      ? "text-primary"
-                                      : "text-muted-foreground group-hover:text-primary"
+                                    ? "text-primary"
+                                    : "text-muted-foreground group-hover:text-primary"
                                     }`}
                                   fill="none"
                                   viewBox="0 0 24 24"
@@ -564,8 +697,8 @@ export default function BillTem() {
                               </div>
                               <span
                                 className={`text-2xl font-semibold transition-colors ${field.state.value === "basic"
-                                    ? "text-primary"
-                                    : "text-foreground group-hover:text-primary"
+                                  ? "text-primary"
+                                  : "text-foreground group-hover:text-primary"
                                   }`}
                               >
                                 พื้นฐาน
@@ -677,7 +810,7 @@ export default function BillTem() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">
                           ข้อความท้ายบิล
                         </FieldLabel>
                         <Textarea
@@ -693,7 +826,7 @@ export default function BillTem() {
                         {isInvalid ? (
                           <FieldError errors={field.state.meta.errors} />
                         ) : (
-                          <FieldDescription>
+                          <FieldDescription className="text-base font-normal">
                             ข้อความท้ายบิลจะปรากฏด้านล่างของบิล
                           </FieldDescription>
                         )}
@@ -710,7 +843,7 @@ export default function BillTem() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">
                           ข้อความท้ายบิลย่อย
                         </FieldLabel>
                         <Textarea
@@ -726,7 +859,7 @@ export default function BillTem() {
                         {isInvalid ? (
                           <FieldError errors={field.state.meta.errors} />
                         ) : (
-                          <FieldDescription>
+                          <FieldDescription className="text-base font-normal">
                             ข้อความท้ายบิลย่อยจะปรากฏด้านล่างของข้อความท้ายบิล
                           </FieldDescription>
                         )}
@@ -743,8 +876,8 @@ export default function BillTem() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>
-                          Theme Color
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                          สีหัวข้อใบเสร็จรับเงิน
                         </FieldLabel>
                         <InputGroup>
                           <InputGroupInput
@@ -767,13 +900,108 @@ export default function BillTem() {
               </div>
               <div className="col-span-full">
                 <form.Field
+                  name="tableHeaderColor"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                          สีพื้นหลังหัวตาราง
+
+                        </FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            type="color"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                          />
+                        </InputGroup>
+                        {isInvalid ? (
+                          <FieldError errors={field.state.meta.errors} />
+                        ) : (
+                          <FieldDescription className="text-base font-normal">
+                            สีพื้นหลังของหัวตารางรายการสินค้า
+                          </FieldDescription>
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full">
+                <form.Field
+                  name="tableHeaderTextColor"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid} className="gap-2">
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                          สีตัวอักษรหัวตาราง
+                        </FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            type="color"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                          />
+                        </InputGroup>
+                        {isInvalid ? (
+                          <FieldError errors={field.state.meta.errors} />
+                        ) : (
+                          <FieldDescription>
+                            สีตัวอักษรของหัวตารางรายการสินค้า
+                          </FieldDescription>
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full">
+                <form.Field
+                  name="isWatermark"
+                  children={(field) => {
+                    return (
+                      <Field className="gap-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <FieldLabel htmlFor={field.name} className="text-base font-normal">
+                              ลายน้ำ (Watermark)
+                            </FieldLabel>
+                            <FieldDescription className="text-base font-normal">
+                              แสดงลายน้ำบนใบเสร็จรับเงินจะเป็นโลโก้ของร้านค้า
+                            </FieldDescription>
+                          </div>
+                          <Switch
+                            id={field.name}
+                            checked={field.state.value || false}
+                            onCheckedChange={(checked) => field.handleChange(checked)}
+                          />
+                        </div>
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
+              <div className="col-span-full">
+                <form.Field
                   name="fontSize"
                   children={(field) => {
                     const isInvalid =
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>Font Size</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">ขนาดฟอนต์</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
                             id={field.name}
@@ -796,7 +1024,7 @@ export default function BillTem() {
 
               <Separator className="my-2" />
               <div className="col-span-full">
-                <h3 className="font-semibold text-foreground text-base mb-3">
+                <h3 className="font-normal text-foreground text-base mb-3">
                   ตั้งค่ากระดาษ
                 </h3>
               </div>
@@ -809,7 +1037,7 @@ export default function BillTem() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>ขนาดกระดาษ</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal"  >ขนาดกระดาษ</FieldLabel>
                         <div className="grid grid-cols-4 gap-3">
                           {["A3", "A4", "A5", "A6"].map((size) => (
                             <button
@@ -827,8 +1055,8 @@ export default function BillTem() {
                               <div className="flex flex-col items-center justify-center h-full">
                                 <span
                                   className={`text-lg font-semibold ${field.state.value === size
-                                      ? "text-primary"
-                                      : "text-foreground"
+                                    ? "text-primary"
+                                    : "text-foreground"
                                     }`}
                                 >
                                   {size}
@@ -854,7 +1082,7 @@ export default function BillTem() {
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid} className="gap-2">
-                        <FieldLabel htmlFor={field.name}>แนวกระดาษ</FieldLabel>
+                        <FieldLabel htmlFor={field.name} className="text-base font-normal">แนวกระดาษ</FieldLabel>
                         <div className="grid grid-cols-2 gap-4">
                           <button
                             type="button"
@@ -870,14 +1098,14 @@ export default function BillTem() {
                             <div className="flex flex-col items-center justify-center h-full space-y-2">
                               <div
                                 className={`w-12 h-16 border-2 rounded ${field.state.value === "portrait"
-                                    ? "border-primary"
-                                    : "border-muted-foreground"
+                                  ? "border-primary"
+                                  : "border-muted-foreground"
                                   }`}
                               />
                               <span
                                 className={`text-base font-medium ${field.state.value === "portrait"
-                                    ? "text-primary"
-                                    : "text-foreground"
+                                  ? "text-primary"
+                                  : "text-foreground"
                                   }`}
                               >
                                 แนวตั้ง
@@ -898,14 +1126,14 @@ export default function BillTem() {
                             <div className="flex flex-col items-center justify-center h-full space-y-2">
                               <div
                                 className={`w-16 h-12 border-2 rounded ${field.state.value === "landscape"
-                                    ? "border-primary"
-                                    : "border-muted-foreground"
+                                  ? "border-primary"
+                                  : "border-muted-foreground"
                                   }`}
                               />
                               <span
                                 className={`text-base font-medium ${field.state.value === "landscape"
-                                    ? "text-primary"
-                                    : "text-foreground"
+                                  ? "text-primary"
+                                  : "text-foreground"
                                   }`}
                               >
                                 แนวนอน
@@ -923,7 +1151,7 @@ export default function BillTem() {
               </div>
 
               <div className="col-span-full">
-                <FieldLabel className="mb-3">ระยะขอบกระดาษ (px)</FieldLabel>
+                <FieldLabel className="mb-3 text-base font-normal">ระยะขอบกระดาษ (px)</FieldLabel>
                 <div className="grid grid-cols-2 gap-4">
                   <form.Field
                     name="marginTop"
@@ -932,7 +1160,7 @@ export default function BillTem() {
                         field.state.meta.isTouched && !field.state.meta.isValid;
                       return (
                         <Field data-invalid={isInvalid} className="gap-2">
-                          <FieldLabel htmlFor={field.name} className="text-sm">
+                          <FieldLabel htmlFor={field.name} className="text-base font-normal">
                             ขอบบน
                           </FieldLabel>
                           <InputGroup>
@@ -963,7 +1191,7 @@ export default function BillTem() {
                         field.state.meta.isTouched && !field.state.meta.isValid;
                       return (
                         <Field data-invalid={isInvalid} className="gap-2">
-                          <FieldLabel htmlFor={field.name} className="text-sm">
+                          <FieldLabel htmlFor={field.name} className="text-base font-normal ">
                             ขอบล่าง
                           </FieldLabel>
                           <InputGroup>
@@ -994,7 +1222,7 @@ export default function BillTem() {
                         field.state.meta.isTouched && !field.state.meta.isValid;
                       return (
                         <Field data-invalid={isInvalid} className="gap-2">
-                          <FieldLabel htmlFor={field.name} className="text-sm">
+                          <FieldLabel htmlFor={field.name} className="text-base font-normal">
                             ขอบซ้าย
                           </FieldLabel>
                           <InputGroup>
@@ -1025,7 +1253,7 @@ export default function BillTem() {
                         field.state.meta.isTouched && !field.state.meta.isValid;
                       return (
                         <Field data-invalid={isInvalid} className="gap-2">
-                          <FieldLabel htmlFor={field.name} className="text-sm">
+                          <FieldLabel htmlFor={field.name} className="text-base font-normal ">
                             ขอบขวา
                           </FieldLabel>
                           <InputGroup>
@@ -1059,7 +1287,7 @@ export default function BillTem() {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+                className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-semibold tracking-widest"
                 onClick={() => router.back()}
               >
                 ย้อนกลับ
@@ -1068,7 +1296,7 @@ export default function BillTem() {
                 type="button"
                 variant="secondary"
                 size="lg"
-                className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+                className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-semibold tracking-widest"
                 onClick={handlePreview}
                 disabled={isLoading}
               >
@@ -1077,7 +1305,7 @@ export default function BillTem() {
               <Button
                 type="button"
                 size="lg"
-                className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out"
+                className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-semibold tracking-widest"
                 onClick={handleSaveAndPreview}
                 disabled={isLoading}
               >

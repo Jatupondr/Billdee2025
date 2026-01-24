@@ -381,15 +381,15 @@ export abstract class reportService {
           {
             text: "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
-            fontSize: billTemplate?.fontSize || 18,
+            fontSize: 16,
             alignment: "center" as const,
           },
 
           {
-            text: "ขอบคุณสำหรับการสั่งซื้อ",
+            text: "เรียบลูกค้าที่เคารพ กรุณาถ่ายวิดีโอตั้งแต่แกะเทปเปิดลัง ตรวจเช็คสินค้า (ไซส์ น้ำหนัก สภาพ ฯลฯ) ในคลิปเดียวไม่ตัดต่อ และไม่วางทิ้งไว้ก่อนเปิด หากไม่มีคลิปตั้งแต่ต้น ทางร้านขอสงวนสิทธิ์ในการดูแลทุกกรณี",
             style: "footer",
 
-            fontSize: billTemplate?.fontSize ||   16,
+            fontSize:   13,
             alignment: "center" as const,
           },
 
