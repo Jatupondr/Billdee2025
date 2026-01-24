@@ -10,7 +10,6 @@ import {
   admin as adminPlugin,
 } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
-import OTPEmail from "../src/email/reset-password";
 import { sendEmailResetPassword } from "../src/email/emil";
 
 export const auth = betterAuth({
