@@ -33,6 +33,15 @@ export namespace ExpModel {
     }),
     userId: t.Optional(t.String()),
 
+    phoneCustomer: t.Optional(t.String()),
+    addressCustomer: t.Optional(t.String()),
+    provinceCustomer: t.Optional(t.String()),
+    districtCustomer: t.Optional(t.String()),
+    subDistrictCustomer: t.Optional(t.String()),
+    postalCodeCustomer: t.Optional(t.String()),
+    taxIdCustomer: t.Optional(t.String()),
+
+
   });
   export const expUpdateDto = t.Object({
     billExpenseNumber: t.String({
@@ -65,6 +74,14 @@ export namespace ExpModel {
       error: "OrganizationId is required",
     }),
     userId: t.Optional(t.String()),
+
+    phoneCustomer: t.Optional(t.String()),
+    addressCustomer: t.Optional(t.String()),
+    provinceCustomer: t.Optional(t.String()),
+    districtCustomer: t.Optional(t.String()),
+    subDistrictCustomer: t.Optional(t.String()),
+    postalCodeCustomer: t.Optional(t.String()),
+    taxIdCustomer: t.Optional(t.String()),
 
   });
 

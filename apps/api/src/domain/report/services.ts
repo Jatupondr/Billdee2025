@@ -330,56 +330,57 @@ export abstract class reportService {
           { text: "\n" },
           {
             columns: [
-              { width: "*",  table: {
-                widths: ["auto", "auto"],
-                body: [
-
-                  ...(billdata?.note ? [[
-                    "หมายเหตุ:",
-                    {
-                      text: billdata?.note,
-                      bold: true,
-                    },
-                  ]] : []),
-                  ...(billdata?.organizationId?.account_name ? [[
-                    "ชื่อบัญชี:",
-                    {
-                      text: billdata?.organizationId?.account_name,
-                      bold: true,
-                    },
-                  ]] : []),
-                  ...((billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) ? [[
-                    "ธนาคาร:",
-                    {
-                      text: billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no,
-                      bold: true,
-                      fontSize: billTemplate?.fontSize || 16,
-                    },
-                  ]] : []),
-                  ...(billdata?.organizationId?.prompt_pay ? [[
-                    "พร้อมเพย์:",
-                    {
-                      text: billdata?.organizationId?.prompt_pay,
-                      bold: true,
-                    },
-                  ]] : []),
-                ...(bankQrcodeBase64 ? [
-                  [
-                    "qr code:",
-                    {
-                      image: bankQrcodeBase64 || "",
-                      width:80,
-                      height: 80,
-                      margin: [0, 0, 0, 5],
-                      alignment: "left",
-
-                    },
-                  ],
-                ] : []),
-
-                ],
+              { width: "*",  
+                ...((billdata?.note || billdata?.organizationId?.account_name || (billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) || billdata?.organizationId?.prompt_pay || bankQrcodeBase64) ? {
+                  table: {
+                    widths: ["auto", "auto"],
+                    body: [
+                      ...(billdata?.note ? [[
+                        "หมายเหตุ:",
+                        {
+                          text: billdata?.note,
+                          bold: true,
+                        },
+                      ]] : []),
+                      ...(billdata?.organizationId?.account_name ? [[
+                        "ชื่อบัญชี:",
+                        {
+                          text: billdata?.organizationId?.account_name,
+                          bold: true,
+                        },
+                      ]] : []),
+                      ...((billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) ? [[
+                        "ธนาคาร:",
+                        {
+                          text: billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no,
+                          bold: true,
+                          fontSize: billTemplate?.fontSize || 16,
+                        },
+                      ]] : []),
+                      ...(billdata?.organizationId?.prompt_pay ? [[
+                        "พร้อมเพย์:",
+                        {
+                          text: billdata?.organizationId?.prompt_pay,
+                          bold: true,
+                        },
+                      ]] : []),
+                      ...(bankQrcodeBase64 ? [
+                        [
+                          "qr code:",
+                          {
+                            image: bankQrcodeBase64 || "",
+                            width: 80,
+                            height: 80,
+                            margin: [0, 0, 0, 5],
+                            alignment: "left",
+                          },
+                        ],
+                      ] : []),
+                    ],
+                  },
+                  layout: "noBorders",
+                } : { text: "" }),
               },
-              layout: "noBorders", },
               {
                 width: "auto",
                 table: {

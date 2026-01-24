@@ -96,7 +96,7 @@ const ViewSupplierModal = ({
               ตำบล/แขวง
             </label>
             <p className="text-base font-normal tracking-widest">
-              {supplier.subdistrict || "-"}
+              {supplier.subDistrict || "-"}
             </p>
           </div>
 
@@ -150,8 +150,6 @@ const ViewSupplierModal = ({
             </p>
           </div>
         </div>
-      </div>
-    </div>
       </DialogContent >
     </Dialog >
   );

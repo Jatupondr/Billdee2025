@@ -19,6 +19,13 @@ export abstract class expService {
           organizationId: dto.organizationId,
           typeCustomer: "supplier",
           userId: dto.userId,
+          address: dto.addressCustomer,
+          province: dto.provinceCustomer,
+          district: dto.districtCustomer,
+          subDistrict: dto.subDistrictCustomer,
+          postalCode: dto.postalCodeCustomer,
+          taxId: dto.taxIdCustomer,
+          phone: dto.phoneCustomer,
         });
         customerId = newCustomer._id.toString();
       } else {
@@ -126,6 +133,13 @@ export abstract class expService {
           organizationId: dto.organizationId,
           typeCustomer: "supplier",
           userId: dto.userId,
+          address: dto.addressCustomer,
+          province: dto.provinceCustomer,
+          district: dto.districtCustomer,
+          subDistrict: dto.subDistrictCustomer,
+          postalCode: dto.postalCodeCustomer,
+          taxId: dto.taxIdCustomer,
+          phone: dto.phoneCustomer,
         });
         customerId = newCustomer._id.toString();
       } else {

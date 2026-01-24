@@ -44,6 +44,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FileDropzone } from '@/components/dropzone';
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 
 
 export const billExpenseSchema = v.object({
@@ -63,12 +64,28 @@ export const billExpenseSchema = v.object({
     total: v.optional(v.number()),
   })), []),
 
+  phoneCustomer: v.optional(v.string()),
+  addressCustomer: v.optional(v.string()),
+  provinceCustomer: v.optional(v.string()),
+  districtCustomer: v.optional(v.string()),
+  subDistrictCustomer: v.optional(v.string()),
+  postalCodeCustomer: v.optional(v.string()),
+  taxIdCustomer: v.optional(v.string()),
+
 
 
 });
 
 type billExpenseData = v.InferOutput<typeof billExpenseSchema>;
-const defaultValues: billExpenseData = {
+const defaultValues: billExpenseData & {
+  phoneCustomer: string;
+  addressCustomer: string;
+  provinceCustomer: string;
+  districtCustomer: string;
+  subDistrictCustomer: string;
+  postalCodeCustomer: string;
+  taxIdCustomer: string;
+} = {
   billExpenseNumber: "",
   name: "",
   date: "",
@@ -84,7 +101,13 @@ const defaultValues: billExpenseData = {
       total: 0,
     },
   ],
-
+  phoneCustomer: "",
+  addressCustomer: "",
+  provinceCustomer: "",
+  districtCustomer: "",
+  subDistrictCustomer: "",
+  postalCodeCustomer: "",
+  taxIdCustomer: "",
 };
 
 
@@ -93,6 +116,7 @@ const CreateBillExp = () => {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [openDate, setOpenDate] = useState<boolean>(false);
+  const [createCustomer, setCreateCustomer] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   const [search, setSearch] = useState("");
@@ -244,6 +268,14 @@ const CreateBillExp = () => {
           total: subtotal,
           name: value.name,
           userId: session?.user?.id,
+
+          phoneCustomer: value.phoneCustomer || "",
+          addressCustomer: value.addressCustomer || "",
+          provinceCustomer: value.provinceCustomer || "",
+          districtCustomer: value.districtCustomer || "",
+          subDistrictCustomer: value.subDistrictCustomer || "",
+          postalCodeCustomer: value.postalCodeCustomer || "",
+          taxIdCustomer: value.taxIdCustomer || "",
         };
 
         createBillMutation.mutate(formattedData);
@@ -365,11 +397,11 @@ const CreateBillExp = () => {
                                   "customerId",
                                   selectedCustomer._id || "",
                                 );
-
+                                setCreateCustomer(false);
                               } else {
                                 form.setFieldValue("customerId", "");
+                                setCreateCustomer(false);
                               }
-
                             }}
                           >
                             <ComboboxInput
@@ -380,12 +412,20 @@ const CreateBillExp = () => {
                               onChange={(e) => {
                                 field.handleChange(e.target.value);
                                 setSearch(e.target.value);
+                                const selectedCustomer = customersData?.rows.find(
+                                  (c: any) => c.name === e.target.value,
+                                );
+                                if (e.target.value !== selectedCustomer?.name) {
+                                  setCreateCustomer(true);
+                                } else {
+                                  setCreateCustomer(false);
+                                }
                               }}
                               aria-invalid={
                                 field.state.meta.isTouched &&
                                 !field.state.meta.isValid
                               }
-                              placeholder="เลือกหรือตั้งค่าลูกค้า"
+                              placeholder="เลือกหรือตั้งค่าซัพลายเออร์"
                               className="font-normal tracking-widest"
                             />
                             <ComboboxContent>
@@ -412,6 +452,233 @@ const CreateBillExp = () => {
                 </div>
               </FieldGroup>
             </FieldSet>
+            {createCustomer && (
+              <>
+                {/* input customer details */}
+                <div className="flex flex-col border border-zinc-900 bg-accent/20 p-4 rounded-lg border-dashed">
+                  <FieldSet data-invalid>
+                    <FieldGroup className="flex flex-col text-left">
+                      <div className="grid grid-cols-1 gap-4">
+                        <form.Field
+                          name="addressCustomer"
+                          children={(field) => {
+                            const isInvalid =
+                              field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalid}>
+                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
+                                  ที่อยู่ซัพลายเออร์
+                                </FieldLabel>
+                                <Textarea
+                                  id={field.name}
+                                  name={field.name}
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  aria-invalid={
+                                    field.state.meta.isTouched &&
+                                    !field.state.meta.isValid
+                                  }
+                                  placeholder="ที่อยู่ซัพลายเออร์"
+                                  className="font-normal tracking-widest"
+                                />
+                                {isInvalid && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </Field>
+                            );
+                          }}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <form.Field name="taxIdCustomer" children={(field) => {
+                          const isInvalidField =
+                            field.state.meta.isTouched && !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalidField}>
+                              <FieldLabel
+                                htmlFor={field.name}
+                                className="font-normal tracking-widest"
+                              >
+                                เลขประจำตัวผู้เสียภาษี
+                              </FieldLabel>
+                              <InputGroup className="h-9 ">
+                                <InputGroupInput
+                                  id={field.name}
+                                  name={field.name}
+                                  value={field.state.value ?? ""}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  aria-invalid={isInvalidField}
+                                  placeholder="เลขประจำตัวผู้เสียภาษี"
+                                  className="font-normal tracking-widest"
+                                />
+                              </InputGroup>
+                              {isInvalidField && (
+                                <FieldError errors={field.state.meta.errors} />
+                              )}
+                            </Field>
+                          );
+                        }}
+                        />
+                        <form.Field name="phoneCustomer" children={(field) => {
+                          const isInvalidField =
+                            field.state.meta.isTouched && !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalidField}>
+                              <FieldLabel
+                                htmlFor={field.name}
+                                className="font-normal tracking-widest"
+                              >
+                                เบอร์โทรซัพลายเออร์
+                              </FieldLabel>
+                              <InputGroup className="h-9 ">
+                                <InputGroupInput
+                                  id={field.name}
+                                  name={field.name}
+                                  value={field.state.value ?? ""}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  aria-invalid={isInvalidField}
+                                  placeholder="เบอร์โทรซัพลายเออร์"
+                                  className="font-normal tracking-widest"
+                                />
+                              </InputGroup>
+                              {isInvalidField && (
+                                <FieldError errors={field.state.meta.errors} />
+                              )}
+                            </Field>
+                          );
+                        }}
+                        />
+                        <form.Field
+                          name="provinceCustomer"
+                          children={(field) => {
+                            const isInvalid =
+                              field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalid}>
+                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">จังหวัด</FieldLabel>
+                                <InputGroup className="h-9">
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    aria-invalid={
+                                      field.state.meta.isTouched &&
+                                      !field.state.meta.isValid
+                                    }
+                                    placeholder="จังหวัด"
+                                    className="font-normal tracking-widest"
+                                  />
+                                </InputGroup>
+                                {isInvalid && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </Field>
+                            );
+                          }}
+                        />
+                        <form.Field
+                          name="districtCustomer"
+                          children={(field) => {
+                            const isInvalid =
+                              field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalid}>
+                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">เขต/อำเภอ</FieldLabel>
+                                <InputGroup className="h-9">
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    aria-invalid={
+                                      field.state.meta.isTouched &&
+                                      !field.state.meta.isValid
+                                    }
+                                    placeholder="เขต/อำเภอ"
+                                    className="font-normal tracking-widest"
+                                  />
+                                </InputGroup>
+                                {isInvalid && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </Field>
+                            );
+                          }}
+                        />
+                        <form.Field
+                          name="subDistrictCustomer"
+                          children={(field) => {
+                            const isInvalid =
+                              field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalid}>
+                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ตำบล/แขวง</FieldLabel>
+                                <InputGroup className="h-9">
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    aria-invalid={
+                                      field.state.meta.isTouched &&
+                                      !field.state.meta.isValid
+                                    }
+                                    placeholder="ตำบล/แขวง"
+                                    className="font-normal tracking-widest"
+                                  />
+                                </InputGroup>
+                                {isInvalid && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </Field>
+                            );
+                          }}
+                        />
+                        <form.Field
+                          name="postalCodeCustomer"
+                          children={(field) => {
+                            const isInvalid =
+                              field.state.meta.isTouched && !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalid}>
+                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
+                                  รหัสไปรษณีย์
+                                </FieldLabel>
+                                <InputGroup className="h-9">
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    aria-invalid={
+                                      field.state.meta.isTouched &&
+                                      !field.state.meta.isValid
+                                    }
+                                    placeholder="รหัสไปรษณีย์"
+                                    className="font-normal tracking-widest"
+                                  />
+                                </InputGroup>
+                                {isInvalid && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </Field>
+                            );
+                          }}
+                        />
+                      </div>
+                    </FieldGroup>
+                  </FieldSet>
+                </div>
+              </>
+            )}
             <FieldSet data-invalid>
               <FieldGroup className="flex flex-col  text-left">
                 <div className="grid grid-cols-1">
