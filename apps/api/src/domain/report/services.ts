@@ -138,7 +138,7 @@ export abstract class reportService {
                   {
                     text: (billdata?.organizationId?.name || "-") + "\n",
                     bold: true,
-                    fontSize: billTemplate?.fontSize || 18,
+                    fontSize:  18,
                   },
 
 
@@ -203,7 +203,7 @@ export abstract class reportService {
                   {
                     text: "ลูกค้า: " + (billdata?.customerId?.name || billdata?.name_customer || "-") + "\n",
                     bold: true,
-                    fontSize: billTemplate?.fontSize || 18,
+                    fontSize:20,
                   },
                   ...([
                       billdata?.customerId?.address || billdata?.address_customer,
@@ -306,7 +306,7 @@ export abstract class reportService {
 
                 // ===== Items =====
                 ...billdata?.products?.map((product: any) => [
-                  { text: product.no, margin: [2, 2, 2, 2] },
+                  { text: product.no, margin: [2, 2, 2, 2] ,  alignment: "center", },
                   { text: product.name, margin: [2, 2, 2, 2] },
                   { text: product.quantity.toLocaleString("th-TH", {
                     minimumFractionDigits: 0,
@@ -430,22 +430,7 @@ export abstract class reportService {
                         bold: true,
                       },
                     ],
-                    // ["ยอดรวม:", { text: (billdata?.total + billdata?.discount || 0).toLocaleString("th-TH", {
-                    //   minimumFractionDigits: 2,
-                    //   maximumFractionDigits: 2,
-                    // }) || "0.00", bold: true }],
-                    // ["ส่วนลด:", { text: billdata?.discount?.toLocaleString("th-TH", {
-                    //   minimumFractionDigits: 2,
-                    //   maximumFractionDigits: 2,
-                    // }) || "0.00", bold: true }],
-                    // ["ภาษีมูลค่าเพิ่ม:", { text: billdata?.vat?.toLocaleString("th-TH", {
-                    //   minimumFractionDigits: 2,
-                    //   maximumFractionDigits: 2,
-                    // }) || "0.00", bold: true }],
-                    // ["ยอดสุทธิ:", { text: ((billdata?.total - billdata?.discount || 0) + billdata?.vat || 0).toLocaleString("th-TH", {
-                    //   minimumFractionDigits: 2,
-                    //   maximumFractionDigits: 2,
-                    // }) || "0.00", bold: true }],
+
 
                   ],
                 },
@@ -457,7 +442,7 @@ export abstract class reportService {
 
 
           {
-            text: billTemplate?.footerText || "ขอบคุณสำหรับการสั่งซื้อ",
+            text: billTemplate?.footerText || "ขอบพระคุณลูกค้าที่ไว้วางใจและเลือกซื้อสินค้าจากเรา",
             style: "footer",
             color: billTemplate?.themcolor || "#000000",
             fontSize: 24,

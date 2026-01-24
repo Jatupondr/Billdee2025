@@ -284,6 +284,12 @@ export default function BillTem() {
                     text: "ที่อยู่: XXX ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ XXXX\n",
                     bold: true,
                     fontSize: parseInt(values.fontSize) || 12,
+
+                  },
+                  {
+                    text: "เลขประจำตัวผู้เสียภาษี: XXX-XXX-XXXX\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 12,
                   },
                   {
                     text: "เบอร์โทร: XXX-XXX-XXXX\n",
@@ -321,6 +327,11 @@ export default function BillTem() {
                   },
                   {
                     text: "ที่อยู่: XXX ถนนพหลโยธิน แขวงสามเสนใน เขตพญาไท กรุงเทพฯ 10400\n",
+                    bold: true,
+                    fontSize: parseInt(values.fontSize) || 12,
+                  },
+                  {
+                    text: "เลขประจำตัวผู้เสียภาษี: XXX-XXX-XXXX\n",
                     bold: true,
                     fontSize: parseInt(values.fontSize) || 12,
                   },
@@ -477,7 +488,9 @@ export default function BillTem() {
           {
             text: values.foterText || "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
-            fontSize: 16,
+            fontSize: 24,
+            color: values.themcolor || "#000000",
+            bold: true,
             alignment: "center" as const,
           },
           {
