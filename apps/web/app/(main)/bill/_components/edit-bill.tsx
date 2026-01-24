@@ -94,6 +94,15 @@ export const billSchema = v.object({
   total: v.optional(v.number(), 0),
   discount: v.optional(v.number(), 0),
   vat: v.optional(v.number(), 0),
+  textIdCustomer: v.optional(v.string(), ""),
+  phoneCustomer: v.optional(v.string(), ""),
+  addressCustomer: v.optional(v.string(), ""),
+  provinceCustomer: v.optional(v.string(), ""),
+  districtCustomer: v.optional(v.string(), ""),
+  subDistrictCustomer: v.optional(v.string(), ""),
+  postalCodeCustomer: v.optional(v.string(), ""),
+  taxIdCustomer: v.optional(v.string(), ""),
+
 });
 
 type billData = v.InferOutput<typeof billSchema>;
@@ -110,6 +119,7 @@ const EditBill = ({ id }: EditBillProps) => {
   const debouncedSearch = useDebounce(search, 500);
   const { data: session } = authClient.useSession();
   const { data: activeOrg } = authClient.useActiveOrganization();
+  const [createCustomer, setCreateCustomer] = useState<boolean>(false);
 
   // ดึงข้อมูลบิลที่จะแก้ไข
   const getBillById = async (billId: string) => {
@@ -204,6 +214,14 @@ const EditBill = ({ id }: EditBillProps) => {
       total: 0,
       discount: 0,
       vat: 0,
+      textIdCustomer: "",
+      phoneCustomer: "",
+      addressCustomer: "",
+      provinceCustomer: "",
+      districtCustomer: "",
+      subDistrictCustomer: "",
+      postalCodeCustomer: "",
+      taxIdCustomer: "",
     },
     validationLogic: revalidateLogic(),
 
@@ -454,6 +472,13 @@ const EditBill = ({ id }: EditBillProps) => {
                                   "address_customer",
                                   selectedCustomer.address || "",
                                 );
+                                setCreateCustomer(false);
+                              }
+                              else {
+                                form.setFieldValue("customerId", "");
+                                form.setFieldValue("phone_customer", "");
+                                form.setFieldValue("address_customer", "");
+                                setCreateCustomer(false);
                               }
                             }}
                           >
@@ -466,6 +491,14 @@ const EditBill = ({ id }: EditBillProps) => {
                               onChange={(e) => {
                                 field.handleChange(e.target.value);
                                 setSearch(e.target.value);
+                                const selectedCustomer = customersData?.rows.find(
+                                  (c: any) => c.name === e.target.value,
+                                );
+                                if (e.target.value !== selectedCustomer?.name) {
+                                  setCreateCustomer(true);
+                                } else {
+                                  setCreateCustomer(false);
+                                }
                               }}
                               aria-invalid={
                                 field.state.meta.isTouched &&

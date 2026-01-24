@@ -17,6 +17,13 @@ export abstract class billService {
           organizationId: dto.organizationId,
           userId: dto.userId,
           typeCustomer: "customer",
+          address: dto.addressCustomer,
+          province: dto.provinceCustomer,
+          district: dto.districtCustomer,
+          subDistrict: dto.subDistrictCustomer,
+          postalCode: dto.postalCodeCustomer,
+          taxId: dto.taxIdCustomer,
+          phone: dto.phoneCustomer,
         });
         customerId = customer._id.toString();
       }
@@ -150,6 +157,13 @@ export abstract class billService {
           organizationId: dto.organizationId,
           userId: dto.userId,
           typeCustomer: "customer",
+          address: dto.addressCustomer,
+          province: dto.provinceCustomer,
+          district: dto.districtCustomer,
+          subDistrict: dto.subDistrictCustomer,
+          postalCode: dto.postalCodeCustomer,
+          taxId: dto.taxIdCustomer,
+          phone: dto.phoneCustomer,
         });
         customerId = customer._id.toString();
       }

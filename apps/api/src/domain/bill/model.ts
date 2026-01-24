@@ -42,6 +42,14 @@ export namespace BillModel {
       error: "OrganizationId is required",
     }),
     userId: t.String({ minLength: 1, error: "UserId is required" }),
+    textIdCustomer: t.Optional(t.String())  ,
+    phoneCustomer: t.Optional(t.String()),
+    addressCustomer: t.Optional(t.String()),
+    provinceCustomer: t.Optional(t.String()),
+    districtCustomer: t.Optional(t.String()),
+    subDistrictCustomer: t.Optional(t.String()),
+    postalCodeCustomer: t.Optional(t.String()),
+    taxIdCustomer: t.Optional(t.String()),
   });
   export const billUpdateDto = t.Object({
     billNumber: t.String({
@@ -84,6 +92,14 @@ export namespace BillModel {
       error: "OrganizationId is required",
     }),
     userId: t.String({ minLength: 1, error: "UserId is required" }),
+    textIdCustomer: t.Optional(t.String())  ,
+    phoneCustomer: t.Optional(t.String()),
+    addressCustomer: t.Optional(t.String()),
+    provinceCustomer: t.Optional(t.String()),
+    districtCustomer: t.Optional(t.String()),
+    subDistrictCustomer: t.Optional(t.String()),
+    postalCodeCustomer: t.Optional(t.String()),
+    taxIdCustomer: t.Optional(t.String()),
   });
 
   export const billResponseDto = t.Object({

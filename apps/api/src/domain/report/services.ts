@@ -21,10 +21,10 @@ export abstract class reportService {
   static async receipt(id: string, set: any, query: any) {
     try {
       const billdata:any = await Bill.findOne({ _id: id, isDeleted: false })
-      .populate("customerId", "name email phone address district subDistrict province postalCode")
+      .populate("customerId", "name email phone address district subDistrict province postalCode taxId")
       .populate("userId", "name email")
       // .populate("products.productId", "name")
-      .populate("organizationId", "_id name logo phone address district subDistrict province postalCode account_name account_no bank_name prompt_pay")
+      .populate("organizationId", "_id name taxId logo phone address district subDistrict province postalCode account_name account_no bank_name prompt_pay")
       .lean();
       // find bill template
       const billTemplate: any = await BillTemplate.findOne({ organizationId: billdata?.organizationId._id })
@@ -140,22 +140,40 @@ export abstract class reportService {
                     bold: true,
                     fontSize: billTemplate?.fontSize || 18,
                   },
-                  {
+
+
+                  ...([
+                      billdata?.organizationId?.address,
+                      billdata?.organizationId?.subDistrict,
+                      billdata?.organizationId?.district,
+                      billdata?.organizationId?.province,
+                      billdata?.organizationId?.postalCode
+                    ].filter(Boolean).length > 0 ? [{
                     text: "ที่อยู่: " + [
                       billdata?.organizationId?.address,
                       billdata?.organizationId?.subDistrict,
                       billdata?.organizationId?.district,
                       billdata?.organizationId?.province,
                       billdata?.organizationId?.postalCode
-                    ].filter(Boolean).join(" ") + "\n" || "-\n",
+                    ].filter(Boolean).join(" ") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
-                  },
+                  }] : []),
+                 ...(billdata?.organizationId?.taxId ? [
                   {
-                    text: "เบอร์โทร: " + (billdata?.organizationId?.phone || "-") + "\n",
+                    text: "เลขประจำตัวผู้เสียภาษี: " + (billdata?.organizationId?.taxId || "-") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
                   },
+                 ] : []),
+                 ...(billdata?.organizationId?.phone ? [
+                    {
+                      text: "เบอร์โทร: " + (billdata?.organizationId?.phone || "-") + "\n",
+                      bold: true,
+                      fontSize: billTemplate?.fontSize || 12,
+                    },
+                  ] : []),
+
 
 
                 ],
@@ -187,22 +205,36 @@ export abstract class reportService {
                     bold: true,
                     fontSize: billTemplate?.fontSize || 18,
                   },
-                  {
-                    text: "ที่อยู่: " + ([
+                  ...([
                       billdata?.customerId?.address || billdata?.address_customer,
                       billdata?.customerId?.subDistrict,
                       billdata?.customerId?.district,
                       billdata?.customerId?.province,
                       billdata?.customerId?.postalCode
-                    ].filter(Boolean).join(" ") || "-") + "\n",
+                    ].filter(Boolean).length > 0 ? [{
+                    text: "ที่อยู่: " + [
+                      billdata?.customerId?.address || billdata?.address_customer,
+                      billdata?.customerId?.subDistrict,
+                      billdata?.customerId?.district,
+                      billdata?.customerId?.province,
+                      billdata?.customerId?.postalCode
+                    ].filter(Boolean).join(" ") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
-                  },
-                  {
-                    text: "เบอร์โทร: " + (billdata?.customerId?.phone || billdata?.phone_customer || "-") + "\n",
+                  }] : []),
+                  ...(billdata?.customerId?.taxId ? [
+                    {
+                      text: "เลขประจำตัวผู้เสียภาษี: " + (billdata?.customerId?.taxId || "-") + "\n",
+                      bold: true,
+                      fontSize: billTemplate?.fontSize || 12,
+                    },
+                   ] : []),
+
+                  ...((billdata?.customerId?.phone || billdata?.phone_customer) ? [{
+                    text: "เบอร์โทร: " + (billdata?.customerId?.phone || billdata?.phone_customer) + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
-                  },
+                  }] : []),
 
 
 
@@ -302,36 +334,35 @@ export abstract class reportService {
                 widths: ["auto", "auto"],
                 body: [
 
-                  [
+                  ...(billdata?.note ? [[
                     "หมายเหตุ:",
                     {
-                      text:billdata?.note || "-",
+                      text: billdata?.note,
                       bold: true,
                     },
-                  ],
-                  [
+                  ]] : []),
+                  ...(billdata?.organizationId?.account_name ? [[
                     "ชื่อบัญชี:",
                     {
-                      text:billdata?.organizationId?.account_name || "-",
+                      text: billdata?.organizationId?.account_name,
                       bold: true,
                     },
-                  ],
-                  [
+                  ]] : []),
+                  ...((billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) ? [[
                     "ธนาคาร:",
                     {
-                      text:   (billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) ? billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no : "-",
+                      text: billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no,
                       bold: true,
                       fontSize: billTemplate?.fontSize || 16,
                     },
-                  ],
-
-                  [
+                  ]] : []),
+                  ...(billdata?.organizationId?.prompt_pay ? [[
                     "พร้อมเพย์:",
                     {
-                      text:billdata?.organizationId?.prompt_pay || "-",
+                      text: billdata?.organizationId?.prompt_pay,
                       bold: true,
                     },
-                  ],
+                  ]] : []),
                 ...(bankQrcodeBase64 ? [
                   [
                     "qr code:",
@@ -428,7 +459,9 @@ export abstract class reportService {
           {
             text: billTemplate?.footerText || "ขอบคุณสำหรับการสั่งซื้อ",
             style: "footer",
-            fontSize: 16,
+            color: billTemplate?.themcolor || "#000000",
+            fontSize: 24,
+            bold: true,
             alignment: "center" as const,
           },
 
@@ -436,6 +469,7 @@ export abstract class reportService {
             text: billTemplate?.footerSubText || "เรียนลูกค้าที่เคารพ กรุณาถ่ายวิดีโอตั้งแต่แกะเทปเปิดลัง ตรวจเช็คสินค้า (ไซส์ น้ำหนัก สภาพ ฯลฯ) ในคลิปเดียวไม่ตัดต่อ และไม่วางทิ้งไว้ก่อนเปิด หากไม่มีคลิปตั้งแต่ต้น ทางร้านขอสงวนสิทธิ์ในการดูแลทุกกรณี",
             style: "footer",
             fontSize: 13,
+
             alignment: "center" as const,
           },
 

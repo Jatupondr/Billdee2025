@@ -250,7 +250,7 @@ const CreateCustomerModal = ({
                           field.state.meta.isTouched &&
                           !field.state.meta.isValid
                         }
-                        placeholder="ที่อยู่ร้านค้า"
+                        placeholder="ที่อยู่ลูกค้า"
                         className="font-normal tracking-widest"
                       />
                       {isInvalid && (
