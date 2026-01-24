@@ -52,6 +52,16 @@ const ViewSupplierModal = ({
                 </p>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-normal tracking-widest text-muted-foreground">
+                  เลขประจำตัวผู้เสียภาษี
+                </label>
+                <p className="text-base font-normal tracking-widest">
+                  {supplier.taxId || "-"}
+                </p>
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-normal tracking-widest text-muted-foreground">
@@ -60,89 +70,90 @@ const ViewSupplierModal = ({
               <p className="text-base font-normal tracking-widest">{supplier.address || "-"}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                  จังหวัด
-                </label>
-                <p className="text-base font-normal tracking-widest">
-                  {supplier.province || "-"}
-                </p>
-              </div>
+          </div>
 
-              <div className="space-y-2">
-                  <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                  เขต/อำเภอ
-                </label>
-                <p className="text-base font-normal tracking-widest">
-                  {supplier.district || "-"}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                  ตำบล/แขวง
-                </label>
-                <p className="text-base font-normal tracking-widest">
-                  {supplier.subdistrict || "-"}
-                </p>
-              </div>
+          <div className="space-y-2">
+            <label className="text-sm font-normal tracking-widest text-muted-foreground">
+              จังหวัด
+            </label>
+            <p className="text-base font-normal tracking-widest">
+              {supplier.province || "-"}
+            </p>
+          </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                  รหัสไปรษณีย์
-                </label>
-                <p className="text-base font-normal tracking-widest">
-                  {supplier.postalCode || "-"}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                สถานะ
-              </label>
-              <div>
-                {supplier.typeCustomer === "customer" ? (
-                  <Badge variant="default">ลูกค้า</Badge>
-                ) : (
-                  <Badge variant="secondary">ซัพพลายเออร์</Badge>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                  วันที่สร้าง
-                </label>
-                <p className="text-sm font-normal tracking-widest">
-                  {new Date(supplier.createdAt).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  }) || "-"}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-normal tracking-widest text-muted-foreground">
-                  แก้ไขล่าสุด
-                </label>
-                <p className="text-sm font-normal tracking-widest">
-                  {new Date(supplier.updatedAt).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  }) || "-"}
-                </p>
-              </div>
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-normal tracking-widest text-muted-foreground">
+              เขต/อำเภอ
+            </label>
+            <p className="text-base font-normal tracking-widest">
+              {supplier.district || "-"}
+            </p>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-normal tracking-widest text-muted-foreground">
+              ตำบล/แขวง
+            </label>
+            <p className="text-base font-normal tracking-widest">
+              {supplier.subdistrict || "-"}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-normal tracking-widest text-muted-foreground">
+              รหัสไปรษณีย์
+            </label>
+            <p className="text-base font-normal tracking-widest">
+              {supplier.postalCode || "-"}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-normal tracking-widest text-muted-foreground">
+            สถานะ
+          </label>
+          <div>
+            {supplier.typeCustomer === "customer" ? (
+              <Badge variant="default">ลูกค้า</Badge>
+            ) : (
+              <Badge variant="secondary">ซัพพลายเออร์</Badge>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-normal tracking-widest text-muted-foreground">
+              วันที่สร้าง
+            </label>
+            <p className="text-sm font-normal tracking-widest">
+              {new Date(supplier.createdAt).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              }) || "-"}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-normal tracking-widest text-muted-foreground">
+              แก้ไขล่าสุด
+            </label>
+            <p className="text-sm font-normal tracking-widest">
+              {new Date(supplier.updatedAt).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              }) || "-"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+      </DialogContent >
+    </Dialog >
   );
 };
 
