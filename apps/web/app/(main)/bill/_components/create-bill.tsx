@@ -246,7 +246,7 @@ const CreateBill = () => {
           : 0;
         const totalAmount = parseFloat((afterDiscount + taxAmount).toFixed(2));
         const costAmount = (value.products || []).reduce(
-          (sum: number, item: any) => sum + (item.cost || 0),
+          (sum: number, item: any) => sum + (item.cost * item.quantity || 0),
           0,
         );
         const formattedData = {
@@ -1088,14 +1088,8 @@ const CreateBill = () => {
                                             `products[${index}].cost`,
                                             selectedProduct.cost,
                                           );
-                                          const currentQty =
-                                            form.getFieldValue(
-                                              `products[${index}].quantity`,
-                                            ) || 1;
-                                          form.setFieldValue(
-                                            `products[${index}].total`,
-                                            parseFloat((selectedProduct.price * currentQty).toFixed(2)),
-                                          );
+
+
                                         } else {
                                           form.setFieldValue(
                                             `products[${index}].productId`,
@@ -1130,22 +1124,7 @@ const CreateBill = () => {
                                         </ComboboxList>
                                       </ComboboxContent>
                                     </Combobox>
-                                    {/* <form.Field
-                                      name={`products[${index}].note`}
-                                    >
-                                      {(noteField) => (
-                                        <Input
-                                          value={noteField.state.value || ""}
-                                          onChange={(e) =>
-                                            noteField.handleChange(
-                                              e.target.value
-                                            )
-                                          }
-                                          placeholder="หมายเหตุ"
-                                          className="text-sm font-normal text-primary/70 mt-1 h-7 border-0 px-0 focus-visible:ring-0"
-                                        />
-                                      )}
-                                    </form.Field> */}
+
                                   </div>
                                 </TableCell>
                               )}
@@ -1168,14 +1147,7 @@ const CreateBill = () => {
                                         parseFloat((currentPrice * newQty).toFixed(2)),
                                       );
                                       //
-                                      const currentCost =
-                                        form.getFieldValue(
-                                          `products[${index}].cost`,
-                                        ) || 0;
-                                      form.setFieldValue(
-                                        `products[${index}].cost`,
-                                        parseFloat((currentCost * newQty).toFixed(2)),
-                                      );
+
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"
                                     min="0"

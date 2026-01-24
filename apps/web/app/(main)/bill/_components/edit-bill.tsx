@@ -239,7 +239,7 @@ const EditBill = ({ id }: EditBillProps) => {
           : 0;
         const totalAmount = afterDiscount + taxAmount;
         const costAmount = (value.products || []).reduce(
-          (sum: number, item: any) => sum + (item.cost || 0),
+          (sum: number, item: any) => sum + (item.cost * item.quantity || 0),
           0,
         );
         const formattedData: any = {
@@ -877,14 +877,7 @@ const EditBill = ({ id }: EditBillProps) => {
                                             `products[${index}].cost`,
                                             selectedProduct.cost,
                                           );
-                                          const currentQty =
-                                            form.getFieldValue(
-                                              `products[${index}].quantity`,
-                                            ) || 1;
-                                          form.setFieldValue(
-                                            `products[${index}].total`,
-                                            selectedProduct.price * currentQty,
-                                          );
+
                                         } else {
                                           form.setFieldValue(
                                             `products[${index}].productId`,
@@ -940,14 +933,7 @@ const EditBill = ({ id }: EditBillProps) => {
                                         `products[${index}].total`,
                                         currentPrice * newQty,
                                       );
-                                      const currentCost =
-                                        form.getFieldValue(
-                                          `products[${index}].cost`,
-                                        ) || 0;
-                                      form.setFieldValue(
-                                        `products[${index}].cost`,
-                                        parseFloat((currentCost * newQty).toFixed(2)),
-                                      );
+
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"
                                     min="0"
