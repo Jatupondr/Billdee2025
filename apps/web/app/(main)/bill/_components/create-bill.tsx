@@ -190,13 +190,15 @@ const CreateBill = () => {
       const response = await api.post("/bills", data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ["bills"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
       toast.success("สร้างบิลสำเร็จ", {
         position: "bottom-right",
       });
       router.push("/bill");
+      // new window
+      window.open(`${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${response.data._id as string}`, "_blank");
     },
     onError: (error: any) => {
       toast.error("เกิดข้อผิดพลาด", {
@@ -217,12 +219,12 @@ const CreateBill = () => {
           (sum: number, item: any) => sum + (item.total || 0),
           0,
         );
-        const discountAmount = (subtotal * (value.discountPercent || 0)) / 100;
-        const afterDiscount = subtotal - discountAmount;
+        const discountAmount = parseFloat(((subtotal * (value.discountPercent || 0)) / 100).toFixed(2));
+        const afterDiscount = parseFloat((subtotal - discountAmount).toFixed(2));
         const taxAmount = value.includeVat
-          ? (afterDiscount * (value.taxPercent || 7)) / 100
+          ? parseFloat(((afterDiscount * (value.taxPercent || 7)) / 100).toFixed(2))
           : 0;
-        const totalAmount = afterDiscount + taxAmount;
+        const totalAmount = parseFloat((afterDiscount + taxAmount).toFixed(2));
         const costAmount = (value.products || []).reduce(
           (sum: number, item: any) => sum + (item.cost || 0),
           0,
@@ -816,7 +818,7 @@ const CreateBill = () => {
                                             ) || 1;
                                           form.setFieldValue(
                                             `products[${index}].total`,
-                                            selectedProduct.price * currentQty,
+                                            parseFloat((selectedProduct.price * currentQty).toFixed(2)),
                                           );
                                         } else {
                                           form.setFieldValue(
@@ -879,7 +881,7 @@ const CreateBill = () => {
                                     type="number"
                                     value={qtyField.state.value ?? 0}
                                     onChange={(e) => {
-                                      const newQty = Number(e.target.value);
+                                      const newQty = parseFloat(e.target.value) || 0;
                                       qtyField.handleChange(newQty);
                                       const currentPrice =
                                         form.getFieldValue(
@@ -887,11 +889,12 @@ const CreateBill = () => {
                                         ) || 0;
                                       form.setFieldValue(
                                         `products[${index}].total`,
-                                        currentPrice * newQty,
+                                        parseFloat((currentPrice * newQty).toFixed(2)),
                                       );
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"
                                     min="0"
+                                    step="0.01"
                                   />
                                 </TableCell>
                               )}
@@ -904,11 +907,12 @@ const CreateBill = () => {
                                     value={costField.state.value ?? 0}
                                     onChange={(e) =>
                                       costField.handleChange(
-                                        Number(e.target.value),
+                                        parseFloat(e.target.value) || 0,
                                       )
                                     }
                                     className="h-10 w-20 font-normal tracking-widest  "
                                     min="0"
+                                    step="0.01"
                                   />
                                 </TableCell>
                               )}
@@ -921,7 +925,7 @@ const CreateBill = () => {
                                       type="number"
                                       value={priceField.state.value ?? 0}
                                       onChange={(e) => {
-                                        const newPrice = Number(e.target.value);
+                                        const newPrice = parseFloat(e.target.value) || 0;
                                         priceField.handleChange(newPrice);
                                         const currentQty =
                                           form.getFieldValue(
@@ -929,10 +933,11 @@ const CreateBill = () => {
                                           ) || 0;
                                         form.setFieldValue(
                                           `products[${index}].total`,
-                                          newPrice * currentQty,
+                                          parseFloat((newPrice * currentQty).toFixed(2)),
                                         );
                                       }}
                                       min="0"
+                                      step="0.01"
                                       className="h-9 w-32 font-normal tracking-widest "
                                     />
                                   </div>
@@ -999,12 +1004,12 @@ const CreateBill = () => {
                   (sum: number, item: any) => sum + (item.total || 0),
                   0,
                 );
-                const discountAmount = (subtotal * discountPercent) / 100;
-                const afterDiscount = subtotal - discountAmount;
+                const discountAmount = parseFloat(((subtotal * discountPercent) / 100).toFixed(2));
+                const afterDiscount = parseFloat((subtotal - discountAmount).toFixed(2));
                 const taxAmount = includeVat
-                  ? (afterDiscount * taxPercent) / 100
+                  ? parseFloat(((afterDiscount * taxPercent) / 100).toFixed(2))
                   : 0;
-                const total = afterDiscount + taxAmount;
+                const total = parseFloat((afterDiscount + taxAmount).toFixed(2));
 
                 return (
                   <div className="flex justify-between mt-4">

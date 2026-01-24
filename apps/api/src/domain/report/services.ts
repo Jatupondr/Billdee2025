@@ -89,17 +89,23 @@ export abstract class reportService {
                 width: "*",
                 text: [
                   {
-                    text: billdata?.organizationId?.name + "\n" || "-" ,
+                    text: (billdata?.organizationId?.name || "-") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 18,
                   },
                   {
-                    text: "ที่อยู่: " + billdata?.organizationId?.address + " " + billdata?.organizationId?.subDistrict + " " + billdata?.organizationId?.district + " " + billdata?.organizationId?.province + " " +  billdata?.organizationId?.postalCode + "\n" || "-" ,
+                    text: "ที่อยู่: " + [
+                      billdata?.organizationId?.address,
+                      billdata?.organizationId?.subDistrict,
+                      billdata?.organizationId?.district,
+                      billdata?.organizationId?.province,
+                      billdata?.organizationId?.postalCode
+                    ].filter(Boolean).join(" ") + "\n" || "-\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
                   },
                   {
-                    text: "เบอร์โทร: " + billdata?.organizationId?.phone + "\n" || "-" ,
+                    text: "เบอร์โทร: " + (billdata?.organizationId?.phone || "-") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
                   },
@@ -130,17 +136,23 @@ export abstract class reportService {
                 width: "*",
                 text: [
                   {
-                    text: "ลูกค้า: " + billdata?.customerId?.name + "\n" || "-" ,
+                    text: "ลูกค้า: " + (billdata?.customerId?.name || billdata?.name_customer || "-") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 18,
                   },
                   {
-                    text: "ที่อยู่: " + billdata?.customerId?.address + " " + billdata?.customerId?.subDistrict + " " + billdata?.customerId?.district + " " + billdata?.customerId?.province + " " +  billdata?.customerId?.postalCode + "\n" || "-" ,
+                    text: "ที่อยู่: " + ([
+                      billdata?.customerId?.address || billdata?.address_customer,
+                      billdata?.customerId?.subDistrict,
+                      billdata?.customerId?.district,
+                      billdata?.customerId?.province,
+                      billdata?.customerId?.postalCode
+                    ].filter(Boolean).join(" ") || "-") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
                   },
                   {
-                    text: "เบอร์โทร: " + billdata?.customerId?.phone + "\n" || "-" ,
+                    text: "เบอร์โทร: " + (billdata?.customerId?.phone || billdata?.phone_customer || "-") + "\n",
                     bold: true,
                     fontSize: billTemplate?.fontSize || 12,
                   },
@@ -260,7 +272,7 @@ export abstract class reportService {
                   [
                     "ธนาคาร:",
                     {
-                      text:   billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no || "-",
+                      text:   (billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) ? billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no : "-",
                       bold: true,
                       fontSize: billTemplate?.fontSize || 16,
                     },
@@ -273,10 +285,11 @@ export abstract class reportService {
                       bold: true,
                     },
                   ],
+                ...(bankQrcodeBase64 ? [
                   [
                     "qr code:",
                     {
-                      image: bankQrcodeBase64,
+                      image: bankQrcodeBase64 || "",
                       width:80,
                       height: 80,
                       margin: [0, 0, 0, 5],
@@ -284,7 +297,7 @@ export abstract class reportService {
 
                     },
                   ],
-
+                ] : []),
 
                 ],
               },

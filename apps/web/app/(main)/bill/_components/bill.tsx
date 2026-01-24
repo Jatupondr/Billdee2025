@@ -17,7 +17,10 @@ import {
   PencilIcon,
   PlusCircleIcon,
   TrashIcon,
+  DotsThreeVerticalIcon,
+  PrinterIcon,
 } from "@phosphor-icons/react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import React, { useState } from "react";
@@ -204,36 +207,79 @@ const Bill = () => {
       size: 150,
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Button
-            size="icon"
-            variant="outline"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out"
-            onClick={() => {
-              router.push(`/bill/${row.original._id}` as any);
-            }}
-          >
-            <EyeIcon size={20} weight="bold" />
-          </Button>
-          <Button
-            size="icon"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-[#ffc107] hover:bg-[#ffc107]/90 text-black"
-            onClick={() => {
-              router.push(`/bill/${row.original._id}/edit`);
-            }}
-          >
-            <PencilIcon size={20} weight="bold" />
-          </Button>
-          <Button
-            size="icon"
-            className="cursor-pointer active:scale-95 duration-200 ease-in-out bg-red-600 hover:bg-red-600/90"
-            onClick={() => {
+          <DropdownMenu>
+            <DropdownMenuTrigger
 
-              setSelectedBill(row.original);
-              setDeleteDialogOpen(true);
-            }}
-          >
-            <TrashIcon size={20} weight="bold" />
-          </Button>
+              render={<Button
+                variant="outline"
+                className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                size="icon"
+              >
+                <DotsThreeVerticalIcon size={24} weight="bold" />
+              </Button>} />
+
+
+
+
+            <DropdownMenuContent className="w-40" align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs font-normal tracking-widest">
+                  ดำเนินการ
+                </DropdownMenuLabel>
+
+                <DropdownMenuItem
+
+                  onClick={() => {
+                    // new window
+                    window.open(`${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${row.original._id}`, "_blank");
+
+                  }}
+                  className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+                  <PrinterIcon size={20} weight="bold" />
+
+                  พิมพ์ใบเสร็จ
+                </DropdownMenuItem>
+                <DropdownMenuItem
+
+                  onClick={() => {
+                    router.push(`/bill/${row.original._id}` as any);
+                  }}
+                  className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+                  <EyeIcon size={20} weight="bold" />
+
+                  ดูรายละเอียดบิล
+                </DropdownMenuItem>
+                <DropdownMenuItem
+
+                  onClick={() => {
+                    router.push(`/bill/${row.original._id}/edit`);
+                  }}
+                  className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+                  <PencilIcon size={20} weight="bold" />
+
+                  แก้ไขบิล
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+
+                    setSelectedBill(row.original);
+                    setDeleteDialogOpen(true);
+                  }}
+                  variant="destructive"
+                  className="font-normal tracking-widest"
+                >
+                  <TrashIcon size={20} weight="bold" />
+
+                  ลบบิล
+                </DropdownMenuItem>
+
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu >
+
         </div>
       ),
     },

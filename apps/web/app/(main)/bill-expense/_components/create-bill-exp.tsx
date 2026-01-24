@@ -557,7 +557,7 @@ const CreateBillExp = () => {
                                     type="number"
                                     value={qtyField.state.value ?? 0}
                                     onChange={(e) => {
-                                      const newQty = Number(e.target.value);
+                                      const newQty = parseFloat(e.target.value) || 0;
                                       qtyField.handleChange(newQty);
                                       const currentPrice =
                                         form.getFieldValue(
@@ -570,6 +570,7 @@ const CreateBillExp = () => {
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"
                                     min="0"
+                                    step="any"
                                   />
                                 </TableCell>
                               )}
@@ -583,7 +584,7 @@ const CreateBillExp = () => {
                                       type="number"
                                       value={priceField.state.value ?? 0}
                                       onChange={(e) => {
-                                        const newPrice = Number(e.target.value);
+                                        const newPrice = parseFloat(e.target.value) || 0;
                                         priceField.handleChange(newPrice);
                                         const currentQty =
                                           form.getFieldValue(
@@ -595,6 +596,7 @@ const CreateBillExp = () => {
                                         );
                                       }}
                                       min="0"
+                                      step="any"
                                       className="h-9 w-full font-normal tracking-widest "
                                     />
                                   </div>
