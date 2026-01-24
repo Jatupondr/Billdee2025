@@ -241,7 +241,7 @@ const CreateBill = () => {
             productId: product.productId || undefined,
             name: product.name,
             quantity: product.quantity,
-            cost: product.cost,
+            cost: product.cost * product.quantity,
             price: product.price,
             total: product.total,
             note: product.note || "",
