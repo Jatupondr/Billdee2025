@@ -221,7 +221,7 @@ const EditBill = ({ id }: EditBillProps) => {
           : 0;
         const totalAmount = afterDiscount + taxAmount;
         const costAmount = (value.products || []).reduce(
-          (sum: number, item: any) => sum + (item.cost * item.quantity || 0),
+          (sum: number, item: any) => sum + (item.cost || 0),
           0,
         );
         const formattedData: any = {
@@ -236,7 +236,7 @@ const EditBill = ({ id }: EditBillProps) => {
             productId: product.productId || undefined,
             name: product.name,
             quantity: product.quantity,
-            cost: product.cost * product.quantity,
+            cost: product.cost,
             price: product.price,
             total: product.total,
             note: product.note || "",
@@ -906,6 +906,14 @@ const EditBill = ({ id }: EditBillProps) => {
                                       form.setFieldValue(
                                         `products[${index}].total`,
                                         currentPrice * newQty,
+                                      );
+                                      const currentCost =
+                                        form.getFieldValue(
+                                          `products[${index}].cost`,
+                                        ) || 0;
+                                      form.setFieldValue(
+                                        `products[${index}].cost`,
+                                        parseFloat((currentCost * newQty).toFixed(2)),
                                       );
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"

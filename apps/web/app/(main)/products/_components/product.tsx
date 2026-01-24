@@ -85,7 +85,12 @@ const ListProduct = () => {
       size: 120,
       cell: ({ row }) => (
         <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
-          ฿{Number(row.original.price).toLocaleString() || "-"}
+          {Number(row.original.price).toLocaleString("th-TH", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+
+
+          }) || "-"}
         </span>
       ),
     },

@@ -226,7 +226,7 @@ const CreateBill = () => {
           : 0;
         const totalAmount = parseFloat((afterDiscount + taxAmount).toFixed(2));
         const costAmount = (value.products || []).reduce(
-          (sum: number, item: any) => sum + (item.cost * item.quantity || 0),
+          (sum: number, item: any) => sum + (item.cost || 0),
           0,
         );
         const formattedData = {
@@ -241,7 +241,7 @@ const CreateBill = () => {
             productId: product.productId || undefined,
             name: product.name,
             quantity: product.quantity,
-            cost: product.cost * product.quantity,
+            cost: product.cost,
             price: product.price,
             total: product.total,
             note: product.note || "",
@@ -892,10 +892,19 @@ const CreateBill = () => {
                                         `products[${index}].total`,
                                         parseFloat((currentPrice * newQty).toFixed(2)),
                                       );
+                                      //
+                                      const currentCost =
+                                        form.getFieldValue(
+                                          `products[${index}].cost`,
+                                        ) || 0;
+                                      form.setFieldValue(
+                                        `products[${index}].cost`,
+                                        parseFloat((currentCost * newQty).toFixed(2)),
+                                      );
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"
                                     min="0"
-                                    step="0.01"
+                                    step="1"
                                   />
                                 </TableCell>
                               )}
@@ -913,7 +922,7 @@ const CreateBill = () => {
                                     }
                                     className="h-10 w-20 font-normal tracking-widest  "
                                     min="0"
-                                    step="0.01"
+                                    step="1"
                                   />
                                 </TableCell>
                               )}
@@ -938,7 +947,7 @@ const CreateBill = () => {
                                         );
                                       }}
                                       min="0"
-                                      step="0.01"
+                                      step="1"
                                       className="h-9 w-32 font-normal tracking-widest "
                                     />
                                   </div>
