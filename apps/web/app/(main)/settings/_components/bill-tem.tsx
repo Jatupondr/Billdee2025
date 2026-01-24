@@ -221,12 +221,12 @@ export default function BillTem() {
                     fontSize: parseInt(values.fontSize) || 18,
                   },
                   {
-                    text: "ที่อยู่: 123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110\n",
+                    text: "ที่อยู่: XXX ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ XXXX\n",
                     bold: true,
                     fontSize: parseInt(values.fontSize) || 12,
                   },
                   {
-                    text: "เบอร์โทร: 02-123-4567\n",
+                    text: "เบอร์โทร: XXX-XXX-XXXX\n",
                     bold: true,
                     fontSize: parseInt(values.fontSize) || 12,
                   },
@@ -260,12 +260,12 @@ export default function BillTem() {
                     fontSize: parseInt(values.fontSize) || 18,
                   },
                   {
-                    text: "ที่อยู่: 456 ถนนพหลโยธิน แขวงสามเสนใน เขตพญาไท กรุงเทพฯ 10400\n",
+                    text: "ที่อยู่: XXX ถนนพหลโยธิน แขวงสามเสนใน เขตพญาไท กรุงเทพฯ 10400\n",
                     bold: true,
                     fontSize: parseInt(values.fontSize) || 12,
                   },
                   {
-                    text: "เบอร์โทร: 081-234-5678\n",
+                    text: "เบอร์โทร: XXX-234-5678\n",
                     bold: true,
                     fontSize: parseInt(values.fontSize) || 12,
                   },
@@ -376,11 +376,11 @@ export default function BillTem() {
                     ],
                     [
                       "ธนาคาร:",
-                      { text: "กสิกรไทย เลขที่: 123-4-56789-0", bold: true, fontSize: parseInt(values.fontSize) || 16 },
+                      { text: "XXXXXX เลขที่: XXX-XXXX-XXXX", bold: true, fontSize: parseInt(values.fontSize) || 16 },
                     ],
                     [
                       "พร้อมเพย์:",
-                      { text: "0812345678", bold: true },
+                      { text: "XXXXXXXXX", bold: true },
                     ],
                   ],
                 },
