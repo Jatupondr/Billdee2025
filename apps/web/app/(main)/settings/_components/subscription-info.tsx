@@ -172,7 +172,7 @@ export default function SubscriptionInfo() {
               </a>
             </p>
             <p className="text-base tracking-wide font-normal">
-              สำหรับเเพ็คเกจ PRO ราคาจะอยู่ที่ 299 บาทต่อเดือน
+              สำหรับเเพ็คเกจ PRO ราคาจะอยู่ที่ 199 บาทต่อเดือน
               (ราคาเดียวเท่านั้น)
             </p>
           </div>
