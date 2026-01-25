@@ -880,37 +880,7 @@ const CreateBill = () => {
               }}
             </form.Subscribe>
 
-            <form.Subscribe selector={(state) => state.values.products || []}>
-              {(products) => {
-                const hasProducts =
-                  products.length > 1 ||
-                  (products.length === 1 && products[0].name);
 
-                return (
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="mb-1 font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
-                      onClick={addProduct}
-                    >
-                      <PlusCircleIcon size={32} weight="duotone" />
-                      เพิ่มสินค้า
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="mb-1 font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
-                      onClick={clearAllProducts}
-                      disabled={!hasProducts}
-                    >
-                      <TrashSimpleIcon size={32} weight="duotone" />
-                      เคลียร์รายการสินค้า
-                    </Button>
-                  </div>
-                );
-              }}
-            </form.Subscribe>
 
 
 
@@ -1125,6 +1095,38 @@ const CreateBill = () => {
                 </form.Field>
               </TableBody>
             </Table>
+
+            <form.Subscribe selector={(state) => state.values.products || []}>
+              {(products) => {
+                const hasProducts =
+                  products.length > 1 ||
+                  (products.length === 1 && products[0].name);
+
+                return (
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mb-1 font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
+                      onClick={addProduct}
+                    >
+                      <PlusCircleIcon size={32} weight="duotone" />
+                      เพิ่มสินค้า
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mb-1 font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                      onClick={clearAllProducts}
+                      disabled={!hasProducts}
+                    >
+                      <TrashSimpleIcon size={32} weight="duotone" />
+                      เคลียร์รายการสินค้า
+                    </Button>
+                  </div>
+                );
+              }}
+            </form.Subscribe>
             {/* card recommended products */}
             {isLoadingProducts ? (
               <>
