@@ -701,127 +701,7 @@ const EditBill = ({ id }: EditBillProps) => {
               }}
             </form.Subscribe>
 
-            {/* card recommended products */}
-            {isLoadingProducts ? (
-              <>
-                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[...Array(6)].map((_, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
-                    >
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : recommendedProducts?.length > 0 ? (
-              <>
-                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
-                  <span className="text-base font-normal tracking-widest text-foreground">
-                    สินค้าแนะนำ
-                  </span>
-                  <span className="text-xs font-normal tracking-widest text-muted-foreground bg-accent px-2 py-1 rounded-full">
-                    {Math.min(recommendedProducts.length, 6)} รายการ
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {recommendedProducts.slice(0, 6).map((product: any) => (
-                    <div
-                      key={product._id}
-                      className="group relative flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-200"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-normal tracking-widest text-foreground truncate">
-                          {product.name}
-                        </p>
-                        <p className="text-xs font-normal tracking-widest text-muted-foreground mt-1">
-                          ราคา: {product.price?.toFixed(2) || "0.00"} บาท
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const currentProducts =
-                            form.getFieldValue("products") || [];
 
-                          // หารายการว่างแรก
-                          const emptyIndex = currentProducts.findIndex(
-                            (p: any) => !p.name || p.name === "",
-                          );
-
-                          // ถ้ามีรายการว่าง ให้แทนที่รายการนั้น
-                          if (emptyIndex !== -1) {
-                            form.setFieldValue(
-                              `products[${emptyIndex}].productId`,
-                              product._id || "",
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].name`,
-                              product.name,
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].cost`,
-                              product.cost || 0,
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].price`,
-                              product.price || 0,
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].total`,
-                              product.price || 0,
-                            );
-                            toast.success(
-                              `เพิ่ม "${product.name}" เข้ารายการแล้ว`,
-                            );
-                            return;
-                          }
-
-                          // ถ้าไม่มีรายการว่าง ตรวจสอบจำนวน
-                          if (currentProducts.length >= 12) {
-                            toast.error(
-                              "ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ",
-                            );
-                            return;
-                          }
-
-                          form.setFieldValue("products", [
-                            ...currentProducts,
-                            {
-                              no: currentProducts.length + 1,
-                              productId: product._id || "",
-                              name: product.name,
-                              quantity: 1,
-                              cost: product.cost || 0,
-                              price: product.price || 0,
-                              note: "",
-                              total: product.price || 0,
-                            },
-                          ]);
-                          toast.success(
-                            `เพิ่ม "${product.name}" เข้ารายการแล้ว`,
-                          );
-                        }}
-                        className="shrink-0 whitespace-nowrap cursor-pointer active:scale-95  ease-in-out h-8 w-8 p-0 hover:bg-primary hover:text-primary-foreground group-hover:scale-110 transition-transform duration-200 font-normal tracking-widest"
-                      >
-                        <PlusCircleIcon size={18} weight="duotone" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : null}
 
             <Table>
               <TableHeader className="bg-accent">
@@ -1029,6 +909,128 @@ const EditBill = ({ id }: EditBillProps) => {
                 </form.Field>
               </TableBody>
             </Table>
+
+            {/* card recommended products */}
+            {isLoadingProducts ? (
+              <>
+                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[...Array(6)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
+                    >
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : recommendedProducts?.length > 0 ? (
+              <>
+                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
+                  <span className="text-base font-normal tracking-widest text-foreground">
+                    สินค้าแนะนำ
+                  </span>
+                  <span className="text-xs font-normal tracking-widest text-muted-foreground bg-accent px-2 py-1 rounded-full">
+                    {Math.min(recommendedProducts.length, 6)} รายการ
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {recommendedProducts.slice(0, 6).map((product: any) => (
+                    <div
+                      key={product._id}
+                      className="group relative flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-200"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-normal tracking-widest text-foreground truncate">
+                          {product.name}
+                        </p>
+                        <p className="text-xs font-normal tracking-widest text-muted-foreground mt-1">
+                          ราคา: {product.price?.toFixed(2) || "0.00"} บาท
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentProducts =
+                            form.getFieldValue("products") || [];
+
+                          // หารายการว่างแรก
+                          const emptyIndex = currentProducts.findIndex(
+                            (p: any) => !p.name || p.name === "",
+                          );
+
+                          // ถ้ามีรายการว่าง ให้แทนที่รายการนั้น
+                          if (emptyIndex !== -1) {
+                            form.setFieldValue(
+                              `products[${emptyIndex}].productId`,
+                              product._id || "",
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].name`,
+                              product.name,
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].cost`,
+                              product.cost || 0,
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].price`,
+                              product.price || 0,
+                            );
+                            form.setFieldValue(
+                              `products[${emptyIndex}].total`,
+                              product.price || 0,
+                            );
+                            toast.success(
+                              `เพิ่ม "${product.name}" เข้ารายการแล้ว`,
+                            );
+                            return;
+                          }
+
+                          // ถ้าไม่มีรายการว่าง ตรวจสอบจำนวน
+                          if (currentProducts.length >= 12) {
+                            toast.error(
+                              "ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ",
+                            );
+                            return;
+                          }
+
+                          form.setFieldValue("products", [
+                            ...currentProducts,
+                            {
+                              no: currentProducts.length + 1,
+                              productId: product._id || "",
+                              name: product.name,
+                              quantity: 1,
+                              cost: product.cost || 0,
+                              price: product.price || 0,
+                              note: "",
+                              total: product.price || 0,
+                            },
+                          ]);
+                          toast.success(
+                            `เพิ่ม "${product.name}" เข้ารายการแล้ว`,
+                          );
+                        }}
+                        className="shrink-0 whitespace-nowrap cursor-pointer active:scale-95  ease-in-out h-8 w-8 p-0 hover:bg-primary hover:text-primary-foreground group-hover:scale-110 transition-transform duration-200 font-normal tracking-widest"
+                      >
+                        <PlusCircleIcon size={18} weight="duotone" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
 
             {/* สรุปยอด */}
             <form.Subscribe

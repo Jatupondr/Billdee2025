@@ -912,6 +912,219 @@ const CreateBill = () => {
               }}
             </form.Subscribe>
 
+
+
+            <Table>
+              <TableHeader className="bg-accent">
+                <TableRow>
+                  {ListTable.map((header, idx: number) => (
+                    <TableHead
+                      className="text-base font-normal tracking-widest leading-4"
+                      key={idx}
+                    >
+                      {header}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <form.Field name="products" mode="array">
+                  {(field) => (
+                    <>
+                      {field.state.value && field.state.value.length > 0 ? (
+                        field.state.value.map((product: any, index: number) => (
+                          <TableRow key={product.productId || `row-${index}`}>
+                            <TableCell className="font-normal tracking-widest w-20 text-center text-base">
+                              {index + 1}
+                            </TableCell>
+                            <form.Field name={`products[${index}].name`}>
+                              {(nameField) => (
+                                <TableCell className="font-normal tracking-widest w-full text-base">
+                                  <div className="flex flex-col justify-start min-w-0">
+                                    <Combobox
+                                      items={productData.map(
+                                        (p: any) => p.name,
+                                      )}
+                                      onValueChange={(value: any) => {
+                                        nameField.handleChange(value);
+                                        const selectedProduct =
+                                          productData.find(
+                                            (p: any) => p.name === value,
+                                          );
+                                        if (selectedProduct) {
+                                          form.setFieldValue(
+                                            `products[${index}].no`,
+                                            index + 1,
+                                          );
+                                          form.setFieldValue(
+                                            `products[${index}].productId`,
+                                            selectedProduct._id || "",
+                                          );
+                                          form.setFieldValue(
+                                            `products[${index}].price`,
+                                            selectedProduct.price,
+                                          );
+                                          form.setFieldValue(
+                                            `products[${index}].cost`,
+                                            selectedProduct.cost,
+                                          );
+
+
+                                        } else {
+                                          form.setFieldValue(
+                                            `products[${index}].productId`,
+                                            "",
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <ComboboxInput
+                                        value={nameField.state.value ?? ""}
+                                        onChange={(e) => {
+                                          nameField.handleChange(
+                                            e.target.value,
+                                          );
+                                        }}
+                                        placeholder="เลือกหรือค้นหาสินค้า"
+                                        className="h-9 font-normal tracking-widest"
+                                      />
+                                      <ComboboxContent>
+                                        <ComboboxEmpty>
+                                          ไม่พบสินค้า
+                                        </ComboboxEmpty>
+                                        <ComboboxList>
+                                          {(item, index) => (
+                                            <ComboboxItem
+                                              key={index}
+                                              value={item}
+                                            >
+                                              {item}
+                                            </ComboboxItem>
+                                          )}
+                                        </ComboboxList>
+                                      </ComboboxContent>
+                                    </Combobox>
+
+                                  </div>
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].quantity`}>
+                              {(qtyField) => (
+                                <TableCell className="w-28 font-normal tracking-widest">
+                                  <Input
+                                    type="number"
+                                    value={qtyField.state.value ?? 0}
+                                    onChange={(e) => {
+                                      const newQty = parseFloat(e.target.value) || 0;
+                                      qtyField.handleChange(newQty);
+                                      const currentPrice =
+                                        form.getFieldValue(
+                                          `products[${index}].price`,
+                                        ) || 0;
+                                      form.setFieldValue(
+                                        `products[${index}].total`,
+                                        parseFloat((currentPrice * newQty).toFixed(2)),
+                                      );
+                                      //
+
+                                    }}
+                                    className="h-10 w-20 font-normal tracking-widest"
+                                    min="0"
+                                    step="any"
+
+                                  />
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].cost`}>
+                              {(costField) => (
+                                <TableCell className="w-28 font-normal tracking-widest">
+                                  <Input
+                                    type="number"
+                                    value={costField.state.value ?? 0}
+                                    onChange={(e) =>
+                                      costField.handleChange(
+                                        parseFloat(e.target.value) || 0,
+                                      )
+                                    }
+                                    className="h-10 w-20 font-normal tracking-widest  "
+                                    min="0"
+                                    step="any"
+                                  />
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].price`}>
+                              {(priceField) => (
+                                <TableCell className="w-60">
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="number"
+                                      value={priceField.state.value ?? 0}
+                                      onChange={(e) => {
+                                        const newPrice = parseFloat(e.target.value) || 0;
+                                        priceField.handleChange(newPrice);
+                                        const currentQty =
+                                          form.getFieldValue(
+                                            `products[${index}].quantity`,
+                                          ) || 0;
+                                        form.setFieldValue(
+                                          `products[${index}].total`,
+                                          parseFloat((newPrice * currentQty).toFixed(2)),
+                                        );
+                                      }}
+                                      min="0"
+                                      step="any"
+                                      className="h-9 w-32 font-normal tracking-widest "
+                                    />
+                                  </div>
+                                </TableCell>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].total`}>
+                              {(totalField) => (
+                                <TableCell className="w-56 min-w-56 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <span className="text-base font-normal tracking-widest whitespace-nowrap">
+                                      {(totalField.state.value || 0).toFixed(2)}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => removeProduct(index)}
+                                      disabled={field.state.value.length <= 1}
+                                      className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
+                                    >
+                                      <TrashSimpleIcon
+                                        size={18}
+                                        weight="duotone"
+                                        color="white"
+                                        className="text-red-400"
+                                      />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              )}
+                            </form.Field>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={7}
+                            className="text-center font-normal tracking-widest text-muted-foreground"
+                          >
+                            ไม่มีสินค้า กดปุ่ม "เพิ่มสินค้า" เพื่อเริ่มต้น
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  )}
+                </form.Field>
+              </TableBody>
+            </Table>
             {/* card recommended products */}
             {isLoadingProducts ? (
               <>
@@ -1033,217 +1246,6 @@ const CreateBill = () => {
                 </div>
               </>
             ) : null}
-
-            <Table>
-              <TableHeader className="bg-accent">
-                <TableRow>
-                  {ListTable.map((header, idx: number) => (
-                    <TableHead
-                      className="text-base font-normal tracking-widest leading-4"
-                      key={idx}
-                    >
-                      {header}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <form.Field name="products" mode="array">
-                  {(field) => (
-                    <>
-                      {field.state.value && field.state.value.length > 0 ? (
-                        field.state.value.map((product: any, index: number) => (
-                          <TableRow key={product.productId || `row-${index}`}>
-                            <TableCell className="font-normal tracking-widest w-20 text-center text-base">
-                              {index + 1}
-                            </TableCell>
-                            <form.Field name={`products[${index}].name`}>
-                              {(nameField) => (
-                                <TableCell className="font-normal tracking-widest w-full text-base">
-                                  <div className="flex flex-col justify-start min-w-0">
-                                    <Combobox
-                                      items={productData.map(
-                                        (p: any) => p.name,
-                                      )}
-                                      onValueChange={(value: any) => {
-                                        nameField.handleChange(value);
-                                        const selectedProduct =
-                                          productData.find(
-                                            (p: any) => p.name === value,
-                                          );
-                                        if (selectedProduct) {
-                                          form.setFieldValue(
-                                            `products[${index}].no`,
-                                            index + 1,
-                                          );
-                                          form.setFieldValue(
-                                            `products[${index}].productId`,
-                                            selectedProduct._id || "",
-                                          );
-                                          form.setFieldValue(
-                                            `products[${index}].price`,
-                                            selectedProduct.price,
-                                          );
-                                          form.setFieldValue(
-                                            `products[${index}].cost`,
-                                            selectedProduct.cost,
-                                          );
-
-
-                                        } else {
-                                          form.setFieldValue(
-                                            `products[${index}].productId`,
-                                            "",
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      <ComboboxInput
-                                        value={nameField.state.value ?? ""}
-                                        onChange={(e) => {
-                                          nameField.handleChange(
-                                            e.target.value,
-                                          );
-                                        }}
-                                        placeholder="เลือกหรือค้นหาสินค้า"
-                                        className="h-9 font-normal tracking-widest"
-                                      />
-                                      <ComboboxContent>
-                                        <ComboboxEmpty>
-                                          ไม่พบสินค้า
-                                        </ComboboxEmpty>
-                                        <ComboboxList>
-                                          {(item, index) => (
-                                            <ComboboxItem
-                                              key={index}
-                                              value={item}
-                                            >
-                                              {item}
-                                            </ComboboxItem>
-                                          )}
-                                        </ComboboxList>
-                                      </ComboboxContent>
-                                    </Combobox>
-
-                                  </div>
-                                </TableCell>
-                              )}
-                            </form.Field>
-                            <form.Field name={`products[${index}].quantity`}>
-                              {(qtyField) => (
-                                <TableCell className="w-28 font-normal tracking-widest">
-                                  <Input
-                                    type="number"
-                                    value={qtyField.state.value ?? 0}
-                                    onChange={(e) => {
-                                      const newQty = parseFloat(e.target.value) || 0;
-                                      qtyField.handleChange(newQty);
-                                      const currentPrice =
-                                        form.getFieldValue(
-                                          `products[${index}].price`,
-                                        ) || 0;
-                                      form.setFieldValue(
-                                        `products[${index}].total`,
-                                        parseFloat((currentPrice * newQty).toFixed(2)),
-                                      );
-                                      //
-
-                                    }}
-                                    className="h-10 w-20 font-normal tracking-widest"
-                                    min="0"
-                                    step="1"
-                                  />
-                                </TableCell>
-                              )}
-                            </form.Field>
-                            <form.Field name={`products[${index}].cost`}>
-                              {(costField) => (
-                                <TableCell className="w-28 font-normal tracking-widest">
-                                  <Input
-                                    type="number"
-                                    value={costField.state.value ?? 0}
-                                    onChange={(e) =>
-                                      costField.handleChange(
-                                        parseFloat(e.target.value) || 0,
-                                      )
-                                    }
-                                    className="h-10 w-20 font-normal tracking-widest  "
-                                    min="0"
-                                    step="1"
-                                  />
-                                </TableCell>
-                              )}
-                            </form.Field>
-                            <form.Field name={`products[${index}].price`}>
-                              {(priceField) => (
-                                <TableCell className="w-60">
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="number"
-                                      value={priceField.state.value ?? 0}
-                                      onChange={(e) => {
-                                        const newPrice = parseFloat(e.target.value) || 0;
-                                        priceField.handleChange(newPrice);
-                                        const currentQty =
-                                          form.getFieldValue(
-                                            `products[${index}].quantity`,
-                                          ) || 0;
-                                        form.setFieldValue(
-                                          `products[${index}].total`,
-                                          parseFloat((newPrice * currentQty).toFixed(2)),
-                                        );
-                                      }}
-                                      min="0"
-                                      step="1"
-                                      className="h-9 w-32 font-normal tracking-widest "
-                                    />
-                                  </div>
-                                </TableCell>
-                              )}
-                            </form.Field>
-                            <form.Field name={`products[${index}].total`}>
-                              {(totalField) => (
-                                <TableCell className="w-56 min-w-56 text-right">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span className="text-base font-normal tracking-widest whitespace-nowrap">
-                                      {(totalField.state.value || 0).toFixed(2)}
-                                    </span>
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="icon"
-                                      onClick={() => removeProduct(index)}
-                                      disabled={field.state.value.length <= 1}
-                                      className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
-                                    >
-                                      <TrashSimpleIcon
-                                        size={18}
-                                        weight="duotone"
-                                        color="white"
-                                        className="text-red-400"
-                                      />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              )}
-                            </form.Field>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={7}
-                            className="text-center font-normal tracking-widest text-muted-foreground"
-                          >
-                            ไม่มีสินค้า กดปุ่ม "เพิ่มสินค้า" เพื่อเริ่มต้น
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </>
-                  )}
-                </form.Field>
-              </TableBody>
-            </Table>
 
             {/* หมายเหตุ */}
 
