@@ -20,7 +20,14 @@ import {
   DotsThreeVerticalIcon,
   PrinterIcon,
 } from "@phosphor-icons/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
@@ -54,11 +61,12 @@ const Bill = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
-  const { data: session, isPending: isLoadingSession } = authClient.useSession();
+  const { data: session, isPending: isLoadingSession } =
+    authClient.useSession();
 
   const getBills = async (page: number, pageSize: number, search: string) => {
     const response = await api.get(
-      `/bills?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`
+      `/bills?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`,
     );
     return response.data;
   };
@@ -199,8 +207,7 @@ const Bill = () => {
             day: "2-digit",
             month: "short",
             year: "numeric",
-          }
-          ) || "-"}
+          }) || "-"}
         </span>
       ),
     },
@@ -212,17 +219,16 @@ const Bill = () => {
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger
-
-              render={<Button
-                variant="outline"
-                className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
-                size="icon"
-              >
-                <DotsThreeVerticalIcon size={24} weight="bold" />
-              </Button>} />
-
-
-
+              render={
+                <Button
+                  variant="outline"
+                  className="cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                  size="icon"
+                >
+                  <DotsThreeVerticalIcon size={24} weight="bold" />
+                </Button>
+              }
+            />
 
             <DropdownMenuContent className="w-40" align="start">
               <DropdownMenuGroup>
@@ -231,43 +237,38 @@ const Bill = () => {
                 </DropdownMenuLabel>
 
                 <DropdownMenuItem
-
                   onClick={() => {
                     // new window
-                    window.open(`${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${row.original._id}`, "_blank");
-
+                    window.open(
+                      `${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${row.original._id}`,
+                      "_blank",
+                    );
                   }}
                   className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 >
                   <PrinterIcon size={20} weight="bold" />
-
                   พิมพ์ใบเสร็จ
                 </DropdownMenuItem>
                 <DropdownMenuItem
-
                   onClick={() => {
                     router.push(`/bill/${row.original._id}` as any);
                   }}
                   className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 >
                   <EyeIcon size={20} weight="bold" />
-
                   ดูรายละเอียดบิล
                 </DropdownMenuItem>
                 <DropdownMenuItem
-
                   onClick={() => {
                     router.push(`/bill/${row.original._id}/edit`);
                   }}
                   className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 >
                   <PencilIcon size={20} weight="bold" />
-
                   แก้ไขบิล
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-
                     setSelectedBill(row.original);
                     setDeleteDialogOpen(true);
                   }}
@@ -275,14 +276,11 @@ const Bill = () => {
                   className="font-normal tracking-widest"
                 >
                   <TrashIcon size={20} weight="bold" />
-
                   ลบบิล
                 </DropdownMenuItem>
-
               </DropdownMenuGroup>
             </DropdownMenuContent>
-          </DropdownMenu >
-
+          </DropdownMenu>
         </div>
       ),
     },
@@ -298,24 +296,24 @@ const Bill = () => {
     return response.data;
   };
 
-  const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery<any>({
-    queryKey: ["subscription"],
-    queryFn: () => getSubscriptionById(session?.user?.id || ""),
-    enabled: !!session?.user?.id,
-  });
+  const { data: subscriptionData, isLoading: isLoadingSubscription } =
+    useQuery<any>({
+      queryKey: ["subscription"],
+      queryFn: () => getSubscriptionById(session?.user?.id || ""),
+      enabled: !!session?.user?.id,
+    });
+
+  const isProPlan =
+    subscriptionData?.data?.plan === "pro" &&
+    subscriptionData?.data?.status === "paid";
 
   const handleCreateBill = () => {
-    if (subscriptionData?.data?.plan === "pro" || billsData?.rows?.length <= 10) {
+    if (isProPlan || billsData?.rows?.length <= 10) {
       router.push("/bill/create");
     } else {
       setShowSubproDialogOpen(true);
     }
   };
-  // useEffect(() => {
-  //   if (subscriptionData?.data?.plan !== "pro" || subscriptionData?.data === null) {
-  //     setShowSubproDialogOpen(true);
-  //   }
-  // }, [subscriptionData]);
 
   return (
     <>

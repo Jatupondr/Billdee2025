@@ -73,7 +73,6 @@ export const billSchema = v.object({
   phone_customer: v.string(),
   address_customer: v.string(),
 
-
   products: v.optional(
     v.array(
       v.object({
@@ -115,7 +114,6 @@ const defaultValues: billData = {
   customerId: "",
   phone_customer: "",
   address_customer: "",
-
 
   products: [
     {
@@ -198,6 +196,64 @@ const CreateBill = () => {
     enabled: !!activeOrg?.id,
   });
 
+  const getSubscriptionById = async (subscriptionId: string) => {
+    const response = await api.get(`/subscriptions/${subscriptionId}`);
+    return response.data;
+  };
+
+  const { data: subscriptionData, isLoading: isLoadingSubscription } =
+    useQuery<any>({
+      queryKey: ["subscription"],
+      queryFn: () => getSubscriptionById(session?.user?.id || ""),
+      enabled: !!session?.user?.id,
+    });
+
+  const getBillsCount = async () => {
+    const response = await api.get(
+      `/bills?page=1&pageSize=1&search=&organizationId=${activeOrg?.id}`,
+    );
+    return response.data;
+  };
+
+  const { data: billsData, isLoading: isLoadingBills } = useQuery<any>({
+    queryKey: ["bills-create-guard", activeOrg?.id],
+    queryFn: () => getBillsCount(),
+    enabled: !!activeOrg?.id,
+  });
+
+  const isProPlan =
+    subscriptionData?.data?.plan === "pro" &&
+    subscriptionData?.data?.status === "paid";
+
+  const totalBills = billsData?.meta?.total ?? billsData?.rows?.length ?? 0;
+  const canCreateBill = isProPlan || totalBills <= 10;
+
+  React.useEffect(() => {
+    if (
+      sessionPending ||
+      isPending ||
+      isLoadingSubscription ||
+      isLoadingBills ||
+      !activeOrg?.id ||
+      !session?.user?.id
+    ) {
+      return;
+    }
+
+    if (!canCreateBill) {
+      router.replace("/bill");
+    }
+  }, [
+    sessionPending,
+    isPending,
+    isLoadingSubscription,
+    isLoadingBills,
+    activeOrg?.id,
+    session?.user?.id,
+    canCreateBill,
+    router,
+  ]);
+
   // สินค้าสำหรับ Combobox - โหลดทั้งหมดครั้งเดียว ให้ filter ฝั่ง client
   const { data: comboboxProductsData } = useQuery<any>({
     queryKey: ["products-combobox", activeOrg?.id],
@@ -218,7 +274,10 @@ const CreateBill = () => {
       });
       router.push("/bill");
       // new window
-      window.open(`${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${response.data._id as string}`, "_blank");
+      window.open(
+        `${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${response.data._id as string}`,
+        "_blank",
+      );
     },
     onError: (error: any) => {
       toast.error("เกิดข้อผิดพลาด", {
@@ -239,10 +298,16 @@ const CreateBill = () => {
           (sum: number, item: any) => sum + (item.total || 0),
           0,
         );
-        const discountAmount = parseFloat(((subtotal * (value.discountPercent || 0)) / 100).toFixed(2));
-        const afterDiscount = parseFloat((subtotal - discountAmount).toFixed(2));
+        const discountAmount = parseFloat(
+          ((subtotal * (value.discountPercent || 0)) / 100).toFixed(2),
+        );
+        const afterDiscount = parseFloat(
+          (subtotal - discountAmount).toFixed(2),
+        );
         const taxAmount = value.includeVat
-          ? parseFloat(((afterDiscount * (value.taxPercent || 7)) / 100).toFixed(2))
+          ? parseFloat(
+              ((afterDiscount * (value.taxPercent || 7)) / 100).toFixed(2),
+            )
           : 0;
         const totalAmount = parseFloat((afterDiscount + taxAmount).toFixed(2));
         const costAmount = (value.products || []).reduce(
@@ -285,8 +350,6 @@ const CreateBill = () => {
           postalCodeCustomer: value.postalCodeCustomer || "",
           taxIdCustomer: value.taxIdCustomer || "",
         };
-
-
 
         createBillMutation.mutate(formattedData);
       },
@@ -364,8 +427,6 @@ const CreateBill = () => {
   const recommendedProducts = productsData?.rows.filter(
     (item: any) => item.isRecommended === true,
   );
-
-
 
   return (
     <>
@@ -464,9 +525,10 @@ const CreateBill = () => {
                               onChange={(e) => {
                                 field.handleChange(e.target.value);
                                 setSearch(e.target.value);
-                                const selectedCustomer = customersData?.rows.find(
-                                  (c: any) => c.name === e.target.value,
-                                );
+                                const selectedCustomer =
+                                  customersData?.rows.find(
+                                    (c: any) => c.name === e.target.value,
+                                  );
                                 if (e.target.value !== selectedCustomer?.name) {
                                   setCreateCustomer(true);
                                 } else {
@@ -529,10 +591,10 @@ const CreateBill = () => {
                                 >
                                   {date
                                     ? date.toLocaleDateString("th-TH", {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                    })
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      })
                                     : "เลือกวันที่"}
                                   <CaretDownIcon
                                     className="ml-2 h-4 w-4 opacity-50"
@@ -580,15 +642,18 @@ const CreateBill = () => {
                   <FieldSet data-invalid>
                     <FieldGroup className="flex flex-col text-left">
                       <div className="grid grid-cols-1 gap-4">
-
                         <form.Field
                           name="addressCustomer"
                           children={(field) => {
                             const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
+                                <FieldLabel
+                                  htmlFor={field.name}
+                                  className="font-normal tracking-widest"
+                                >
                                   ที่อยู่ลูกค้า
                                 </FieldLabel>
                                 <Textarea
@@ -596,7 +661,9 @@ const CreateBill = () => {
                                   name={field.name}
                                   value={field.state.value}
                                   onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                  }
                                   aria-invalid={
                                     field.state.meta.isTouched &&
                                     !field.state.meta.isValid
@@ -605,96 +672,113 @@ const CreateBill = () => {
                                   className="font-normal tracking-widest"
                                 />
                                 {isInvalid && (
-                                  <FieldError errors={field.state.meta.errors} />
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
                                 )}
                               </Field>
                             );
                           }}
                         />
-
-
-
-
-
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <form.Field name="taxIdCustomer" children={(field) => {
-                          const isInvalidField =
-                            field.state.meta.isTouched && !field.state.meta.isValid;
-                          return (
-                            <Field data-invalid={isInvalidField}>
-                              <FieldLabel
-                                htmlFor={field.name}
-                                className="font-normal tracking-widest"
-                              >
-                                เลขประจำตัวผู้เสียภาษี
-                              </FieldLabel>
-                              <InputGroup className="h-9 ">
-                                <InputGroupInput
-                                  id={field.name}
-                                  name={field.name}
-                                  value={field.state.value ?? ""}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                  aria-invalid={isInvalidField}
-                                  placeholder="เลขประจำตัวผู้เสียภาษี"
+                        <form.Field
+                          name="taxIdCustomer"
+                          children={(field) => {
+                            const isInvalidField =
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalidField}>
+                                <FieldLabel
+                                  htmlFor={field.name}
                                   className="font-normal tracking-widest"
-                                />
-                              </InputGroup>
-                              {isInvalidField && (
-                                <FieldError errors={field.state.meta.errors} />
-                              )}
-                            </Field>
-                          );
-                        }}
-
+                                >
+                                  เลขประจำตัวผู้เสียภาษี
+                                </FieldLabel>
+                                <InputGroup className="h-9 ">
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value ?? ""}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                      field.handleChange(e.target.value)
+                                    }
+                                    aria-invalid={isInvalidField}
+                                    placeholder="เลขประจำตัวผู้เสียภาษี"
+                                    className="font-normal tracking-widest"
+                                  />
+                                </InputGroup>
+                                {isInvalidField && (
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
+                                )}
+                              </Field>
+                            );
+                          }}
                         />
-                        <form.Field name="phoneCustomer" children={(field) => {
-                          const isInvalidField =
-                            field.state.meta.isTouched && !field.state.meta.isValid;
-                          return (
-                            <Field data-invalid={isInvalidField}>
-                              <FieldLabel
-                                htmlFor={field.name}
-                                className="font-normal tracking-widest"
-                              >
-                                เบอร์โทรลูกค้า
-                              </FieldLabel>
-                              <InputGroup className="h-9 ">
-                                <InputGroupInput
-                                  id={field.name}
-                                  name={field.name}
-                                  value={field.state.value ?? ""}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                  aria-invalid={isInvalidField}
-                                  placeholder="เบอร์โทรลูกค้า"
+                        <form.Field
+                          name="phoneCustomer"
+                          children={(field) => {
+                            const isInvalidField =
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalidField}>
+                                <FieldLabel
+                                  htmlFor={field.name}
                                   className="font-normal tracking-widest"
-                                />
-                              </InputGroup>
-                              {isInvalidField && (
-                                <FieldError errors={field.state.meta.errors} />
-                              )}
-                            </Field>
-                          );
-                        }}
-
+                                >
+                                  เบอร์โทรลูกค้า
+                                </FieldLabel>
+                                <InputGroup className="h-9 ">
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    value={field.state.value ?? ""}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                      field.handleChange(e.target.value)
+                                    }
+                                    aria-invalid={isInvalidField}
+                                    placeholder="เบอร์โทรลูกค้า"
+                                    className="font-normal tracking-widest"
+                                  />
+                                </InputGroup>
+                                {isInvalidField && (
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
+                                )}
+                              </Field>
+                            );
+                          }}
                         />
                         <form.Field
                           name="provinceCustomer"
                           children={(field) => {
                             const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">จังหวัด</FieldLabel>
+                                <FieldLabel
+                                  htmlFor={field.name}
+                                  className="font-normal tracking-widest"
+                                >
+                                  จังหวัด
+                                </FieldLabel>
                                 <InputGroup className="h-9">
                                   <InputGroupInput
                                     id={field.name}
                                     name={field.name}
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    onChange={(e) =>
+                                      field.handleChange(e.target.value)
+                                    }
                                     aria-invalid={
                                       field.state.meta.isTouched &&
                                       !field.state.meta.isValid
@@ -704,7 +788,9 @@ const CreateBill = () => {
                                   />
                                 </InputGroup>
                                 {isInvalid && (
-                                  <FieldError errors={field.state.meta.errors} />
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
                                 )}
                               </Field>
                             );
@@ -714,17 +800,25 @@ const CreateBill = () => {
                           name="districtCustomer"
                           children={(field) => {
                             const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">เขต/อำเภอ</FieldLabel>
+                                <FieldLabel
+                                  htmlFor={field.name}
+                                  className="font-normal tracking-widest"
+                                >
+                                  เขต/อำเภอ
+                                </FieldLabel>
                                 <InputGroup className="h-9">
                                   <InputGroupInput
                                     id={field.name}
                                     name={field.name}
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    onChange={(e) =>
+                                      field.handleChange(e.target.value)
+                                    }
                                     aria-invalid={
                                       field.state.meta.isTouched &&
                                       !field.state.meta.isValid
@@ -734,7 +828,9 @@ const CreateBill = () => {
                                   />
                                 </InputGroup>
                                 {isInvalid && (
-                                  <FieldError errors={field.state.meta.errors} />
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
                                 )}
                               </Field>
                             );
@@ -744,17 +840,25 @@ const CreateBill = () => {
                           name="subDistrictCustomer"
                           children={(field) => {
                             const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">ตำบล/แขวง</FieldLabel>
+                                <FieldLabel
+                                  htmlFor={field.name}
+                                  className="font-normal tracking-widest"
+                                >
+                                  ตำบล/แขวง
+                                </FieldLabel>
                                 <InputGroup className="h-9">
                                   <InputGroupInput
                                     id={field.name}
                                     name={field.name}
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    onChange={(e) =>
+                                      field.handleChange(e.target.value)
+                                    }
                                     aria-invalid={
                                       field.state.meta.isTouched &&
                                       !field.state.meta.isValid
@@ -764,7 +868,9 @@ const CreateBill = () => {
                                   />
                                 </InputGroup>
                                 {isInvalid && (
-                                  <FieldError errors={field.state.meta.errors} />
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
                                 )}
                               </Field>
                             );
@@ -774,10 +880,14 @@ const CreateBill = () => {
                           name="postalCodeCustomer"
                           children={(field) => {
                             const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name} className="font-normal tracking-widest">
+                                <FieldLabel
+                                  htmlFor={field.name}
+                                  className="font-normal tracking-widest"
+                                >
                                   รหัสไปรษณีย์
                                 </FieldLabel>
                                 <InputGroup className="h-9">
@@ -786,7 +896,9 @@ const CreateBill = () => {
                                     name={field.name}
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    onChange={(e) =>
+                                      field.handleChange(e.target.value)
+                                    }
                                     aria-invalid={
                                       field.state.meta.isTouched &&
                                       !field.state.meta.isValid
@@ -796,13 +908,14 @@ const CreateBill = () => {
                                   />
                                 </InputGroup>
                                 {isInvalid && (
-                                  <FieldError errors={field.state.meta.errors} />
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
                                 )}
                               </Field>
                             );
                           }}
                         />
-
                       </div>
                     </FieldGroup>
                   </FieldSet>
@@ -880,10 +993,6 @@ const CreateBill = () => {
               }}
             </form.Subscribe>
 
-
-
-
-
             <Table>
               <TableHeader className="bg-accent">
                 <TableRow>
@@ -938,8 +1047,6 @@ const CreateBill = () => {
                                             `products[${index}].cost`,
                                             selectedProduct.cost,
                                           );
-
-
                                         } else {
                                           form.setFieldValue(
                                             `products[${index}].productId`,
@@ -974,7 +1081,6 @@ const CreateBill = () => {
                                         </ComboboxList>
                                       </ComboboxContent>
                                     </Combobox>
-
                                   </div>
                                 </TableCell>
                               )}
@@ -986,7 +1092,8 @@ const CreateBill = () => {
                                     type="number"
                                     value={qtyField.state.value ?? 0}
                                     onChange={(e) => {
-                                      const newQty = parseFloat(e.target.value) || 0;
+                                      const newQty =
+                                        parseFloat(e.target.value) || 0;
                                       qtyField.handleChange(newQty);
                                       const currentPrice =
                                         form.getFieldValue(
@@ -994,15 +1101,15 @@ const CreateBill = () => {
                                         ) || 0;
                                       form.setFieldValue(
                                         `products[${index}].total`,
-                                        parseFloat((currentPrice * newQty).toFixed(2)),
+                                        parseFloat(
+                                          (currentPrice * newQty).toFixed(2),
+                                        ),
                                       );
                                       //
-
                                     }}
                                     className="h-10 w-20 font-normal tracking-widest"
                                     min="0"
                                     step="any"
-
                                   />
                                 </TableCell>
                               )}
@@ -1033,7 +1140,8 @@ const CreateBill = () => {
                                       type="number"
                                       value={priceField.state.value ?? 0}
                                       onChange={(e) => {
-                                        const newPrice = parseFloat(e.target.value) || 0;
+                                        const newPrice =
+                                          parseFloat(e.target.value) || 0;
                                         priceField.handleChange(newPrice);
                                         const currentQty =
                                           form.getFieldValue(
@@ -1041,7 +1149,9 @@ const CreateBill = () => {
                                           ) || 0;
                                         form.setFieldValue(
                                           `products[${index}].total`,
-                                          parseFloat((newPrice * currentQty).toFixed(2)),
+                                          parseFloat(
+                                            (newPrice * currentQty).toFixed(2),
+                                          ),
                                         );
                                       }}
                                       min="0"
@@ -1265,12 +1375,18 @@ const CreateBill = () => {
                   (sum: number, item: any) => sum + (item.total || 0),
                   0,
                 );
-                const discountAmount = parseFloat(((subtotal * discountPercent) / 100).toFixed(2));
-                const afterDiscount = parseFloat((subtotal - discountAmount).toFixed(2));
+                const discountAmount = parseFloat(
+                  ((subtotal * discountPercent) / 100).toFixed(2),
+                );
+                const afterDiscount = parseFloat(
+                  (subtotal - discountAmount).toFixed(2),
+                );
                 const taxAmount = includeVat
                   ? parseFloat(((afterDiscount * taxPercent) / 100).toFixed(2))
                   : 0;
-                const total = parseFloat((afterDiscount + taxAmount).toFixed(2));
+                const total = parseFloat(
+                  (afterDiscount + taxAmount).toFixed(2),
+                );
 
                 return (
                   <div className="flex justify-between mt-4">

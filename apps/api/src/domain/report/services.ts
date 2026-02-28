@@ -121,6 +121,19 @@ export abstract class reportService {
           };
         },
         content: [
+
+          ...(logoBase64 ? [
+            [
+
+              {
+                image: logoBase64 || "",
+                width: 80,
+                height: 80,
+                margin: [0, 0, 0, 5],
+                alignment: "right",
+              },
+            ],
+          ] : []),
           {
             text: "ใบเสร็จรับเงิน",
             style: "header",
@@ -330,7 +343,7 @@ export abstract class reportService {
           { text: "\n" },
           {
             columns: [
-              { width: "*",  
+              { width: "*",
                 ...((billdata?.note || billdata?.organizationId?.account_name || (billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) || billdata?.organizationId?.prompt_pay || bankQrcodeBase64) ? {
                   table: {
                     widths: ["auto", "auto"],
