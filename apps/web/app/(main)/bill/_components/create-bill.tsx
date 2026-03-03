@@ -221,12 +221,12 @@ const CreateBill = () => {
     enabled: !!activeOrg?.id,
   });
 
-  const isProPlan =
-    subscriptionData?.data?.plan === "pro" &&
-    subscriptionData?.data?.status === "paid";
+  // const isProPlan =
+  //   subscriptionData?.data?.plan === "pro" &&
+  //   subscriptionData?.data?.status === "paid";
 
   const totalBills = billsData?.meta?.total ?? billsData?.rows?.length ?? 0;
-  const canCreateBill = isProPlan || totalBills <= 10;
+
 
   React.useEffect(() => {
     if (
@@ -240,9 +240,7 @@ const CreateBill = () => {
       return;
     }
 
-    if (!canCreateBill) {
-      router.replace("/bill");
-    }
+
   }, [
     sessionPending,
     isPending,
@@ -250,7 +248,7 @@ const CreateBill = () => {
     isLoadingBills,
     activeOrg?.id,
     session?.user?.id,
-    canCreateBill,
+    
     router,
   ]);
 
