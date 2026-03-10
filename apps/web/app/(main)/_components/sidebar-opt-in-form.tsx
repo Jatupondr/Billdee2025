@@ -24,17 +24,15 @@ export function SidebarOptInForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="px-4">
-        <form>
-          <div className="grid gap-2.5">
-            <Button
-              className="bg-sidebar-primary font-normal tracking-widest text-sidebar-primary-foreground w-full shadow-none cursor-pointer hover:bg-sidebar-primary/90"
-              size="sm"
-              onClick={() => router.push("/settings?tab=subscription-info")}
-            >
-              อัปเกรดเป็น Pro
-            </Button>
-          </div>
-        </form>
+        <div className="grid gap-2.5">
+          <Button
+            className="bg-sidebar-primary font-normal tracking-widest text-sidebar-primary-foreground w-full shadow-none cursor-pointer hover:bg-sidebar-primary/90"
+            size="sm"
+            onClick={() => router.push("/settings?tab=subscription-info")}
+          >
+            อัปเกรดเป็น Pro
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
