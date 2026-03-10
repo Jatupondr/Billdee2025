@@ -63,9 +63,13 @@ const ListProduct = () => {
     pageSize: number,
     search: string
   ) => {
-    const response = await api.get(
-      `/products?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`
-    );
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+      search,
+      organizationId: activeOrg?.id ?? "",
+    });
+    const response = await api.get(`/products?${params.toString()}`);
     return response.data;
   };
   const columns: ColumnDef<Product>[] = [
@@ -178,8 +182,9 @@ const ListProduct = () => {
   ];
 
   const { data: productsData, isLoading } = useQuery<any>({
-    queryKey: ["products", debouncedSearch, page, pageSize],
+    queryKey: ["products", activeOrg?.id, debouncedSearch, page, pageSize],
     queryFn: () => getProducts(page, pageSize, debouncedSearch),
+    enabled: !!activeOrg?.id,
   });
   return (
     <>

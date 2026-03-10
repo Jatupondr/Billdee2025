@@ -35,7 +35,14 @@ export abstract class productService {
       const page = Number(query.page) || 1; // หน้า
       const limit = Number(query.pageSize) || 10; // จำนวนต่อหน้า
       const search = query.search || ""; // คำค้นหา
-      const organizationId = query.organizationId || ""; // กรองตาม organizationId
+      const rawOrganizationId = query.organizationId;
+      const organizationId =
+        rawOrganizationId &&
+        rawOrganizationId !== "undefined" &&
+        rawOrganizationId !== "null" &&
+        mongoose.Types.ObjectId.isValid(rawOrganizationId)
+          ? rawOrganizationId
+          : "";
       const skip = (page - 1) * limit;
       const filter: any = {
         ...(search && {
@@ -54,7 +61,7 @@ export abstract class productService {
           .limit(limit)
           .sort({ createdAt: -1 })
           .lean(),
-        Product.countDocuments(),
+        Product.countDocuments(filter),
       ]);
 
       return {
