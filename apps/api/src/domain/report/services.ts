@@ -321,10 +321,14 @@ export abstract class reportService {
                 ...billdata?.products?.map((product: any) => [
                   { text: product.no, margin: [2, 2, 2, 2] ,  alignment: "center", },
                   { text: product.name, margin: [2, 2, 2, 2] },
-                  { text: product.quantity.toLocaleString("th-TH", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  }) || "0", alignment: "right", margin: [2, 2, 2, 2] },
+                  {
+                    text: Number(product.quantity ?? 0).toLocaleString("th-TH", {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    }),
+                    alignment: "right",
+                    margin: [2, 2, 2, 2],
+                  },
                   { text: product.price.toLocaleString("th-TH", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,

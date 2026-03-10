@@ -193,7 +193,10 @@ const ViewBill = ({ id }: ViewBillProps) => {
                     )}
                   </TableCell>
                   <TableCell className="w-28 text-center font-normal tracking-widest    ">
-                    {product.quantity}
+                    {Number(product.quantity ?? 0).toLocaleString("th-TH", {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    })}
                   </TableCell>
                   <TableCell className="w-28 text-right font-normal tracking-widest    ">
                     {(product.cost).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}
