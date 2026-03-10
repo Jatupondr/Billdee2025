@@ -11,6 +11,7 @@ import {
 } from "better-auth/plugins";
 import { ac, admin, user } from "./permissions";
 import { sendEmailResetPassword } from "../src/email/emil";
+import { dash } from "@better-auth/infra";
 
 export const auth = betterAuth({
   database: mongodbAdapter(client),
@@ -36,8 +37,7 @@ export const auth = betterAuth({
     minPasswordLength: 6,
     maxPasswordLength: 20,
     sendResetPassword: async ({ user, url, token }, request) => {
-
-      await sendEmailResetPassword(user.email, 'Reset Password', url);
+      await sendEmailResetPassword(user.email, "Reset Password", url);
     },
   },
   socialProviders: {
@@ -65,6 +65,9 @@ export const auth = betterAuth({
     openAPI(),
     multiSession({
       maximumSessions: 2,
+    }),
+    dash({
+      apiKey: process.env.BETTER_AUTH_API_KEY,
     }),
     lastLoginMethod(),
     haveIBeenPwned(),
