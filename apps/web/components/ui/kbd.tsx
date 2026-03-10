@@ -15,7 +15,7 @@ function Kbd({ className, ...props }: Omit<React.HTMLAttributes<HTMLElement>, "d
 
 function KbdGroup({ className, ...props }: Omit<React.HTMLAttributes<HTMLDivElement>, "data-slot">) {
   return (
-    <kbd
+    <div
       data-slot="kbd-group"
       className={cn("gap-1 inline-flex items-center", className)}
       {...props}

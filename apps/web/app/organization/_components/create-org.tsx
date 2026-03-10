@@ -38,11 +38,23 @@ const CreateOrg = () => {
       onSubmitAsync: async ({ value }) => {
         await authClient.organization.create(
           {
-            name: value.fullName, // required
-            slug: value.slug || "", // required
+            name: value.fullName,
+            slug: value.slug || "",
             logo: "",
-            // metadata,
             userId: session?.user.id,
+            phone: "",
+            taxId: "",
+            email: "",
+            note: "",
+            address: "",
+            province: "",
+            district: "",
+            subDistrict: "",
+            postalCode: "",
+            account_no: "",
+            account_name: "",
+            prompt_pay: "",
+            bank_name: "",
           },
           {
             onSuccess: () => {
