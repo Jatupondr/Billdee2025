@@ -53,7 +53,7 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
 
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: isSessionPending } = authClient.useSession();
 
 
 
@@ -214,12 +214,12 @@ const Users = () => {
     }) || [];
 
   useEffect(() => {
+    // รอให้โหลด session เสร็จก่อน ไม่อย่างนั้นเปิด URL ตรงจะถูกเด้งกลับหน้าแรก
+    if (isSessionPending) return;
     if (session?.user?.role !== "admin") {
       router.push("/");
     }
-
-
-  }, [session]);
+  }, [session, isSessionPending, router]);
 
   return (
     <>
