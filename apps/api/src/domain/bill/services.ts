@@ -3,6 +3,24 @@ import mongoose from "mongoose";
 import { BillModel } from "./model";
 import { Bill, Customer, Product } from "../../../models/model";
 
+// อัปเดตราคา/ต้นทุนของสินค้าให้เป็นค่าล่าสุดที่กรอกในบิล
+async function syncProductPrices(
+  organizationId: string,
+  items: { productId: string; price: number; cost: number }[]
+) {
+  const ops = items
+    .filter((item) => mongoose.Types.ObjectId.isValid(item.productId))
+    .map((item) => ({
+      updateOne: {
+        filter: { _id: item.productId, organizationId, isDeleted: false },
+        update: { $set: { price: item.price, cost: item.cost } },
+      },
+    }));
+  if (ops.length > 0) {
+    await Product.bulkWrite(ops);
+  }
+}
+
 export abstract class billService {
   static async create(dto: BillModel.billCreateDto) {
     try {
@@ -68,6 +86,8 @@ export abstract class billService {
         userId: dto.userId,
         date: date,
       });
+
+      await syncProductPrices(dto.organizationId, products);
 
       return bill;
     } catch (error) {
@@ -168,8 +188,18 @@ export abstract class billService {
         customerId = customer._id.toString();
       }
 
+      // ราคา/ต้นทุนเดิมในบิล ใช้ตรวจว่าบรรทัดไหนถูกแก้ไขราคา
+      const previousBill: any = await Bill.findById(id, { products: 1 }).lean();
+      const previousPrices = new Map<string, { price: number; cost: number }>(
+        (previousBill?.products || []).map((p: any) => [
+          String(p.productId),
+          { price: p.price, cost: p.cost || 0 },
+        ])
+      );
+
       // check if dto.products is not empty if not productId is create product
       let products = [];
+      const changedPrices: { productId: string; price: number; cost: number }[] = [];
       if (dto.products.length > 0) {
         for (const product of dto.products) {
           let productId = product.productId;
@@ -184,6 +214,19 @@ export abstract class billService {
               cost: product.cost || 0
             });
             productId = newProduct._id.toString();
+          } else {
+            const previous = previousPrices.get(String(productId));
+            if (
+              !previous ||
+              previous.price !== product.price ||
+              previous.cost !== (product.cost || 0)
+            ) {
+              changedPrices.push({
+                productId,
+                price: product.price,
+                cost: product.cost || 0,
+              });
+            }
           }
 
           // add product to products array with correct productId
@@ -215,6 +258,12 @@ export abstract class billService {
       if (!updatedBill) {
         throw status(404, "Bill not found");
       }
+
+      await syncProductPrices(
+        String(dto.organizationId ?? (updatedBill as any).organizationId),
+        changedPrices
+      );
+
       return updatedBill;
     } catch (error) {
       throw error;

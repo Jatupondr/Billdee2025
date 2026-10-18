@@ -275,6 +275,10 @@ const CreateBill = () => {
     onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ["bills"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
+      // ราคา/ต้นทุนสินค้าถูกอัปเดตตามบิลล่าสุด
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-combobox"] });
+      queryClient.invalidateQueries({ queryKey: ["products-recommended"] });
       toast.success("สร้างบิลสำเร็จ", {
         position: "bottom-right",
       });

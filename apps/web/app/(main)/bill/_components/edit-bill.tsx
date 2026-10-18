@@ -181,6 +181,10 @@ const EditBill = ({ id }: EditBillProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bills"] });
       queryClient.invalidateQueries({ queryKey: ["bill", id] });
+      // ราคา/ต้นทุนสินค้าถูกอัปเดตตามบิลล่าสุด
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-combobox"] });
+      queryClient.invalidateQueries({ queryKey: ["products-recommended"] });
       toast.success("แก้ไขบิลสำเร็จ", {
         position: "bottom-right",
       });
