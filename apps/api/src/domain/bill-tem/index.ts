@@ -1,4 +1,5 @@
 import Elysia from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 
 import { BaseResponse } from "../../utils/respone";
 
@@ -6,6 +7,7 @@ import { BaseResponse } from "../../utils/respone";
 import { billTemplateService } from "./services";
 
 export const billTemplate = new Elysia({ prefix: "/bill-template" })
+  .use(betterAuth)
 
   .get(
     "/:id",

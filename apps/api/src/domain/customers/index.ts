@@ -1,4 +1,5 @@
 import Elysia from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 
 import { BaseResponse } from "../../utils/respone";
 
@@ -6,6 +7,7 @@ import { CustomerModel } from "./model";
 import { customerService } from "./services";
 
 export const customer = new Elysia({ prefix: "/customers" })
+  .use(betterAuth)
   .post(
     "/",
     async (c) => {

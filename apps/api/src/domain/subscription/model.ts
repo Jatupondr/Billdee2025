@@ -22,6 +22,10 @@ export namespace SubscriptionModel {
     userId: t.Optional(t.String({ minLength: 1 })),
   });
 
+  export const subscriptionExtendDto = t.Object({
+    days: t.Integer({ minimum: 1, maximum: 3650, error: "days must be 1-3650" }),
+  });
+
   export const subscriptionResponseDto = t.Object({
     _id: t.Any(),
     plan: t.String(),
@@ -57,6 +61,7 @@ export namespace SubscriptionModel {
   export type subscriptionCreateDto = typeof subscriptionCreateDto.static;
   export type subscriptionUpdateDto = typeof subscriptionUpdateDto.static;
   export type subscriptionResponseDto = typeof subscriptionResponseDto.static;
+  export type subscriptionExtendDto = typeof subscriptionExtendDto.static;
   export type subscriptionListUserQuery = typeof subscriptionListUserQuery.static;
   export type subscriptionListUserQueryWithPagination = typeof subscriptionListUserQueryWithPagination.static;
   export type subscriptionQueryWithPagination =

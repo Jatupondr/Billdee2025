@@ -1,9 +1,11 @@
 import Elysia, { t } from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 import { cloudinaryService } from "./cloudinaies.service";
 
 export const cloudinary = new Elysia({
   prefix: "/cloudinary",
 })
+  .use(betterAuth)
   .post(
     "/upload",
     async ({ body, set }) => {

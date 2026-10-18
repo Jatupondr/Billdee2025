@@ -1,4 +1,5 @@
 import Elysia from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 
 import { BaseResponse } from "../../utils/respone";
 
@@ -7,6 +8,7 @@ import { subscriptionService } from "./service";
 import { SubscriptionModel } from "./model";
 
 export const subscription = new Elysia({ prefix: "/subscriptions" })
+  .use(betterAuth)
   .post(
     "/",
     async (c) => {
@@ -39,7 +41,7 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
         summary: "Create a new subscription",
         description: "Create a new subscription with the provided details",
       },
-      auth: true,
+      admin: true,
     }
   )
   .get(
@@ -72,7 +74,7 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
           summary: "list of subscriptions user",
         description: "list of subscriptions user with optional filtering and pagination",
       },
-      auth: true,
+      admin: true,
     }
   )
   .get(
@@ -105,14 +107,17 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
           summary: "list of subscriptions",
         description: "list of subscriptions with optional filtering and pagination",
       },
-      auth: true,
+      admin: true,
     }
   )
   .get(
     "/:id",
     async (c) => {
-      const { params, set } = c;
+      const { params, user, status } = c as any;
       try {
+        if (user.role !== "admin" && user.id !== params.id) {
+          return status(403, { success: false, message: "Forbidden" });
+        }
         const response = await subscriptionService.findById(params.id);
         return {
           data: response,
@@ -142,8 +147,14 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
   .patch(
     "/cancel/:id",
     async (c) => {
-      const { params, set } = c;
+      const { params, set, user, status } = c as any;
       try {
+        if (user.role !== "admin") {
+          const owned = await subscriptionService.isOwner(params.id, user.id);
+          if (!owned) {
+            return status(403, { success: false, message: "Forbidden" });
+          }
+        }
         const response = await subscriptionService.cancelSubscription(params.id);
         set.status = 200;
         return {
@@ -175,6 +186,38 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
 
 
   .patch(
+    "/:id/extend",
+    async (c) => {
+      const { params, body, set } = c;
+      try {
+        const response = await subscriptionService.extend(params.id, body.days);
+        set.status = 200;
+        return {
+          data: response,
+          message: "Subscription extended successfully",
+        };
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      params: BaseResponse.ParamsId,
+      body: SubscriptionModel.subscriptionExtendDto,
+      response: {
+        400: BaseResponse.badRequest,
+        403: BaseResponse.forbidden,
+        401: BaseResponse.unauthorized,
+        500: BaseResponse.internalServerError,
+      },
+      detail: {
+        tags: ["Subscription"],
+        summary: "extend a subscription by days",
+        description: "add days to a subscription; counts from today if it has already expired",
+      },
+      admin: true,
+    }
+  )
+  .patch(
     "/:id",
     async (c) => {
       const { params, body, set } = c;
@@ -204,7 +247,7 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
         summary: "update a subscription by id",
         description: "update a customer by id",
       },
-      auth: true,
+      admin: true,
     }
   )
   .delete(
@@ -235,6 +278,6 @@ export const subscription = new Elysia({ prefix: "/subscriptions" })
         summary: "delete a subscription by id",
         description: "delete a subscription by id",
       },
-      auth: true,
+      admin: true,
     }
   );

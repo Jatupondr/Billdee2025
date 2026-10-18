@@ -3,18 +3,19 @@ import { DataTable } from '@/components/data-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import React, { useEffect, useState } from 'react'
 import { ColumnDef } from '@tanstack/react-table';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import api from '@/hooks/axios';
 import { useDebounce } from '@/hooks/use-debounce';
 
 import { Badge } from '@/components/ui/badge';
 import Paginations from '@/components/pagination';
 import { Button } from '@/components/ui/button';
-import { DotsThreeVerticalIcon, PlusCircleIcon } from '@phosphor-icons/react';
+import { CalendarPlusIcon, DotsThreeVerticalIcon, PencilSimpleIcon, PlusCircleIcon, ProhibitIcon, TrashIcon } from '@phosphor-icons/react';
 import CreatePackModal from './create-pack-modal';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import CancelSubscriptionDialog from '../../settings/_components/cancel-sub-dialog';
+import { ConfirmPackDialog, EditPackDialog, ExtendDaysDialog, STATUS_LABELS, type PackRow } from './pack-action-dialogs';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 
@@ -47,8 +48,25 @@ const Packages = () => {
   const [search, setSearch] = useState("");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const debouncedSearch = useDebounce(search, 500);
-  const [openCancelSubscriptionDialog, setOpenCancelSubscriptionDialog] = useState(false);
-  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<string | null>(null);
+  const [extendPack, setExtendPack] = useState<PackRow | null>(null);
+  const [editPack, setEditPack] = useState<PackRow | null>(null);
+  const [confirm, setConfirm] = useState<{ pack: PackRow; action: "cancel" | "delete" } | null>(null);
+  const queryClient = useQueryClient();
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      api.patch(`/subscriptions/${id}`, { status }),
+    onSuccess: (_data, vars) => {
+      toast.success(`เปลี่ยนสถานะเป็น "${STATUS_LABELS[vars.status]}" แล้ว`, { position: "bottom-right" });
+      queryClient.invalidateQueries({ queryKey: ["packages"] });
+    },
+    onError: (error: any) => {
+      toast.error("เกิดข้อผิดพลาด", {
+        description: error?.response?.data?.message || "ไม่สามารถเปลี่ยนสถานะได้",
+        position: "bottom-right",
+      });
+    },
+  });
 
 
   const getPackages = async (page: number, pageSize: number, search: string) => {
@@ -128,12 +146,17 @@ const Packages = () => {
       accessorKey: "totalBill",
       cell: ({ row }) => {
         const dateTotalDays = Math.ceil((new Date(row.original.expDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        return (
-          <>
-            <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
-              {dateTotalDays} วัน
+        if (dateTotalDays <= 0) {
+          return (
+            <span className="text-sm font-normal tracking-widest text-left line-clamp-1 text-red-500">
+              หมดอายุแล้ว
             </span>
-          </>
+          );
+        }
+        return (
+          <span className={`text-sm font-normal tracking-widest text-left line-clamp-1 ${dateTotalDays <= 7 ? "text-orange-500" : ""}`}>
+            เหลือ {dateTotalDays} วัน
+          </span>
         );
       },
     },
@@ -185,13 +208,43 @@ const Packages = () => {
 
               <DotsThreeVerticalIcon size={24} weight="bold" />
             </Button>} />
-            <DropdownMenuContent className="w-40" align="start">
+            <DropdownMenuContent className="w-48" align="start">
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="text-xs font-normal tracking-widest">จัดการเเพ็คเกจ</DropdownMenuLabel>
-                <DropdownMenuItem disabled={row.original.status === "canceled" ? true : false} className={` "text-sm font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out`} onClick={() => { setOpenCancelSubscriptionDialog(true); setSelectedSubscriptionId(row.original._id); }}>
+                <DropdownMenuItem className="text-sm font-normal tracking-widest cursor-pointer" onClick={() => setExtendPack(row.original as unknown as PackRow)}>
+                  <CalendarPlusIcon size={18} weight="bold" />
+                  เพิ่มวันใช้งาน
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-sm font-normal tracking-widest cursor-pointer" onClick={() => setEditPack(row.original as unknown as PackRow)}>
+                  <PencilSimpleIcon size={18} weight="bold" />
+                  แก้ไขแพ็คเกจ
+                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="text-sm font-normal tracking-widest cursor-pointer">
+                    เปลี่ยนสถานะ
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                      <DropdownMenuItem
+                        key={value}
+                        disabled={row.original.status === value || statusMutation.isPending}
+                        className="text-sm font-normal tracking-widest cursor-pointer"
+                        onClick={() => statusMutation.mutate({ id: row.original._id, status: value })}
+                      >
+                        {label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled={row.original.status === "canceled"} className="text-sm font-normal tracking-widest cursor-pointer" onClick={() => setConfirm({ pack: row.original as unknown as PackRow, action: "cancel" })}>
+                  <ProhibitIcon size={18} weight="bold" />
                   ยกเลิกเเพ็คเกจ
                 </DropdownMenuItem>
-
+                <DropdownMenuItem className="text-sm font-normal tracking-widest cursor-pointer text-red-500" onClick={() => setConfirm({ pack: row.original as unknown as PackRow, action: "delete" })}>
+                  <TrashIcon size={18} weight="bold" />
+                  ลบแพ็คเกจ
+                </DropdownMenuItem>
               </DropdownMenuGroup>
 
 
@@ -262,7 +315,9 @@ const Packages = () => {
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
       />
-      <CancelSubscriptionDialog open={openCancelSubscriptionDialog} onOpenChange={setOpenCancelSubscriptionDialog} subscriptionId={selectedSubscriptionId} />
+      <ExtendDaysDialog pack={extendPack} onOpenChange={(open) => !open && setExtendPack(null)} />
+      <EditPackDialog pack={editPack} onOpenChange={(open) => !open && setEditPack(null)} />
+      <ConfirmPackDialog pack={confirm?.pack ?? null} action={confirm?.action ?? "cancel"} onOpenChange={(open) => !open && setConfirm(null)} />
     </>
   )
 }

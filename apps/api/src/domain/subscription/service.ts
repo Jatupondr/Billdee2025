@@ -4,6 +4,16 @@ import { SubscriptionModel } from "./model";
 import { Customer, Subscription, User } from "../../../models/model";
 import { user } from "../../../lib/permissions";
 
+// เปลี่ยน subscription ที่ชำระแล้วแต่เลยวันหมดอายุ ให้เป็น expired
+async function expireOverdue(filter: Record<string, unknown> = {}) {
+  await Subscription.updateMany(
+    { ...filter, status: "paid", isDeleted: false, expDate: { $lt: new Date() } },
+    { $set: { status: "expired" } }
+  );
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 export abstract class subscriptionService {
   static async create(dto: SubscriptionModel.subscriptionCreateDto) {
     try {
@@ -106,9 +116,12 @@ export abstract class subscriptionService {
       const userId = query.userId || ""; // กรองตาม userId
       const skip = (page - 1) * limit;
 
+      await expireOverdue();
+
       const filter: any = {
         isDeleted: false,
         ...(userId && { userId }),
+        ...(query.status && { status: query.status }),
       };
 
       // ถ้ามีการค้นหา ให้ค้นหา User ที่มี name ตรงกับ search ก่อน
@@ -157,7 +170,8 @@ export abstract class subscriptionService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
-        const subscription = await Subscription.findOne({ userId: id, isDeleted: false, status: "paid" }).lean();
+      await expireOverdue({ userId: id });
+      const subscription = await Subscription.findOne({ userId: id, isDeleted: false, status: "paid" }).lean();
 
       return subscription;
     } catch (error) {
@@ -190,6 +204,31 @@ export abstract class subscriptionService {
   }
 
 
+  static async isOwner(id: string, userId: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) return false;
+    const found = await Subscription.exists({ _id: id, userId, isDeleted: false });
+    return Boolean(found);
+  }
+
+  // เพิ่มวันใช้งาน: ถ้ายังไม่หมดอายุ ต่อจากวันหมดอายุเดิม ถ้าหมดแล้วนับจากวันนี้
+  static async extend(id: string, days: number) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw status(400, "id is invalid not ObjectId");
+    }
+    const subscription: any = await Subscription.findOne({ _id: id, isDeleted: false }).lean();
+    if (!subscription) {
+      throw status(404, "Subscription not found");
+    }
+    const now = Date.now();
+    const base = Math.max(new Date(subscription.expDate).getTime(), now);
+    const newExpDate = new Date(base + days * DAY_MS);
+    return Subscription.findByIdAndUpdate(
+      id,
+      { $set: { expDate: newExpDate, endDate: newExpDate, status: "paid" } },
+      { new: true }
+    ).lean();
+  }
+
   static async update(id: string, dto: SubscriptionModel.subscriptionUpdateDto) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -199,6 +238,7 @@ export abstract class subscriptionService {
         id,
         {
           ...dto,
+          ...(dto.endDate && !dto.expDate && { expDate: dto.endDate }),
         },
         { new: true }
       ).lean();

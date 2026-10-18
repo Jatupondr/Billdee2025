@@ -1,4 +1,5 @@
 import Elysia, { t } from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 
 import { BaseResponse } from "../../utils/respone";
 
@@ -6,6 +7,7 @@ import { BaseResponse } from "../../utils/respone";
 import { affiliateService } from "./services";
 
 export const affiliate = new Elysia({ prefix: "/affiliate" })
+  .use(betterAuth)
 
 
 .get(

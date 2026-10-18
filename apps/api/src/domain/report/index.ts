@@ -1,8 +1,10 @@
 import Elysia, { t } from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 import { BaseResponse } from "../../utils/respone";
 import { reportService } from "./services";
 
-export const report = new Elysia({ prefix: "/report" }).get(
+export const report = new Elysia({ prefix: "/report" })
+  .use(betterAuth).get(
   "receipt/:id",
   async ({ set, params, query }) => {
     const bill = await reportService.receipt(params.id, set, query);

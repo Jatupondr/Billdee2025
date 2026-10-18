@@ -1,10 +1,12 @@
 import Elysia from "elysia";
+import { betterAuth } from "../../plugins/better-auth";
 import { OverviewModel } from "./model";
 
 import { BaseResponse } from "../../utils/respone";
 import { overviewService } from "./services";
 
 export const overview = new Elysia({ prefix: "/overview" })
+  .use(betterAuth)
   .get(
     "/summary",
     async (c) => {
