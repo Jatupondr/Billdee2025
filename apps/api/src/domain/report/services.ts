@@ -1,6 +1,7 @@
 
 import { Bill, BillTemplate, Organization } from "../../../models/model";
 import generatePayload from "promptpay-qr";
+import { getBankLogo, getPromptPayLogo } from "./bank-logos";
 const PdfPrinter = require("pdfmake/src/printer");
 
 // Helper function to convert image URL to base64
@@ -77,6 +78,8 @@ export abstract class reportService {
         billdata?.organizationId?.province,
         billdata?.organizationId?.postalCode,
       ].filter(Boolean).join(" ");
+      const bankLogo = getBankLogo(billdata?.organizationId?.bank_name);
+      const promptPayLogo = billdata?.organizationId?.prompt_pay ? getPromptPayLogo() : null;
       const hasPayment = Boolean(
         billdata?.organizationId?.bank_name ||
           billdata?.organizationId?.account_no ||
@@ -375,9 +378,12 @@ export abstract class reportService {
                               margin: [0, 0, 0, 2],
                             },
                             ...(billdata?.organizationId?.bank_name ? [{
-                              text: billdata.organizationId.bank_name,
-                              bold: true,
-                              fontSize: 18,
+                              columns: [
+                                ...(bankLogo ? [{ image: bankLogo, width: 24, height: 24 }] : []),
+                                { text: billdata.organizationId.bank_name, bold: true, fontSize: 18, width: "*", margin: [0, bankLogo ? 1 : 0, 0, 0] },
+                              ],
+                              columnGap: 8,
+                              margin: [0, 0, 0, 2],
                             }] : []),
                             ...(billdata?.organizationId?.account_no ? [{
                               text: [
@@ -392,10 +398,17 @@ export abstract class reportService {
                               ],
                             }] : []),
                             ...(billdata?.organizationId?.prompt_pay ? [{
-                              text: [
-                                { text: "พร้อมเพย์  ", fontSize: 14 },
-                                { text: billdata.organizationId.prompt_pay, bold: true, fontSize: 17 },
+                              columns: [
+                                ...(promptPayLogo ? [{ image: promptPayLogo, width: 18, height: 18, margin: [0, 1, 0, 0] }] : []),
+                                {
+                                  width: "*",
+                                  text: [
+                                    { text: "พร้อมเพย์  ", fontSize: 14 },
+                                    { text: billdata.organizationId.prompt_pay, bold: true, fontSize: 17 },
+                                  ],
+                                },
                               ],
+                              columnGap: 8,
                             }] : []),
                           ],
                           margin: [8, 6, 8, 6],
