@@ -19,6 +19,7 @@ import {
   TrashIcon,
   DotsThreeVerticalIcon,
   PrinterIcon,
+  ImageIcon,
 } from "@phosphor-icons/react";
 import {
   DropdownMenu,
@@ -38,6 +39,8 @@ import api from "@/hooks/axios";
 import { useRouter } from "next/navigation";
 import DeleteBillDialog from "./delete-bill-dialog";
 import ShowSubproDialog from "./show-subpro-dialog";
+import { downloadReceiptImage } from "@/lib/receipt-image";
+import { toast } from "sonner";
 
 interface Bill {
   _id: string;
@@ -248,6 +251,26 @@ const Bill = () => {
                 >
                   <PrinterIcon size={20} weight="bold" />
                   พิมพ์ใบเสร็จ
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    toast.promise(
+                      downloadReceiptImage(
+                        row.original._id,
+                        row.original.billNumber,
+                      ),
+                      {
+                        loading: "กำลังสร้างรูปใบเสร็จ...",
+                        success: "บันทึกใบเสร็จเป็นรูปแล้ว",
+                        error: "บันทึกใบเสร็จเป็นรูปไม่สำเร็จ",
+                        position: "bottom-right",
+                      },
+                    );
+                  }}
+                  className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+                  <ImageIcon size={20} weight="bold" />
+                  บันทึกเป็นรูป
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {

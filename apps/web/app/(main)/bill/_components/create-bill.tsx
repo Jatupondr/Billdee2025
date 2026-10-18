@@ -60,6 +60,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { downloadReceiptImage } from "@/lib/receipt-image";
 
 export const billSchema = v.object({
   name_customer: v.pipe(
@@ -283,6 +284,16 @@ const CreateBill = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/report/receipt/${response.data._id as string}`,
         "_blank",
       );
+      // บันทึกใบเสร็จเป็นรูปภาพอัตโนมัติ
+      downloadReceiptImage(
+        response.data._id as string,
+        response.data.billNumber,
+      ).catch((error) => {
+        console.error("Failed to save receipt image:", error);
+        toast.error("บันทึกใบเสร็จเป็นรูปไม่สำเร็จ", {
+          position: "bottom-right",
+        });
+      });
     },
     onError: (error: any) => {
       toast.error("เกิดข้อผิดพลาด", {
