@@ -1,4 +1,6 @@
 "use client";
+
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
@@ -116,35 +118,15 @@ const LoginComponent = () => {
               className="flex flex-col items-center gap-2 font-medium"
             >
               <div className="flex size-20 items-center justify-center rounded-md">
-                <svg
-                  width="96"
-                  height="68"
-                  viewBox="0 0 48 34"
-                  xmlns="http://www.w3.org/2000/svg"
-                  data-logo="logo"
-                >
-                  <g
-                    transform="translate(0, 0) rotate(0)"
-                    id="logogram"
-                    style={{ opacity: 1 }}
-                  >
-                    <path
-                      fill="#123C68"
-                      d="M15.4992 0H36.5808L21.0816 22.9729H0L15.4992 0Z"
-                    ></path>
-                    <path
-                      fill="#B0B0B0"
-                      d="M16.4224 25.102L10.4192 34H32.5008L48 11.0271H31.7024L22.2064 25.102H16.4224Z"
-                    ></path>
-                  </g>
-                  <g
-                    transform="translate(48, 17)"
-                    id="logotype"
-                    style={{ opacity: 1 }}
-                  ></g>
-                </svg>
+                <Image
+                  src="/logo.png"
+                  alt="Billdee"
+                  width={80}
+                  height={80}
+                  priority
+                />
               </div>
-              <span className="sr-only">Acme Inc.</span>
+              <span className="sr-only">Billdee</span>
             </a>
             <h1 className="text-4xl font-normal tracking-widest text-caption ">
               Billdee บิลดี

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import * as React from "react";
 
 import { SidebarMenu, useSidebar } from "@/components/ui/sidebar";
@@ -29,24 +31,13 @@ export function TeamSwitcher({
           href="/"
           className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition"
         >
-          <svg
-            width="36"
-            height="28"
-            viewBox="0 0 48 34"
-            xmlns="http://www.w3.org/2000/svg"
-            className="drop-shadow-sm"
-          >
-            <g id="logogram">
-              <path
-                fill="#4DA3FF"
-                d="M15.4992 0H36.5808L21.0816 22.9729H0L15.4992 0Z"
-              />
-              <path
-                fill="#ffffff"
-                d="M16.4224 25.102L10.4192 34H32.5008L48 11.0271H31.7024L22.2064 25.102H16.4224Z"
-              />
-            </g>
-          </svg>
+          <Image
+            src="/logo.png"
+            alt="Billdee"
+            width={32}
+            height={32}
+            priority
+          />
         </a>
 
         {/* Team info */}
