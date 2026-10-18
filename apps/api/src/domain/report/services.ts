@@ -64,6 +64,42 @@ export abstract class reportService {
         logoBase64 = await getImageBase64(billdata.organizationId.logo);
       }
 
+      const themeColor = billTemplate?.themcolor || "#000000";
+      const formatMoney = (value: number) =>
+        Number(value).toLocaleString("th-TH", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      const shopAddress = [
+        billdata?.organizationId?.address,
+        billdata?.organizationId?.subDistrict,
+        billdata?.organizationId?.district,
+        billdata?.organizationId?.province,
+        billdata?.organizationId?.postalCode,
+      ].filter(Boolean).join(" ");
+      const hasPayment = Boolean(
+        billdata?.organizationId?.bank_name ||
+          billdata?.organizationId?.account_no ||
+          billdata?.organizationId?.account_name ||
+          billdata?.organizationId?.prompt_pay ||
+          bankQrcodeBase64,
+      );
+
+      const pageWidths: Record<string, number> = { A4: 595.28, A5: 419.53, LETTER: 612 };
+      const margins = billTemplate?.pageMargins || [26, 26, 26, 26];
+      // pageMargins may be a number, [h, v], [l, t, r, b] or { left, top, right, bottom }
+      const [marginLeft, marginRight] = Array.isArray(margins)
+        ? margins.length === 2
+          ? [margins[0], margins[0]]
+          : [margins[0], margins[2]]
+        : typeof margins === "object"
+          ? [margins.left ?? 0, margins.right ?? 0]
+          : [margins, margins];
+      const contentWidth =
+        (pageWidths[String(billTemplate?.typePage || "A4").toUpperCase()] ?? 595.28) -
+        Number(marginLeft) -
+        Number(marginRight);
+
       const docDefinition: any = {
         pageSize: billTemplate?.typePage || "A4",
         pageMargins: billTemplate?.pageMargins || [26, 26, 26, 26],
@@ -122,92 +158,67 @@ export abstract class reportService {
         },
         content: [
 
-          ...(logoBase64 ? [
-            [
-
-              {
-                image: logoBase64 || "",
-                width: 80,
-                height: 80,
-                margin: [0, 0, 0, 5],
-                alignment: "right",
-              },
-            ],
-          ] : []),
-          {
-            text: "ใบเสร็จรับเงิน",
-            style: "header",
-            color: billTemplate?.themcolor || "#000000",
-            fontSize: 28,
-            bold: true,
-            alignment: "center" as const,
-          },
-          { text: "\n" },
           {
             columns: [
+              ...(logoBase64 ? [{
+                image: logoBase64,
+                fit: [56, 56],
+                width: 56,
+                margin: [0, 0, 10, 0],
+              }] : []),
               {
                 width: "*",
                 text: [
                   {
                     text: (billdata?.organizationId?.name || "-") + "\n",
                     bold: true,
-                    fontSize:  18,
+                    fontSize: 18,
                   },
-
-
-                  ...([
-                      billdata?.organizationId?.address,
-                      billdata?.organizationId?.subDistrict,
-                      billdata?.organizationId?.district,
-                      billdata?.organizationId?.province,
-                      billdata?.organizationId?.postalCode
-                    ].filter(Boolean).length > 0 ? [{
-                    text: "ที่อยู่: " + [
-                      billdata?.organizationId?.address,
-                      billdata?.organizationId?.subDistrict,
-                      billdata?.organizationId?.district,
-                      billdata?.organizationId?.province,
-                      billdata?.organizationId?.postalCode
-                    ].filter(Boolean).join(" ") + "\n",
-                    bold: true,
+                  ...(shopAddress ? [{
+                    text: "ที่อยู่: " + shopAddress + "\n",
                     fontSize: billTemplate?.fontSize || 12,
                   }] : []),
-                 ...(billdata?.organizationId?.taxId ? [
-                  {
-                    text: "เลขประจำตัวผู้เสียภาษี: " + (billdata?.organizationId?.taxId || "-") + "\n",
-                    bold: true,
+                  ...(billdata?.organizationId?.taxId ? [{
+                    text: "เลขประจำตัวผู้เสียภาษี: " + billdata.organizationId.taxId + "\n",
                     fontSize: billTemplate?.fontSize || 12,
-                  },
-                 ] : []),
-                 ...(billdata?.organizationId?.phone ? [
-                    {
-                      text: "เบอร์โทร: " + (billdata?.organizationId?.phone || "-") + "\n",
-                      bold: true,
-                      fontSize: billTemplate?.fontSize || 12,
-                    },
-                  ] : []),
-
-
-
+                  }] : []),
+                  ...(billdata?.organizationId?.phone ? [{
+                    text: "เบอร์โทร: " + billdata.organizationId.phone,
+                    fontSize: billTemplate?.fontSize || 12,
+                  }] : []),
                 ],
               },
               {
                 width: "auto",
-                text: [
-                  { text: "วันที่: ", bold: true },
-                  new Date(billdata?.date as Date).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  }) + "\n",
-                  { text: "เลขที่บิล: ", bold: true },
-                  billdata?.billNumber,
+                stack: [
+                  {
+                    text: "ใบเสร็จรับเงิน",
+                    color: themeColor,
+                    fontSize: 26,
+                    bold: true,
+                    alignment: "right" as const,
+                  },
+                  {
+                    text: [
+                      { text: "วันที่: ", bold: true },
+                      new Date(billdata?.date as Date).toLocaleDateString("th-TH", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      }) + "\n",
+                      { text: "เลขที่บิล: ", bold: true },
+                      billdata?.billNumber,
+                    ],
+                    alignment: "right" as const,
+                  },
                 ],
-                alignment: "right" as const,
               },
             ],
           },
-          { text: "\n" },
+          {
+            canvas: [{ type: "line", x1: 0, y1: 0, x2: contentWidth, y2: 0, lineWidth: 1, lineColor: themeColor }],
+            margin: [0, 6, 0, 6],
+          },
           {
             columns: [
               {
@@ -347,109 +358,84 @@ export abstract class reportService {
           { text: "\n" },
           {
             columns: [
-              { width: "*",
-                ...((billdata?.note || billdata?.organizationId?.account_name || (billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) || billdata?.organizationId?.prompt_pay || bankQrcodeBase64) ? {
-                  table: {
-                    widths: ["auto", "auto"],
-                    body: [
-                      ...(billdata?.note ? [[
-                        "หมายเหตุ:",
+              {
+                width: "*",
+                stack: [
+                  ...(hasPayment ? [{
+                    table: {
+                      widths: ["*", ...(bankQrcodeBase64 ? ["auto"] : [])],
+                      body: [[
                         {
-                          text: billdata?.note,
-                          bold: true,
+                          stack: [
+                            {
+                              text: "ช่องทางการชำระเงิน",
+                              bold: true,
+                              color: themeColor,
+                              fontSize: 16,
+                              margin: [0, 0, 0, 2],
+                            },
+                            ...(billdata?.organizationId?.bank_name ? [{
+                              text: billdata.organizationId.bank_name,
+                              bold: true,
+                              fontSize: 18,
+                            }] : []),
+                            ...(billdata?.organizationId?.account_no ? [{
+                              text: [
+                                { text: "เลขที่บัญชี  ", fontSize: 14 },
+                                { text: billdata.organizationId.account_no, bold: true, fontSize: 26 },
+                              ],
+                            }] : []),
+                            ...(billdata?.organizationId?.account_name ? [{
+                              text: [
+                                { text: "ชื่อบัญชี  ", fontSize: 14 },
+                                { text: billdata.organizationId.account_name, bold: true, fontSize: 17 },
+                              ],
+                            }] : []),
+                            ...(billdata?.organizationId?.prompt_pay ? [{
+                              text: [
+                                { text: "พร้อมเพย์  ", fontSize: 14 },
+                                { text: billdata.organizationId.prompt_pay, bold: true, fontSize: 17 },
+                              ],
+                            }] : []),
+                          ],
+                          margin: [8, 6, 8, 6],
                         },
-                      ]] : []),
-                      ...(billdata?.organizationId?.account_name ? [[
-                        "ชื่อบัญชี:",
-                        {
-                          text: billdata?.organizationId?.account_name,
-                          bold: true,
-                        },
-                      ]] : []),
-                      ...((billdata?.organizationId?.bank_name && billdata?.organizationId?.account_no) ? [[
-                        "ธนาคาร:",
-                        {
-                          text: billdata?.organizationId?.bank_name + " เลขที่: " + billdata?.organizationId?.account_no,
-                          bold: true,
-                          fontSize: billTemplate?.fontSize || 16,
-                        },
-                      ]] : []),
-                      ...(billdata?.organizationId?.prompt_pay ? [[
-                        "พร้อมเพย์:",
-                        {
-                          text: billdata?.organizationId?.prompt_pay,
-                          bold: true,
-                        },
-                      ]] : []),
-                      ...(bankQrcodeBase64 ? [
-                        [
-                          "qr code:",
-                          {
-                            image: bankQrcodeBase64 || "",
-                            width: 80,
-                            height: 80,
-                            margin: [0, 0, 0, 5],
-                            alignment: "left",
-                          },
-                        ],
-                      ] : []),
-                    ],
-                  },
-                  layout: "noBorders",
-                } : { text: "" }),
+                        ...(bankQrcodeBase64 ? [{
+                          image: bankQrcodeBase64,
+                          width: 90,
+                          height: 90,
+                          margin: [4, 4, 6, 4],
+                        }] : []),
+                      ]],
+                    },
+                    layout: {
+                      hLineWidth: () => 1,
+                      vLineWidth: (i: number, node: any) => (i === 0 || i === node.table.widths.length ? 1 : 0),
+                      hLineColor: () => themeColor,
+                      vLineColor: () => themeColor,
+                      fillColor: () => themeColor,
+                      fillOpacity: () => 0.07,
+                    },
+                  }] : []),
+                  ...(billdata?.note ? [{
+                    text: [{ text: "หมายเหตุ: ", bold: true }, billdata.note],
+                    margin: [0, 6, 0, 0],
+                  }] : []),
+                ],
               },
               {
-                width: "auto",
+                width: 190,
+                margin: [14, 0, 0, 0],
                 table: {
-                  widths: ["auto", "auto"],
+                  widths: ["*", "auto"],
                   body: [
+                    ["ยอดรวม", { text: formatMoney((billdata?.total ?? 0) + (billdata?.discount ?? 0) - (billdata?.vat ?? 0)), alignment: "right" }],
+                    ["ส่วนลด", { text: formatMoney(billdata?.discount ?? 0), alignment: "right" }],
+                    ["ภาษีมูลค่าเพิ่ม", { text: formatMoney(billdata?.vat ?? 0), alignment: "right" }],
                     [
-                      "ยอดรวม:",
-                      {
-                        text: (
-                          ((billdata?.total ?? 0) + (billdata?.discount ?? 0) - (billdata?.vat ?? 0))
-                        ).toLocaleString("th-TH", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }),
-                        bold: true,
-                      },
+                      { text: "ยอดชำระสุทธิ", bold: true, fontSize: 18, color: "#ffffff", fillColor: themeColor, margin: [6, 4, 0, 4] },
+                      { text: formatMoney(billdata?.total ?? 0), bold: true, fontSize: 24, color: "#ffffff", fillColor: themeColor, alignment: "right", margin: [0, 1, 6, 1] },
                     ],
-
-                    [
-                      "ส่วนลด:",
-                      {
-                        text: (billdata?.discount ?? 0).toLocaleString("th-TH", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }),
-                        bold: true,
-                      },
-                    ],
-
-                    [
-                      "ภาษีมูลค่าเพิ่ม:",
-                      {
-                        text: (billdata?.vat ?? 0).toLocaleString("th-TH", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }),
-                        bold: true,
-                      },
-                    ],
-
-                    [
-                      "ยอดสุทธิ:",
-                      {
-                        text: (billdata?.total ?? 0).toLocaleString("th-TH", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }),
-                        bold: true,
-                      },
-                    ],
-
-
                   ],
                 },
                 layout: "noBorders",
