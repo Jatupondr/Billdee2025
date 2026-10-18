@@ -189,10 +189,17 @@ const CreateBill = () => {
     return response.data;
   };
 
-  // สินค้าแนะนำ - ไม่มี search (โหลดครั้งเดียว)
+  // สินค้าแนะนำ - ดึงเฉพาะสินค้าที่ปักหมุดจาก API (ไม่จำกัดแค่ 50 รายการล่าสุด)
+  const getRecommendedProducts = async () => {
+    const response = await api.get(
+      `/products?page=1&pageSize=100&isRecommended=true&organizationId=${activeOrg?.id}`,
+    );
+    return response.data;
+  };
+
   const { data: productsData, isLoading: isLoadingProducts } = useQuery<any>({
     queryKey: ["products-recommended", activeOrg?.id],
-    queryFn: () => getProducts(""),
+    queryFn: () => getRecommendedProducts(),
     enabled: !!activeOrg?.id,
   });
 
@@ -1045,6 +1052,23 @@ const CreateBill = () => {
                                             `products[${index}].cost`,
                                             selectedProduct.cost,
                                           );
+                                          const qty =
+                                            form.getFieldValue(
+                                              `products[${index}].quantity`,
+                                            ) || 1;
+                                          form.setFieldValue(
+                                            `products[${index}].quantity`,
+                                            qty,
+                                          );
+                                          form.setFieldValue(
+                                            `products[${index}].total`,
+                                            parseFloat(
+                                              (
+                                                (selectedProduct.price || 0) *
+                                                qty
+                                              ).toFixed(2),
+                                            ),
+                                          );
                                         } else {
                                           form.setFieldValue(
                                             `products[${index}].productId`,
@@ -1264,11 +1288,11 @@ const CreateBill = () => {
                     สินค้าแนะนำ
                   </span>
                   <span className="text-xs font-normal tracking-widest text-muted-foreground bg-accent px-2 py-1 rounded-full">
-                    {Math.min(recommendedProducts.length, 6)} รายการ
+                    {recommendedProducts.length} รายการ
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {recommendedProducts.slice(0, 6).map((product: any) => (
+                  {recommendedProducts.map((product: any) => (
                     <div
                       key={product._id}
                       className="group relative flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-200"
@@ -1312,9 +1336,17 @@ const CreateBill = () => {
                               `products[${emptyIndex}].price`,
                               product.price || 0,
                             );
+                            const emptyQty =
+                              currentProducts[emptyIndex]?.quantity || 1;
+                            form.setFieldValue(
+                              `products[${emptyIndex}].quantity`,
+                              emptyQty,
+                            );
                             form.setFieldValue(
                               `products[${emptyIndex}].total`,
-                              product.price || 0,
+                              parseFloat(
+                                ((product.price || 0) * emptyQty).toFixed(2),
+                              ),
                             );
                             toast.success(
                               `เพิ่ล "${product.name}" เข้ารายการแล้ว`,

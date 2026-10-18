@@ -52,6 +52,7 @@ export abstract class productService {
           ],
         }),
         ...(organizationId && { organizationId }),
+        ...(query.isRecommended === "true" && { isRecommended: true }),
         isDeleted: false,
       };
 

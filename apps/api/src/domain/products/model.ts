@@ -40,6 +40,7 @@ export namespace ProductModel {
 
   export const productQuery = t.Object({
     organizationId: t.Optional(t.String()),
+    isRecommended: t.Optional(t.String()),
   });
 
   // extend
