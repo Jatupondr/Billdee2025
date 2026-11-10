@@ -151,6 +151,8 @@ const CreateBill = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [createCustomer, setCreateCustomer] = useState<boolean>(false);
   const [openDate, setOpenDate] = useState<boolean>(false);
+  // มือถือ: ส่วนลด · VAT · หมายเหตุ พับเก็บไว้ (จอใหญ่แสดงตลอด)
+  const [showExtras, setShowExtras] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -235,7 +237,6 @@ const CreateBill = () => {
 
   const totalBills = billsData?.meta?.total ?? billsData?.rows?.length ?? 0;
 
-
   React.useEffect(() => {
     if (
       sessionPending ||
@@ -247,8 +248,6 @@ const CreateBill = () => {
     ) {
       return;
     }
-
-
   }, [
     sessionPending,
     isPending,
@@ -256,7 +255,7 @@ const CreateBill = () => {
     isLoadingBills,
     activeOrg?.id,
     session?.user?.id,
-    
+
     router,
   ]);
 
@@ -429,6 +428,95 @@ const CreateBill = () => {
     );
   };
 
+  // ค้นหาสินค้าได้หลายคำ เช่น "กุ้ง 30" เจอ "กุ้งขาวฟรีโฟม 30/35"
+  const multiWordFilter = (item: unknown, query: string) => {
+    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const text = String(item).toLowerCase();
+    return words.every((w) => text.includes(w));
+  };
+
+  const recalcTotal = (index: number) => {
+    const qty = form.getFieldValue(`products[${index}].quantity`) || 0;
+    const price = form.getFieldValue(`products[${index}].price`) || 0;
+    form.setFieldValue(
+      `products[${index}].total`,
+      parseFloat((price * qty).toFixed(2)),
+    );
+  };
+
+  const applyProductAt = (index: number, value: string) => {
+    const selectedProduct = productData.find((p: any) => p.name === value);
+    if (!selectedProduct) {
+      form.setFieldValue(`products[${index}].productId`, "");
+      return;
+    }
+    form.setFieldValue(`products[${index}].no`, index + 1);
+    form.setFieldValue(
+      `products[${index}].productId`,
+      selectedProduct._id || "",
+    );
+    form.setFieldValue(`products[${index}].price`, selectedProduct.price);
+    form.setFieldValue(`products[${index}].cost`, selectedProduct.cost);
+    const qty = form.getFieldValue(`products[${index}].quantity`) || 1;
+    form.setFieldValue(`products[${index}].quantity`, qty);
+    recalcTotal(index);
+  };
+
+  // มือถือ: รายการที่เพิ่มเห็นได้ทันที ไม่ต้องมี toast ทับแถบล่าง
+  const notifyAdded = (name: string) => {
+    if (window.matchMedia("(min-width: 768px)").matches)
+      toast.success(`เพิ่ม "${name}" เข้ารายการแล้ว`);
+  };
+
+  const addRecommended = (product: any) => {
+    const currentProducts = form.getFieldValue("products") || [];
+    // หารายการว่างแรก ถ้ามีให้แทนที่รายการนั้น
+    const emptyIndex = currentProducts.findIndex(
+      (p: any) => !p.name || p.name === "",
+    );
+    if (emptyIndex !== -1) {
+      form.setFieldValue(
+        `products[${emptyIndex}].productId`,
+        product._id || "",
+      );
+      form.setFieldValue(`products[${emptyIndex}].name`, product.name);
+      form.setFieldValue(`products[${emptyIndex}].cost`, product.cost || 0);
+      form.setFieldValue(`products[${emptyIndex}].price`, product.price || 0);
+      const emptyQty = currentProducts[emptyIndex]?.quantity || 1;
+      form.setFieldValue(`products[${emptyIndex}].quantity`, emptyQty);
+      form.setFieldValue(
+        `products[${emptyIndex}].total`,
+        parseFloat(((product.price || 0) * emptyQty).toFixed(2)),
+      );
+      notifyAdded(product.name);
+      return;
+    }
+    if (currentProducts.length >= 12) {
+      toast.error("ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ");
+      return;
+    }
+    form.setFieldValue("products", [
+      ...currentProducts,
+      {
+        no: currentProducts.length + 1,
+        productId: product._id || "",
+        name: product.name,
+        quantity: 1,
+        cost: product.cost || 0,
+        price: product.price || 0,
+        note: "",
+        total: product.price || 0,
+      },
+    ]);
+    notifyAdded(product.name);
+  };
+
+  const money = (n: number) =>
+    n.toLocaleString("th-TH", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
   const clearAllProducts = () => {
     form.setFieldValue("products", [
       {
@@ -450,12 +538,12 @@ const CreateBill = () => {
 
   return (
     <>
-      <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
+      <Card className="p-3 md:p-4 shadow-md border border-border/50 dark:bg-zinc-900">
         <CardHeader>
-          <CardTitle className="text-2xl font-normal tracking-widest">
+          <CardTitle className="text-xl md:text-2xl font-normal tracking-widest">
             สร้างบิลใหม่ #{lastbill?.data?.billNumber}
           </CardTitle>
-          <CardDescription className="font-normal tracking-widest">
+          <CardDescription className="hidden md:block font-normal tracking-widest">
             หากพบปัญหาในการใช้งาน กรุณาติดต่อฝ่ายสนับสนุน
           </CardDescription>
           <CardAction className="space-x-2">
@@ -474,7 +562,7 @@ const CreateBill = () => {
               form="form-create-bill"
               disabled={createBillMutation.isPending}
               size="sm"
-              className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+              className="hidden md:inline-flex whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
             >
               <FloppyDiskBackIcon size={32} weight="fill" className="" />
               {createBillMutation.isPending ? "กำลังสร้าง..." : "สร้างบิล"}
@@ -955,11 +1043,11 @@ const CreateBill = () => {
                 if (!selectedCustomer) return null;
 
                 return (
-                  <Card className="border border-border/50 bg-accent/20 w-1/2">
+                  <Card className="border border-border/50 bg-accent/20 w-full md:w-1/2">
                     <CardContent>
                       <div className="flex items-start justify-between">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col items-start gap-0.5 md:flex-row md:items-center md:gap-2">
                             <span className="text-sm font-normal tracking-widest text-muted-foreground">
                               ชื่อลูกค้า:
                             </span>
@@ -968,7 +1056,7 @@ const CreateBill = () => {
                             </span>
                           </div>
                           {selectedCustomer.email && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-start gap-0.5 md:flex-row md:items-center md:gap-2">
                               <span className="text-sm font-normal tracking-widest text-muted-foreground">
                                 อีเมล:
                               </span>
@@ -978,7 +1066,7 @@ const CreateBill = () => {
                             </div>
                           )}
                           {selectedCustomer.phone && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-start gap-0.5 md:flex-row md:items-center md:gap-2">
                               <span className="text-sm font-normal tracking-widest text-muted-foreground">
                                 เบอร์โทร:
                               </span>
@@ -988,20 +1076,23 @@ const CreateBill = () => {
                             </div>
                           )}
                           {selectedCustomer.address && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-start gap-0.5 md:flex-row md:items-center md:gap-2">
                               <span className="text-sm font-normal tracking-widest text-muted-foreground">
                                 ที่อยู่:
                               </span>
-                              <span className="text-sm font-normal tracking-wide">
-                                {selectedCustomer.address +
-                                  ", แขวง/ตำบล: " +
-                                  selectedCustomer.district +
-                                  ",  เขต/อำเภอ: " +
-                                  selectedCustomer.subDistrict +
-                                  ", จังหวัด: " +
-                                  selectedCustomer.province +
-                                  ", รหัสไปรษณีย์: " +
-                                  selectedCustomer.postalCode}
+                              <span className="text-sm font-normal tracking-wide line-clamp-3 md:line-clamp-none">
+                                {[
+                                  selectedCustomer.address,
+                                  selectedCustomer.district &&
+                                    `แขวง/ตำบล ${selectedCustomer.district}`,
+                                  selectedCustomer.subDistrict &&
+                                    `เขต/อำเภอ ${selectedCustomer.subDistrict}`,
+                                  selectedCustomer.province &&
+                                    `จังหวัด ${selectedCustomer.province}`,
+                                  selectedCustomer.postalCode,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
                               </span>
                             </div>
                           )}
@@ -1013,235 +1104,428 @@ const CreateBill = () => {
               }}
             </form.Subscribe>
 
-            <Table>
-              <TableHeader className="bg-accent">
-                <TableRow>
-                  {ListTable.map((header, idx: number) => (
-                    <TableHead
-                      className="text-base font-normal tracking-widest leading-4"
-                      key={idx}
-                    >
-                      {header}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <form.Field name="products" mode="array">
-                  {(field) => (
-                    <>
-                      {field.state.value && field.state.value.length > 0 ? (
-                        field.state.value.map((product: any, index: number) => (
-                          <TableRow key={product.productId || `row-${index}`}>
-                            <TableCell className="font-normal tracking-widest w-20 text-center text-base">
-                              {index + 1}
-                            </TableCell>
-                            <form.Field name={`products[${index}].name`}>
-                              {(nameField) => (
-                                <TableCell className="font-normal tracking-widest w-full text-base">
-                                  <div className="flex flex-col justify-start min-w-0">
-                                    <Combobox
-                                      items={productData.map(
-                                        (p: any) => p.name,
-                                      )}
-                                      onValueChange={(value: any) => {
-                                        nameField.handleChange(value);
-                                        const selectedProduct =
-                                          productData.find(
-                                            (p: any) => p.name === value,
-                                          );
-                                        if (selectedProduct) {
-                                          form.setFieldValue(
-                                            `products[${index}].no`,
-                                            index + 1,
-                                          );
-                                          form.setFieldValue(
-                                            `products[${index}].productId`,
-                                            selectedProduct._id || "",
-                                          );
-                                          form.setFieldValue(
-                                            `products[${index}].price`,
-                                            selectedProduct.price,
-                                          );
-                                          form.setFieldValue(
-                                            `products[${index}].cost`,
-                                            selectedProduct.cost,
-                                          );
-                                          const qty =
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader className="bg-accent">
+                  <TableRow>
+                    {ListTable.map((header, idx: number) => (
+                      <TableHead
+                        className="text-base font-normal tracking-widest leading-4"
+                        key={idx}
+                      >
+                        {header}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <form.Field name="products" mode="array">
+                    {(field) => (
+                      <>
+                        {field.state.value && field.state.value.length > 0 ? (
+                          field.state.value.map(
+                            (product: any, index: number) => (
+                              <TableRow
+                                key={product.productId || `row-${index}`}
+                              >
+                                <TableCell className="font-normal tracking-widest w-20 text-center text-base">
+                                  {index + 1}
+                                </TableCell>
+                                <form.Field name={`products[${index}].name`}>
+                                  {(nameField) => (
+                                    <TableCell className="font-normal tracking-widest w-full text-base">
+                                      <div className="flex flex-col justify-start min-w-0">
+                                        <Combobox
+                                          items={productData.map(
+                                            (p: any) => p.name,
+                                          )}
+                                          filter={multiWordFilter}
+                                          onValueChange={(value: any) => {
+                                            nameField.handleChange(value);
+                                            const selectedProduct =
+                                              productData.find(
+                                                (p: any) => p.name === value,
+                                              );
+                                            if (selectedProduct) {
+                                              form.setFieldValue(
+                                                `products[${index}].no`,
+                                                index + 1,
+                                              );
+                                              form.setFieldValue(
+                                                `products[${index}].productId`,
+                                                selectedProduct._id || "",
+                                              );
+                                              form.setFieldValue(
+                                                `products[${index}].price`,
+                                                selectedProduct.price,
+                                              );
+                                              form.setFieldValue(
+                                                `products[${index}].cost`,
+                                                selectedProduct.cost,
+                                              );
+                                              const qty =
+                                                form.getFieldValue(
+                                                  `products[${index}].quantity`,
+                                                ) || 1;
+                                              form.setFieldValue(
+                                                `products[${index}].quantity`,
+                                                qty,
+                                              );
+                                              form.setFieldValue(
+                                                `products[${index}].total`,
+                                                parseFloat(
+                                                  (
+                                                    (selectedProduct.price ||
+                                                      0) * qty
+                                                  ).toFixed(2),
+                                                ),
+                                              );
+                                            } else {
+                                              form.setFieldValue(
+                                                `products[${index}].productId`,
+                                                "",
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          <ComboboxInput
+                                            value={nameField.state.value ?? ""}
+                                            onChange={(e) => {
+                                              nameField.handleChange(
+                                                e.target.value,
+                                              );
+                                            }}
+                                            placeholder="เลือกหรือค้นหาสินค้า"
+                                            className="h-9 font-normal tracking-widest"
+                                          />
+                                          <ComboboxContent>
+                                            <ComboboxEmpty>
+                                              ไม่พบสินค้า
+                                            </ComboboxEmpty>
+                                            <ComboboxList>
+                                              {(item, index) => (
+                                                <ComboboxItem
+                                                  key={index}
+                                                  value={item}
+                                                >
+                                                  {item}
+                                                </ComboboxItem>
+                                              )}
+                                            </ComboboxList>
+                                          </ComboboxContent>
+                                        </Combobox>
+                                      </div>
+                                    </TableCell>
+                                  )}
+                                </form.Field>
+                                <form.Field
+                                  name={`products[${index}].quantity`}
+                                >
+                                  {(qtyField) => (
+                                    <TableCell className="w-28 font-normal tracking-widest">
+                                      <Input
+                                        type="number"
+                                        value={qtyField.state.value ?? 0}
+                                        onChange={(e) => {
+                                          const newQty =
+                                            parseFloat(e.target.value) || 0;
+                                          qtyField.handleChange(newQty);
+                                          const currentPrice =
                                             form.getFieldValue(
-                                              `products[${index}].quantity`,
-                                            ) || 1;
-                                          form.setFieldValue(
-                                            `products[${index}].quantity`,
-                                            qty,
-                                          );
+                                              `products[${index}].price`,
+                                            ) || 0;
                                           form.setFieldValue(
                                             `products[${index}].total`,
                                             parseFloat(
-                                              (
-                                                (selectedProduct.price || 0) *
-                                                qty
-                                              ).toFixed(2),
+                                              (currentPrice * newQty).toFixed(
+                                                2,
+                                              ),
                                             ),
                                           );
-                                        } else {
-                                          form.setFieldValue(
-                                            `products[${index}].productId`,
-                                            "",
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      <ComboboxInput
-                                        value={nameField.state.value ?? ""}
-                                        onChange={(e) => {
-                                          nameField.handleChange(
-                                            e.target.value,
-                                          );
+                                          //
                                         }}
-                                        placeholder="เลือกหรือค้นหาสินค้า"
-                                        className="h-9 font-normal tracking-widest"
+                                        className="h-10 w-20 font-normal tracking-widest"
+                                        min="0"
+                                        step="any"
                                       />
-                                      <ComboboxContent>
-                                        <ComboboxEmpty>
-                                          ไม่พบสินค้า
-                                        </ComboboxEmpty>
-                                        <ComboboxList>
-                                          {(item, index) => (
-                                            <ComboboxItem
-                                              key={index}
-                                              value={item}
-                                            >
-                                              {item}
-                                            </ComboboxItem>
-                                          )}
-                                        </ComboboxList>
-                                      </ComboboxContent>
-                                    </Combobox>
-                                  </div>
-                                </TableCell>
+                                    </TableCell>
+                                  )}
+                                </form.Field>
+                                <form.Field name={`products[${index}].cost`}>
+                                  {(costField) => (
+                                    <TableCell className="w-28 font-normal tracking-widest">
+                                      <Input
+                                        type="number"
+                                        value={costField.state.value ?? 0}
+                                        onChange={(e) =>
+                                          costField.handleChange(
+                                            parseFloat(e.target.value) || 0,
+                                          )
+                                        }
+                                        className="h-10 w-20 font-normal tracking-widest  "
+                                        min="0"
+                                        step="any"
+                                      />
+                                    </TableCell>
+                                  )}
+                                </form.Field>
+                                <form.Field name={`products[${index}].price`}>
+                                  {(priceField) => (
+                                    <TableCell className="w-60">
+                                      <div className="flex items-center gap-2">
+                                        <Input
+                                          type="number"
+                                          value={priceField.state.value ?? 0}
+                                          onChange={(e) => {
+                                            const newPrice =
+                                              parseFloat(e.target.value) || 0;
+                                            priceField.handleChange(newPrice);
+                                            const currentQty =
+                                              form.getFieldValue(
+                                                `products[${index}].quantity`,
+                                              ) || 0;
+                                            form.setFieldValue(
+                                              `products[${index}].total`,
+                                              parseFloat(
+                                                (newPrice * currentQty).toFixed(
+                                                  2,
+                                                ),
+                                              ),
+                                            );
+                                          }}
+                                          min="0"
+                                          step="any"
+                                          className="h-9 w-32 font-normal tracking-widest "
+                                        />
+                                      </div>
+                                    </TableCell>
+                                  )}
+                                </form.Field>
+                                <form.Field name={`products[${index}].total`}>
+                                  {(totalField) => (
+                                    <TableCell className="w-56 min-w-56 text-right">
+                                      <div className="flex items-center justify-end gap-2">
+                                        <span className="text-base font-normal tracking-widest whitespace-nowrap">
+                                          {(
+                                            totalField.state.value || 0
+                                          ).toFixed(2)}
+                                        </span>
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="icon"
+                                          onClick={() => removeProduct(index)}
+                                          disabled={
+                                            field.state.value.length <= 1
+                                          }
+                                          className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
+                                        >
+                                          <TrashSimpleIcon
+                                            size={18}
+                                            weight="duotone"
+                                            color="white"
+                                            className="text-red-400"
+                                          />
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  )}
+                                </form.Field>
+                              </TableRow>
+                            ),
+                          )
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={7}
+                              className="text-center font-normal tracking-widest text-muted-foreground"
+                            >
+                              ไม่มีสินค้า กดปุ่ม "เพิ่มสินค้า" เพื่อเริ่มต้น
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    )}
+                  </form.Field>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* มือถือ: รายการเป็นการ์ด */}
+            <div className="flex flex-col gap-3 md:hidden">
+              <form.Field name="products" mode="array">
+                {(field) => (
+                  <>
+                    {(field.state.value || []).map(
+                      (product: any, index: number) => (
+                        <div
+                          key={product.productId || `card-${index}`}
+                          className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-background/40 p-3"
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="mt-2.5 grid size-7 shrink-0 place-items-center rounded-lg bg-accent text-sm">
+                              {index + 1}
+                            </span>
+                            <form.Field name={`products[${index}].name`}>
+                              {(nameField) => (
+                                <div className="min-w-0 flex-1">
+                                  <Combobox
+                                    items={productData.map((p: any) => p.name)}
+                                    filter={multiWordFilter}
+                                    onValueChange={(value: any) => {
+                                      nameField.handleChange(value);
+                                      applyProductAt(index, value);
+                                    }}
+                                  >
+                                    <ComboboxInput
+                                      value={nameField.state.value ?? ""}
+                                      onChange={(e) =>
+                                        nameField.handleChange(e.target.value)
+                                      }
+                                      aria-label={`ชื่อสินค้า รายการ ${index + 1}`}
+                                      placeholder="พิมพ์ชื่อสินค้า เช่น กุ้ง 30"
+                                      showTrigger={false}
+                                      className="h-11 text-base font-normal"
+                                    />
+                                    <ComboboxContent>
+                                      <ComboboxEmpty>
+                                        ไม่พบสินค้า — พิมพ์ชื่อเองได้
+                                      </ComboboxEmpty>
+                                      <ComboboxList>
+                                        {(item, i) => (
+                                          <ComboboxItem
+                                            key={i}
+                                            value={item}
+                                            className="min-h-11"
+                                          >
+                                            {item}
+                                          </ComboboxItem>
+                                        )}
+                                      </ComboboxList>
+                                    </ComboboxContent>
+                                  </Combobox>
+                                </div>
                               )}
                             </form.Field>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              aria-label={`ลบรายการ ${index + 1}`}
+                              onClick={() => removeProduct(index)}
+                              disabled={field.state.value.length <= 1}
+                              className="size-11 shrink-0 text-red-400 hover:text-red-300 disabled:opacity-40"
+                            >
+                              <TrashSimpleIcon size={20} weight="duotone" />
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
                             <form.Field name={`products[${index}].quantity`}>
                               {(qtyField) => (
-                                <TableCell className="w-28 font-normal tracking-widest">
+                                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                                  จำนวน
                                   <Input
                                     type="number"
-                                    value={qtyField.state.value ?? 0}
+                                    inputMode="decimal"
+                                    value={qtyField.state.value || ""}
+                                    placeholder="0"
                                     onChange={(e) => {
-                                      const newQty =
-                                        parseFloat(e.target.value) || 0;
-                                      qtyField.handleChange(newQty);
-                                      const currentPrice =
-                                        form.getFieldValue(
-                                          `products[${index}].price`,
-                                        ) || 0;
-                                      form.setFieldValue(
-                                        `products[${index}].total`,
-                                        parseFloat(
-                                          (currentPrice * newQty).toFixed(2),
-                                        ),
+                                      qtyField.handleChange(
+                                        parseFloat(e.target.value) || 0,
                                       );
-                                      //
+                                      recalcTotal(index);
                                     }}
-                                    className="h-10 w-20 font-normal tracking-widest"
+                                    className="h-11 text-right text-base text-foreground"
                                     min="0"
                                     step="any"
                                   />
-                                </TableCell>
+                                </label>
+                              )}
+                            </form.Field>
+                            <form.Field name={`products[${index}].price`}>
+                              {(priceField) => (
+                                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                                  ราคาขาย
+                                  <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    value={priceField.state.value || ""}
+                                    placeholder="0"
+                                    onChange={(e) => {
+                                      priceField.handleChange(
+                                        parseFloat(e.target.value) || 0,
+                                      );
+                                      recalcTotal(index);
+                                    }}
+                                    className="h-11 text-right text-base text-foreground"
+                                    min="0"
+                                    step="any"
+                                  />
+                                </label>
                               )}
                             </form.Field>
                             <form.Field name={`products[${index}].cost`}>
                               {(costField) => (
-                                <TableCell className="w-28 font-normal tracking-widest">
+                                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                                  ทุน
                                   <Input
                                     type="number"
-                                    value={costField.state.value ?? 0}
+                                    inputMode="decimal"
+                                    value={costField.state.value || ""}
+                                    placeholder="0"
                                     onChange={(e) =>
                                       costField.handleChange(
                                         parseFloat(e.target.value) || 0,
                                       )
                                     }
-                                    className="h-10 w-20 font-normal tracking-widest  "
+                                    className="h-11 text-right text-base text-foreground"
                                     min="0"
                                     step="any"
                                   />
-                                </TableCell>
+                                </label>
                               )}
                             </form.Field>
-                            <form.Field name={`products[${index}].price`}>
-                              {(priceField) => (
-                                <TableCell className="w-60">
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="number"
-                                      value={priceField.state.value ?? 0}
-                                      onChange={(e) => {
-                                        const newPrice =
-                                          parseFloat(e.target.value) || 0;
-                                        priceField.handleChange(newPrice);
-                                        const currentQty =
-                                          form.getFieldValue(
-                                            `products[${index}].quantity`,
-                                          ) || 0;
-                                        form.setFieldValue(
-                                          `products[${index}].total`,
-                                          parseFloat(
-                                            (newPrice * currentQty).toFixed(2),
-                                          ),
-                                        );
-                                      }}
-                                      min="0"
-                                      step="any"
-                                      className="h-9 w-32 font-normal tracking-widest "
-                                    />
-                                  </div>
-                                </TableCell>
-                              )}
-                            </form.Field>
-                            <form.Field name={`products[${index}].total`}>
-                              {(totalField) => (
-                                <TableCell className="w-56 min-w-56 text-right">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span className="text-base font-normal tracking-widest whitespace-nowrap">
-                                      {(totalField.state.value || 0).toFixed(2)}
-                                    </span>
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="icon"
-                                      onClick={() => removeProduct(index)}
-                                      disabled={field.state.value.length <= 1}
-                                      className="border-0 flex bg-red-500 hover:bg-red-600 items-center justify-center cursor-pointer active:scale-95 transition-transform ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 font-normal tracking-widest"
-                                    >
-                                      <TrashSimpleIcon
-                                        size={18}
-                                        weight="duotone"
-                                        color="white"
-                                        className="text-red-400"
-                                      />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              )}
-                            </form.Field>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={7}
-                            className="text-center font-normal tracking-widest text-muted-foreground"
+                          </div>
+                          <form.Subscribe
+                            selector={(state) => state.values.products?.[index]}
                           >
-                            ไม่มีสินค้า กดปุ่ม "เพิ่มสินค้า" เพื่อเริ่มต้น
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </>
-                  )}
-                </form.Field>
-              </TableBody>
-            </Table>
+                            {(p: any) => (
+                              <div className="flex items-baseline justify-between border-t border-dashed border-border/60 pt-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  กำไร{" "}
+                                  <b className="font-semibold text-green-500">
+                                    {money(
+                                      (p?.total || 0) -
+                                        (p?.cost || 0) * (p?.quantity || 0),
+                                    )}
+                                  </b>
+                                </span>
+                                <span>
+                                  รวม{" "}
+                                  <b className="text-base font-semibold">
+                                    {money(p?.total || 0)}
+                                  </b>{" "}
+                                  บาท
+                                </span>
+                              </div>
+                            )}
+                          </form.Subscribe>
+                        </div>
+                      ),
+                    )}
+                  </>
+                )}
+              </form.Field>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addProduct}
+                className="h-12 border-dashed text-base font-normal"
+              >
+                <PlusCircleIcon size={22} weight="duotone" />
+                เพิ่มรายการ
+              </Button>
+            </div>
 
             <form.Subscribe selector={(state) => state.values.products || []}>
               {(products) => {
@@ -1254,7 +1538,7 @@ const CreateBill = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="mb-1 font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
+                      className="hidden md:inline-flex mb-1 font-normal tracking-widest cursor-pointer active:scale-95 duration-200 ease-in-out"
                       onClick={addProduct}
                     >
                       <PlusCircleIcon size={32} weight="duotone" />
@@ -1298,7 +1582,22 @@ const CreateBill = () => {
               </>
             ) : recommendedProducts?.length > 0 ? (
               <>
-                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
+                <div className="flex flex-wrap gap-2 md:hidden">
+                  {recommendedProducts.map((product: any) => (
+                    <button
+                      key={`chip-${product._id}`}
+                      type="button"
+                      onClick={() => addRecommended(product)}
+                      className="min-h-10 rounded-full border border-border/60 bg-background/50 px-4 text-sm active:scale-95 transition-transform"
+                    >
+                      {product.name}{" "}
+                      <span className="text-muted-foreground">
+                        {product.price ?? 0}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden md:flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
                   <span className="text-base font-normal tracking-widest text-foreground">
                     สินค้าแนะนำ
                   </span>
@@ -1306,7 +1605,7 @@ const CreateBill = () => {
                     {recommendedProducts.length} รายการ
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {recommendedProducts.map((product: any) => (
                     <div
                       key={product._id}
@@ -1324,76 +1623,8 @@ const CreateBill = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          const currentProducts =
-                            form.getFieldValue("products") || [];
-
-                          // หารายการว่างแรก
-                          const emptyIndex = currentProducts.findIndex(
-                            (p: any) => !p.name || p.name === "",
-                          );
-
-                          // ถ้ามีรายการว่าง ให้แทนที่รายการนั้น
-                          if (emptyIndex !== -1) {
-                            form.setFieldValue(
-                              `products[${emptyIndex}].productId`,
-                              product._id || "",
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].name`,
-                              product.name,
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].cost`,
-                              product.cost || 0,
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].price`,
-                              product.price || 0,
-                            );
-                            const emptyQty =
-                              currentProducts[emptyIndex]?.quantity || 1;
-                            form.setFieldValue(
-                              `products[${emptyIndex}].quantity`,
-                              emptyQty,
-                            );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].total`,
-                              parseFloat(
-                                ((product.price || 0) * emptyQty).toFixed(2),
-                              ),
-                            );
-                            toast.success(
-                              `เพิ่ล "${product.name}" เข้ารายการแล้ว`,
-                            );
-                            return;
-                          }
-
-                          // ถ้าไม่มีรายการว่าง ตรวจสอบจำนวน
-                          if (currentProducts.length >= 12) {
-                            toast.error(
-                              "ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ",
-                            );
-                            return;
-                          }
-
-                          form.setFieldValue("products", [
-                            ...currentProducts,
-                            {
-                              no: currentProducts.length + 1,
-                              productId: product._id || "",
-                              name: product.name,
-                              quantity: 1,
-                              cost: product.cost || 0,
-                              price: product.price || 0,
-                              note: "",
-                              total: product.price || 0,
-                            },
-                          ]);
-                          toast.success(
-                            `เพิ่ม "${product.name}" เข้ารายการแล้ว`,
-                          );
-                        }}
+                        onClick={() => addRecommended(product)}
+                        aria-label={`เพิ่ม ${product.name}`}
                         className="shrink-0 cursor-pointer active:scale-95  ease-in-out h-8 w-8 p-0 hover:bg-primary hover:text-primary-foreground group-hover:scale-110 transition-transform duration-200 font-normal tracking-widest"
                       >
                         <PlusCircleIcon size={18} weight="duotone" />
@@ -1433,119 +1664,171 @@ const CreateBill = () => {
                   (afterDiscount + taxAmount).toFixed(2),
                 );
 
+                const costAmount = products.reduce(
+                  (sum: number, item: any) =>
+                    sum + (item.cost || 0) * (item.quantity || 0),
+                  0,
+                );
+                const profit = afterDiscount - costAmount;
+
                 return (
-                  <div className="flex justify-between mt-4">
-                    <div className="space-y-1">
-                      <div className=" grid grid-cols-1">
-                        <form.Field name="billNote">
-                          {(field) => (
-                            <Field>
-                              <FieldLabel htmlFor="billNote">
-                                หมายเหตุ
-                              </FieldLabel>
-                              <Textarea
-                                id="billNote"
-                                value={field.state.value || ""}
-                                onChange={(e) =>
-                                  field.handleChange(e.target.value)
-                                }
-                                placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"
-                                className="min-h-25 resize-none w-full"
-                              />
-                            </Field>
-                          )}
-                        </form.Field>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowExtras((x) => !x)}
+                      aria-expanded={showExtras}
+                      className="md:hidden flex min-h-12 items-center justify-between rounded-2xl border border-border/60 bg-background/40 px-4 text-left text-base"
+                    >
+                      <span>ส่วนลด · VAT · หมายเหตุ</span>
+                      <span className="text-sm text-muted-foreground">
+                        {showExtras ? "ซ่อน" : "แตะเพื่อเปิด"}
+                      </span>
+                    </button>
+                    <div
+                      className={`${showExtras ? "flex" : "hidden"} md:flex flex-col-reverse md:flex-row justify-between gap-4 md:mt-4`}
+                    >
+                      <div className="space-y-1">
+                        <div className=" grid grid-cols-1">
+                          <form.Field name="billNote">
+                            {(field) => (
+                              <Field>
+                                <FieldLabel htmlFor="billNote">
+                                  หมายเหตุ
+                                </FieldLabel>
+                                <Textarea
+                                  id="billNote"
+                                  value={field.state.value || ""}
+                                  onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                  }
+                                  placeholder="กรอกหมายเหตุเพิ่มเติม (ถ้ามี)"
+                                  className="min-h-25 resize-none w-full"
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+                        </div>
+                        <p className="text-sm font-normal tracking-widest">
+                          - ตรวจสอบความถูกต้องก่อนยืนยันออกบิล
+                        </p>
+                        <p className="text-sm font-normal tracking-widest">
+                          - ราคายังไม่รวมภาษีมูลค่าเพิ่ม (ถ้ามี)
+                        </p>
                       </div>
-                      <p className="text-sm font-normal tracking-widest">
-                        - ตรวจสอบความถูกต้องก่อนยืนยันออกบิล
-                      </p>
-                      <p className="text-sm font-normal tracking-widest">
-                        - ราคายังไม่รวมภาษีมูลค่าเพิ่ม (ถ้ามี)
-                      </p>
-                    </div>
-                    <div className="w-96 space-y-3 border rounded-lg p-4 bg-accent/30">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-normal tracking-widest">
-                          ยอดรวมก่อนส่วนลด
-                        </span>
-                        <span className="text-base font-normal tracking-widest">
-                          {subtotal.toLocaleString("th-TH", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center gap-4">
-                        <span className="text-sm font-normal tracking-widest">
-                          ส่วนลด (%)
-                        </span>
-                        <form.Field name="discountPercent">
-                          {(field) => (
-                            <Input
-                              type="number"
-                              value={field.state.value || 0}
-                              onChange={(e) =>
-                                field.handleChange(Number(e.target.value))
-                              }
-                              className="h-9 w-24 text-right font-normal tracking-widest"
-                              min="0"
-                              max="100"
-                              step="0.01"
-                            />
-                          )}
-                        </form.Field>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-normal tracking-widest">
-                          จำนวนส่วนลด
-                        </span>
-                        <span className="text-base font-normal tracking-widest">
-                          {discountAmount.toLocaleString("th-TH", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center gap-4">
-                        <span className="text-sm font-normal tracking-widest">
-                          ภาษีมูลค่าเพิ่ม (7%)
-                        </span>
-                        <div className="flex items-center gap-2">
+                      <div className="w-full md:w-96 space-y-3 border rounded-lg p-4 bg-accent/30">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-normal tracking-widest">
+                            ยอดรวมก่อนส่วนลด
+                          </span>
                           <span className="text-base font-normal tracking-widest">
-                            {taxAmount.toLocaleString("th-TH", {
+                            {subtotal.toLocaleString("th-TH", {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
                           </span>
-                          <form.Field name="includeVat">
+                        </div>
+
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm font-normal tracking-widest">
+                            ส่วนลด (%)
+                          </span>
+                          <form.Field name="discountPercent">
                             {(field) => (
-                              <Switch
-                                checked={field.state.value}
-                                onCheckedChange={(checked) =>
-                                  field.handleChange(checked)
+                              <Input
+                                type="number"
+                                value={field.state.value || 0}
+                                onChange={(e) =>
+                                  field.handleChange(Number(e.target.value))
                                 }
+                                className="h-9 w-24 text-right font-normal tracking-widest"
+                                min="0"
+                                max="100"
+                                step="0.01"
                               />
                             )}
                           </form.Field>
                         </div>
-                      </div>
 
-                      <div className="border-t pt-3 flex justify-between items-center">
-                        <span className="text-base font-normal tracking-widest">
-                          รวมสุทธิ
-                        </span>
-                        <span className="text-xl font-normal tracking-widest">
-                          {total.toLocaleString("th-TH", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-normal tracking-widest">
+                            จำนวนส่วนลด
+                          </span>
+                          <span className="text-base font-normal tracking-widest">
+                            {discountAmount.toLocaleString("th-TH", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-sm font-normal tracking-widest">
+                            ภาษีมูลค่าเพิ่ม (7%)
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base font-normal tracking-widest">
+                              {taxAmount.toLocaleString("th-TH", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </span>
+                            <form.Field name="includeVat">
+                              {(field) => (
+                                <Switch
+                                  checked={field.state.value}
+                                  onCheckedChange={(checked) =>
+                                    field.handleChange(checked)
+                                  }
+                                />
+                              )}
+                            </form.Field>
+                          </div>
+                        </div>
+
+                        <div className="border-t pt-3 flex justify-between items-center">
+                          <span className="text-base font-normal tracking-widest">
+                            รวมสุทธิ
+                          </span>
+                          <span className="text-xl font-normal tracking-widest">
+                            {total.toLocaleString("th-TH", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+
+                    {/* มือถือ: แถบยอดรวม + ปุ่มสร้างบิลติดล่างจอ */}
+                    <div className="h-24 md:hidden" aria-hidden="true" />
+                    <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border/60 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <span className="text-xs text-muted-foreground">
+                          ยอดรวม · กำไร{" "}
+                          <b className="font-semibold text-green-500">
+                            {money(profit)}
+                          </b>
+                        </span>
+                        <b className="text-xl font-semibold leading-tight">
+                          {money(total)}{" "}
+                          <span className="text-sm font-normal text-muted-foreground">
+                            บาท
+                          </span>
+                        </b>
+                      </div>
+                      <Button
+                        type="submit"
+                        form="form-create-bill"
+                        disabled={createBillMutation.isPending}
+                        className="h-12 px-6 text-base"
+                      >
+                        <FloppyDiskBackIcon size={22} weight="fill" />
+                        {createBillMutation.isPending
+                          ? "กำลังสร้าง..."
+                          : "สร้างบิล"}
+                      </Button>
+                    </div>
+                  </>
                 );
               }}
             </form.Subscribe>
