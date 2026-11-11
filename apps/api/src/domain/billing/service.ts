@@ -245,10 +245,8 @@ export async function startTrial(user: { id: string; email: string; name?: strin
   if (lic) throw new BillingError(409, "อีเมลนี้เคยใช้ PostHub แล้ว ทดลองได้ครั้งเดียว");
   const exp = trialExpiry(deps.now());
   await ph.setExpiry(user.email, exp, "trial");
-  deps
-    .telegram()
-    ?.sendText(`🎁 <b>ทดลอง PostHub ใหม่</b>\n${esc(user.email)}${user.name ? ` (${esc(user.name)})` : ""}\nหมด ${thaiDate(exp)}`)
-    .catch(() => {});
+  // แจ้งเทเลแกรมผ่าน trialTick() ที่เดียว (ทดลองจากเว็บหรือจากส่วนขยายก็แจ้งแบบเดียวกัน ไม่ซ้ำ)
+  trialTick().catch(() => {});
   return { expiresAt: exp };
 }
 
@@ -524,6 +522,33 @@ export async function morningTick() {
   ).lean<any>();
   if (prev?.value === today) return;
   await sendSummary();
+}
+
+/**
+ * ทดลอง PostHub ใหม่ → แจ้งเทเลแกรม (เรียกทุก 2 นาที)
+ * ลูกค้ากดเข้าสู่ระบบด้วย Google ในส่วนขยายครั้งแรก = เริ่มทดลองที่เซิร์ฟเวอร์ PostHub เลย Billdee เลยคอยดูรายชื่อแทน
+ */
+export async function trialTick() {
+  const tg = deps.telegram();
+  const ph = deps.posthub();
+  if (!tg || !ph) return;
+  const trials = (await ph.list()).filter((l) => l.note === "trial" && l.created_at);
+  const meta = await BillingMeta.findOne({ key: "trial_seen" }).lean<any>();
+  const seen = meta?.value ? Date.parse(meta.value) : Number.NaN;
+  if (!Number.isFinite(seen)) {
+    // ครั้งแรก: จำไว้ว่าเห็นถึงตอนนี้แล้ว ไม่ไล่แจ้งของเก่า
+    await BillingMeta.updateOne({ key: "trial_seen" }, { $set: { value: deps.now().toISOString() } }, { upsert: true });
+    return;
+  }
+  const fresh = trials.filter((t) => Date.parse(t.created_at!) > seen).sort((a, b) => Date.parse(a.created_at!) - Date.parse(b.created_at!));
+  if (!fresh.length) return;
+  // ขยับก่อนส่ง: ถ้าสองรอบทำงานพร้อมกัน รอบที่ช้ากว่าจะไม่เจอรายการเดิมซ้ำ
+  const last = fresh[fresh.length - 1]!.created_at!;
+  const moved = await BillingMeta.updateOne({ key: "trial_seen", value: meta!.value }, { $set: { value: last } });
+  if (!moved.modifiedCount) return;
+  for (const t of fresh) {
+    await tg.sendText(`🎁 <b>ทดลอง PostHub ใหม่</b>\n${esc(t.email)}\nหมด ${thaiDate(t.expires_at ?? deps.now())}`).catch(() => {});
+  }
 }
 
 export async function registerWebhook() {

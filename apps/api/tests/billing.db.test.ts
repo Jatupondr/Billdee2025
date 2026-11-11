@@ -158,6 +158,18 @@ d("billing with a database", () => {
     expect((await Payment.findById(p.id).lean<any>()).posthubError).toBeUndefined();
   });
 
+  it("new trials (from the extension or the web) reach Telegram once; old ones are not replayed", async () => {
+    licenses["old@x.co"] = { email: "old@x.co", plan: "30d", status: "active", note: "trial", created_at: "2026-11-10T00:00:00Z", expires_at: "2026-11-17T00:00:00Z" };
+    await billing.trialTick(); // first run only remembers "now"
+    expect(sent).toHaveLength(0);
+    licenses["new@x.co"] = { email: "new@x.co", plan: "30d", status: "active", note: "trial", created_at: "2026-11-11T06:00:00Z", expires_at: "2026-11-18T06:00:00Z" };
+    licenses["paid@x.co"] = { email: "paid@x.co", plan: "30d", status: "active", note: "billdee", created_at: "2026-11-11T06:00:00Z", expires_at: "2026-12-18T06:00:00Z" };
+    await billing.trialTick();
+    await billing.trialTick();
+    const texts = sent.filter((s) => s.method === "sendText").map((s) => s.body.text);
+    expect(texts).toEqual(["🎁 <b>ทดลอง PostHub ใหม่</b>\nnew@x.co\nหมด 18 พ.ย. 2569"]);
+  });
+
   it("trial: once per email, 7 days", async () => {
     const r = await billing.startTrial(user);
     expect(thaiDate(r.expiresAt)).toBe("18 พ.ย. 2569");

@@ -170,4 +170,7 @@ export function startBillingJobs() {
   const tick = () => billing.morningTick().catch((e) => console.error("morning summary failed", e instanceof Error ? e.message : e));
   setTimeout(tick, 30_000);
   setInterval(tick, 5 * 60_000);
+  const trials = () => billing.trialTick().catch((e) => console.error("trial notify failed", e instanceof Error ? e.message : e));
+  setTimeout(trials, 20_000);
+  setInterval(trials, 2 * 60_000);
 }
