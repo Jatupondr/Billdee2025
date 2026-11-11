@@ -3,7 +3,8 @@
 
 const RENDER_SCALE = 2;
 
-export async function downloadReceiptImage(billId: string, fileName?: string) {
+/** รูปใบเสร็จ (PNG) ขนาดตามหน้ากระดาษของ PDF ใบเสร็จ — ทุกหน้าต่อกันเป็นรูปเดียว */
+export async function renderReceiptBlob(billId: string): Promise<Blob> {
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -52,11 +53,19 @@ export async function downloadReceiptImage(billId: string, fileName?: string) {
     output.toBlob(resolve, "image/png"),
   );
   if (!blob) throw new Error("ไม่สามารถสร้างรูปภาพได้");
+  return blob;
+}
 
+export async function downloadReceiptImage(billId: string, fileName?: string) {
+  const blob = await renderReceiptBlob(billId);
+  saveBlob(blob, `${fileName || `BillDee_${billId}`}.png`);
+}
+
+export function saveBlob(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${fileName || `BillDee_${billId}`}.png`;
+  link.download = name;
   document.body.appendChild(link);
   link.click();
   link.remove();
