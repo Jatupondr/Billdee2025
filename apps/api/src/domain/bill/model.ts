@@ -130,6 +130,33 @@ export namespace BillModel {
 
   export const billQuery = t.Object({
     organizationId: t.Optional(t.String()),
+    status: t.Optional(
+      t.Union([
+        t.Literal("pending"),
+        t.Literal("paid"),
+        t.Literal("credit"),
+        t.Literal("canceled"),
+        t.Literal("overdue"),
+      ])
+    ),
+  });
+
+  export const billStatusDto = t.Object({
+    organizationId: t.String({ minLength: 1 }),
+    status: t.Union([
+      t.Literal("pending"),
+      t.Literal("paid"),
+      t.Literal("credit"),
+      t.Literal("canceled"),
+    ]),
+    // YYYY-MM-DD (ใช้กับเครดิต)
+    dueDate: t.Optional(t.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  });
+
+  export const billSummaryQuery = t.Object({
+    organizationId: t.String({ minLength: 1 }),
+    // YYYY-MM (เวลาไทย)
+    month: t.String({ pattern: "^\\d{4}-(0[1-9]|1[0-2])$" }),
   });
 
   // extend
@@ -149,4 +176,6 @@ export namespace BillModel {
   export type billQueryLastBillNumber = typeof billQueryLastBillNumber.static;
 
   export type billQueryWithPagination = typeof billQueryWithPagination.static;
+  export type billStatusDto = typeof billStatusDto.static;
+  export type billSummaryQuery = typeof billSummaryQuery.static;
 }

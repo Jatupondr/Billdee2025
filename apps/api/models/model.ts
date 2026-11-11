@@ -385,10 +385,17 @@ const billSchemaq = new Schema(
     note: {
       type: String,
     },
+    // pending = รอโอน · paid = โอนแล้ว · credit = เครดิต (มี dueDate) · canceled = ยกเลิก
     status: {
       type: String,
-      enum: ["pending", "paid", "canceled"],
+      enum: ["pending", "paid", "credit", "canceled"],
       default: "pending",
+    },
+    dueDate: {
+      type: Date,
+    },
+    paidAt: {
+      type: Date,
     },
 
     isDeleted: {

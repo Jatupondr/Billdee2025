@@ -78,6 +78,43 @@ export const bill = new Elysia({ prefix: "/bills" })
     }
   )
   .get(
+    "/summary",
+    async (c) => {
+      const { query, set } = c;
+      set.status = 200;
+      const data = await billService.monthSummary(query);
+      return { data, message: "Summary retrieved successfully" };
+    },
+    {
+      query: BillModel.billSummaryQuery,
+      detail: {
+        tags: ["Bill"],
+        summary: "monthly summary",
+        description: "Totals by status, profit and amount owed to each supplier for one month (Thai time)",
+      },
+      auth: true,
+    }
+  )
+  .patch(
+    "/:id/status",
+    async (c) => {
+      const { params, body, set } = c;
+      const data = await billService.setStatus(params.id, body);
+      set.status = 200;
+      return { data, message: "Bill status updated" };
+    },
+    {
+      params: BaseResponse.ParamsId,
+      body: BillModel.billStatusDto,
+      detail: {
+        tags: ["Bill"],
+        summary: "set bill status",
+        description: "pending / paid / credit (with dueDate) / canceled",
+      },
+      auth: true,
+    }
+  )
+  .get(
     "/:id",
     async (c) => {
       const { params, set } = c;

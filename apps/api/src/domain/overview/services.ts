@@ -14,6 +14,7 @@ export abstract class overviewService {
           $lte: query.endDate,
         },
         isDeleted: false,
+        status: { $ne: "canceled" }, // บิลยกเลิกไม่นับยอด
       };
 
       const bills = await Bill.find(findQuery).lean();
@@ -54,6 +55,7 @@ export abstract class overviewService {
               $lte: query.endDate,
             },
             isDeleted: false,
+            status: { $ne: "canceled" }, // บิลยกเลิกไม่นับยอด
           },
         },
         {
@@ -115,6 +117,7 @@ export abstract class overviewService {
               $lte: query.endDate,
             },
             isDeleted: false,
+            status: { $ne: "canceled" }, // บิลยกเลิกไม่นับยอด
           },
         },
         {
@@ -169,6 +172,7 @@ export abstract class overviewService {
               $lte: query.endDate,
             },
             isDeleted: false,
+            status: { $ne: "canceled" }, // บิลยกเลิกไม่นับยอด
           },
         },
         {

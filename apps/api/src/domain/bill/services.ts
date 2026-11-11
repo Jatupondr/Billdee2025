@@ -21,6 +21,14 @@ async function syncProductPrices(
   }
 }
 
+/** ตัวกรองสถานะของรายการบิล ("overdue" = เครดิตที่เลยวันครบกำหนด) */
+function statusFilter(value?: string): Record<string, unknown> {
+  if (!value) return {};
+  if (value === "overdue") return { status: "credit", dueDate: { $lt: new Date() } };
+  if (value === "pending") return { status: { $in: ["pending", null] } };
+  return { status: value };
+}
+
 export abstract class billService {
   static async create(dto: BillModel.billCreateDto) {
     try {
@@ -118,6 +126,7 @@ export abstract class billService {
           ],
         }),
         ...(organizationId && { organizationId }),
+        ...statusFilter(query.status),
         isDeleted: false,
       };
 
@@ -294,6 +303,101 @@ export abstract class billService {
     } catch (error) {
       throw error;
     }
+  }
+
+  /** เปลี่ยนสถานะบิล (B3): รอโอน / โอนแล้ว / เครดิต (มีวันครบกำหนด) / ยกเลิก */
+  static async setStatus(id: string, dto: BillModel.billStatusDto) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw status(400, "id is invalid not ObjectId");
+    }
+    if (dto.status === "credit" && !dto.dueDate) {
+      throw status(400, "กรุณาเลือกวันครบกำหนดของเครดิต");
+    }
+    const set: Record<string, unknown> = { status: dto.status };
+    const unset: Record<string, ""> = {};
+    if (dto.status === "credit") set.dueDate = new Date(`${dto.dueDate}T00:00:00+07:00`);
+    else unset.dueDate = "";
+    if (dto.status === "paid") set.paidAt = new Date();
+    else unset.paidAt = "";
+    const bill = await Bill.findOneAndUpdate(
+      { _id: id, organizationId: dto.organizationId, isDeleted: false },
+      { $set: set, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
+      { new: true }
+    ).lean();
+    if (!bill) throw status(404, "Bill not found");
+    return bill;
+  }
+
+  /** สรุปรายเดือน (B4) ตามวันที่ออกบิล เวลาไทย — บิลยกเลิกไม่นับในยอดขาย/ต้นทุน */
+  static async monthSummary(query: BillModel.billSummaryQuery) {
+    if (!mongoose.Types.ObjectId.isValid(query.organizationId)) {
+      throw status(400, "organizationId is invalid");
+    }
+    const [y, m] = query.month.split("-").map(Number);
+    const start = new Date(`${query.month}-01T00:00:00+07:00`);
+    const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+    const end = new Date(`${next}-01T00:00:00+07:00`);
+    const bills: any[] = await Bill.find(
+      {
+        organizationId: query.organizationId,
+        isDeleted: false,
+        date: { $gte: start, $lt: end },
+      },
+      {
+        billNumber: 1, date: 1, name_customer: 1, total: 1, cost: 1, status: 1,
+        dueDate: 1, paidAt: 1, products: 1,
+      }
+    )
+      .sort({ date: 1, createdAt: 1 })
+      .limit(5000)
+      .lean();
+
+    const now = Date.now();
+    const r2 = (n: number) => Math.round(n * 100) / 100;
+    const byStatus: Record<string, { count: number; total: number }> = {
+      pending: { count: 0, total: 0 },
+      paid: { count: 0, total: 0 },
+      credit: { count: 0, total: 0 },
+      canceled: { count: 0, total: 0 },
+    };
+    const overdue = { count: 0, total: 0 };
+    const suppliers = new Map<string, { supplier: string; count: number; total: number }>();
+    let sales = 0;
+    let cost = 0;
+    for (const b of bills) {
+      const st = byStatus[b.status] ? b.status : "pending";
+      byStatus[st].count += 1;
+      byStatus[st].total = r2(byStatus[st].total + (b.total || 0));
+      if (st === "canceled") continue;
+      sales += b.total || 0;
+      cost += b.cost || 0;
+      if (st === "credit" && b.dueDate && new Date(b.dueDate).getTime() < now) {
+        overdue.count += 1;
+        overdue.total = r2(overdue.total + (b.total || 0));
+      }
+      for (const line of b.products || []) {
+        const name = (line.supplier || "").trim();
+        if (!name) continue;
+        const row = suppliers.get(name) || { supplier: name, count: 0, total: 0 };
+        row.count += 1;
+        row.total = r2(row.total + (line.cost || 0) * (line.quantity || 0));
+        suppliers.set(name, row);
+      }
+    }
+    return {
+      month: query.month,
+      totals: {
+        bills: bills.length - byStatus.canceled.count,
+        sales: r2(sales),
+        cost: r2(cost),
+        profit: r2(sales - cost),
+        outstanding: r2(byStatus.pending.total + byStatus.credit.total),
+      },
+      byStatus,
+      overdue,
+      suppliers: [...suppliers.values()].sort((a, b) => b.total - a.total),
+      bills,
+    };
   }
 
   static async getLastBillNumberByOrganizationIdAndUserId(

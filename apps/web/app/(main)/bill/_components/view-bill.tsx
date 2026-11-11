@@ -22,6 +22,8 @@ import { BackspaceIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/hooks/axios";
 import { SupplierPayables } from "./supplier";
+import { BillStatusActions, BillStatusBadge } from "./status";
+import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 interface ViewBillProps {
@@ -30,6 +32,7 @@ interface ViewBillProps {
 
 const ViewBill = ({ id }: ViewBillProps) => {
   const router = useRouter();
+  const { data: activeOrg } = authClient.useActiveOrganization();
 
   const getBillById = async (billId: string) => {
     const response = await api.get(`/bills/${billId}`);
@@ -83,7 +86,12 @@ const ViewBill = ({ id }: ViewBillProps) => {
     <Card className="p-4 shadow-md border border-border/50 dark:bg-zinc-900">
       <CardHeader>
         <CardTitle className="text-2xl  font-normal tracking-widest">
-          รายละเอียดบิล #{bill.billNumber}
+          รายละเอียดบิล #{bill.billNumber}{" "}
+          <BillStatusBadge
+            status={bill.status}
+            dueDate={bill.dueDate}
+            className="align-middle text-sm"
+          />
         </CardTitle>
         <CardDescription className=" font-normal tracking-widest">
           ข้อมูลบิลฉบับนี้
@@ -112,6 +120,14 @@ const ViewBill = ({ id }: ViewBillProps) => {
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* สถานะบิล (B3) */}
+        <div className="space-y-1.5">
+          <span className="text-sm font-normal tracking-widest text-muted-foreground">
+            สถานะการโอน
+          </span>
+          <BillStatusActions bill={bill} organizationId={activeOrg?.id} />
+        </div>
+
         {/* ข้อมูลทั่วไป */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">

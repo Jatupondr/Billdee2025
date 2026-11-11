@@ -38,6 +38,7 @@ import { authClient } from "@/lib/auth-client";
 import api from "@/hooks/axios";
 import { useRouter } from "next/navigation";
 import DeleteBillDialog from "./delete-bill-dialog";
+import { BillStatusBadge } from "./status";
 import ShowSubproDialog from "./show-subpro-dialog";
 import { downloadReceiptImage } from "@/lib/receipt-image";
 import { toast } from "sonner";
@@ -48,6 +49,7 @@ interface Bill {
   name_customer: string;
   total: number;
   status: string;
+  dueDate?: string;
   createdAt: string;
   updatedAt: string;
   date: string;
@@ -67,9 +69,11 @@ const Bill = () => {
   const { data: session, isPending: isLoadingSession } =
     authClient.useSession();
 
+  // ตัวกรองสถานะ (B3): "" = ทั้งหมด
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const getBills = async (page: number, pageSize: number, search: string) => {
     const response = await api.get(
-      `/bills?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}`,
+      `/bills?page=${page}&pageSize=${pageSize}&search=${search}&organizationId=${activeOrg?.id}${statusFilter ? `&status=${statusFilter}` : ""}`,
     );
     return response.data;
   };
@@ -135,6 +139,17 @@ const Bill = () => {
           }) || "0.00"}{" "}
           ฿
         </span>
+      ),
+    },
+    {
+      header: "สถานะ",
+      accessorKey: "status",
+      size: 110,
+      cell: ({ row }) => (
+        <BillStatusBadge
+          status={row.original.status}
+          dueDate={row.original.dueDate}
+        />
       ),
     },
     // {
@@ -310,7 +325,7 @@ const Bill = () => {
   ];
 
   const { data: billsData, isLoading: isLoadingBills } = useQuery<any>({
-    queryKey: ["bills", debouncedSearch, page, pageSize],
+    queryKey: ["bills", debouncedSearch, page, pageSize, statusFilter],
     queryFn: () => getBills(page, pageSize, debouncedSearch),
   });
 
@@ -366,6 +381,39 @@ const Bill = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+            </div>
+
+            <div
+              role="tablist"
+              aria-label="กรองตามสถานะ"
+              className="flex gap-2 overflow-x-auto pb-1"
+            >
+              {[
+                ["", "ทั้งหมด"],
+                ["pending", "รอโอน"],
+                ["credit", "เครดิต"],
+                ["overdue", "เลยกำหนด"],
+                ["paid", "โอนแล้ว"],
+                ["canceled", "ยกเลิก"],
+              ].map(([value, label]) => (
+                <button
+                  key={value || "all"}
+                  type="button"
+                  role="tab"
+                  aria-selected={statusFilter === value}
+                  onClick={() => {
+                    setStatusFilter(value);
+                    setPage(1);
+                  }}
+                  className={`min-h-9 shrink-0 rounded-full border px-4 text-sm ${
+                    statusFilter === value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:bg-accent"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             {isLoadingBills ? (

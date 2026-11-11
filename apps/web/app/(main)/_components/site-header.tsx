@@ -81,6 +81,8 @@ const SiteHeader = () => {
         return "โปรแกรม affiliate";
       case "Bill Expense":
         return "บิลค่าใช้จ่าย";
+      case "Summary":
+        return "สรุปรายเดือน";
       default:
         return t;
     }

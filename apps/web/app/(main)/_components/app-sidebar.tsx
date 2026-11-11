@@ -54,6 +54,12 @@ const data = {
       isActive: false,
     },
     {
+      title: "สรุปรายเดือน",
+      url: "/summary",
+      icon: ChartBarIcon,
+      isActive: false,
+    },
+    {
       title: "บิลค่าใช้จ่าย",
       url: "/bill-expense",
       icon: WalletIcon,
