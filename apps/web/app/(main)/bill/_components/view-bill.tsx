@@ -24,6 +24,7 @@ import api from "@/hooks/axios";
 import { SupplierPayables } from "./supplier";
 import { BillStatusActions, BillStatusBadge } from "./status";
 import { CopyForCustomerButton } from "./customer-copy";
+import { useChatSettings } from "@/lib/chat-bill";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
@@ -34,6 +35,7 @@ interface ViewBillProps {
 const ViewBill = ({ id }: ViewBillProps) => {
   const router = useRouter();
   const { data: activeOrg } = authClient.useActiveOrganization();
+  const chatSettings = useChatSettings(activeOrg?.id);
 
   const getBillById = async (billId: string) => {
     const response = await api.get(`/bills/${billId}`);
@@ -128,7 +130,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
           </span>
           <BillStatusActions bill={bill} organizationId={activeOrg?.id} />
           <div className="mt-1 flex flex-wrap gap-2">
-            <CopyForCustomerButton bill={bill} org={activeOrg as any} />
+            <CopyForCustomerButton bill={bill} org={activeOrg as any} settings={chatSettings} />
             <button
               type="button"
               onClick={() => router.push(`/bill/${id}/done` as any)}

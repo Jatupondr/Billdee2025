@@ -41,6 +41,7 @@ import { useRouter } from "next/navigation";
 import DeleteBillDialog from "./delete-bill-dialog";
 import { StatusChoices, StatusMenu, useSetStatus } from "./status";
 import { copyBillForCustomer } from "./customer-copy";
+import { useChatSettings } from "@/lib/chat-bill";
 import ShowSubproDialog from "./show-subpro-dialog";
 import { downloadReceiptImage } from "@/lib/receipt-image";
 import { toast } from "sonner";
@@ -68,6 +69,7 @@ const Bill = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
+  const chatSettings = useChatSettings(activeOrg?.id);
   const { data: session, isPending: isLoadingSession } =
     authClient.useSession();
 
@@ -161,7 +163,7 @@ const Bill = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
-                    copyBillForCustomer(b as any, activeOrg as any)
+                    copyBillForCustomer(b as any, activeOrg as any, chatSettings)
                   }
                   className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
                 >

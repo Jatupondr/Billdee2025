@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import api from "@/hooks/axios";
 import { authClient } from "@/lib/auth-client";
 import { renderBillImage } from "@/lib/bill-image";
+import { bankLogoUrl, useBillTemplate, resolveChatSettings } from "@/lib/chat-bill";
 import { saveBlob } from "@/lib/receipt-image";
 import { cn } from "@/lib/utils";
 import { customerBillText } from "./customer-copy";
@@ -27,6 +28,8 @@ export default function BillDone({ id }: { id: string }) {
     enabled: !!id,
   });
   const bill = data?.data;
+  const { data: template, isFetched: templateReady } = useBillTemplate(activeOrg?.id);
+  const cs = resolveChatSettings(template);
 
   const [blob, setBlob] = useState<Blob | null>(null);
   const [imgUrl, setImgUrl] = useState<string>("");
@@ -34,12 +37,32 @@ export default function BillDone({ id }: { id: string }) {
   const [canShareText, setCanShareText] = useState(false);
 
   // รูปบิล: วาดใหม่เมื่อข้อมูลบิล/ร้านพร้อม (สถานะเปลี่ยนไม่ต้องวาดใหม่)
-  const imageKey = bill ? JSON.stringify([bill.products, bill.total, bill.discount, bill.vat, shop?.name, shop?.account_no]) : "";
+  const imageKey = bill
+    ? JSON.stringify([bill.products, bill.total, bill.discount, bill.vat, shop?.name, shop?.account_no, shop?.prompt_pay, cs])
+    : "";
   useEffect(() => {
-    if (!bill || !shop) return;
+    if (!bill || !shop || !templateReady) return;
     let url = "";
     let cancelled = false;
-    renderBillImage(bill, shop)
+    const qr =
+      cs.showQr && shop.prompt_pay
+        ? api.get(`/report/promptpay-qr/${id}`).then((r) => r.data?.data ?? null).catch(() => null)
+        : Promise.resolve(null);
+    qr.then((qrDataUrl: string | null) =>
+      renderBillImage(bill, shop, {
+        headerColor: cs.color,
+        footerText: cs.footer,
+        showPhone: cs.showPhone,
+        showUnit: cs.showUnit,
+        showBank: cs.showBank,
+        showAccountNo: cs.showAccountNo,
+        showAccountName: cs.showAccountName,
+        showPromptPay: cs.showPromptPay,
+        totalLabel: cs.totalLabel,
+        bankLogoUrl: cs.showBankLogo ? bankLogoUrl(shop.bank_name) : null,
+        qrDataUrl,
+      }),
+    )
       .then((b) => {
         if (cancelled) return;
         setBlob(b);
@@ -55,9 +78,9 @@ export default function BillDone({ id }: { id: string }) {
       if (url) URL.revokeObjectURL(url);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imageKey, !!shop]);
+  }, [imageKey, !!shop, templateReady]);
 
-  const text = useMemo(() => (bill ? customerBillText(bill, shop) : ""), [bill, shop]);
+  const text = useMemo(() => (bill ? customerBillText(bill, shop, cs) : ""), [bill, shop, imageKey]);
   const fileName = `${bill?.billNumber || "bill"}.png`;
 
   const shareImage = async () => {

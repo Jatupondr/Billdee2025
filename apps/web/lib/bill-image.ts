@@ -28,7 +28,27 @@ export type BillImageShop = {
 export type BillImageOptions = {
   headerColor?: string;
   footerText?: string;
+  showPhone?: boolean;
+  showUnit?: boolean;
+  showBank?: boolean;
+  showAccountNo?: boolean;
+  showAccountName?: boolean;
+  showPromptPay?: boolean;
+  totalLabel?: string;
+  /** รูปโลโก้ธนาคาร (URL ในเว็บเดียวกัน) */
+  bankLogoUrl?: string | null;
+  /** QR พร้อมเพย์ (data URL) */
+  qrDataUrl?: string | null;
 };
+
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
 
 const W = 720; // px (วาดที่ 2 เท่าของ 360 เพื่อความคม)
 const PAD = 40;
@@ -73,6 +93,12 @@ export async function renderBillImage(
   const family = fontFamily();
   const header = opts.headerColor || "#2563eb";
   const footer = opts.footerText ?? "ขอบคุณที่อุดหนุนครับ 🙏";
+  const show = (v: boolean | undefined) => v !== false;
+  const phone = show(opts.showPhone) ? shop?.phone : undefined;
+  const [logo, qr] = await Promise.all([
+    opts.bankLogoUrl ? loadImage(opts.bankLogoUrl) : Promise.resolve(null),
+    opts.qrDataUrl ? loadImage(opts.qrDataUrl) : Promise.resolve(null),
+  ]);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("ไม่สามารถสร้างรูปบิลได้");
@@ -94,17 +120,17 @@ export async function renderBillImage(
   // หัวบิล
   ctx.font = font(42, true);
   const shopLines = wrap(ctx, shop?.name || "ใบแจ้งยอด", inner);
-  const headH = 44 + shopLines.length * 52 + (shop?.phone ? 40 : 0) + 24;
+  const headH = 44 + shopLines.length * 52 + (phone ? 40 : 0) + 24;
   add(headH, (y) => {
     ctx.fillStyle = header;
     ctx.fillRect(0, y, W, headH);
     ctx.fillStyle = "#ffffff";
     ctx.font = font(42, true);
     shopLines.forEach((l, i) => ctx.fillText(l, PAD, y + 80 + i * 52));
-    if (shop?.phone) {
+    if (phone) {
       ctx.globalAlpha = 0.88;
       ctx.font = font(26);
-      ctx.fillText(`โทร ${shop.phone}`, PAD, y + 80 + shopLines.length * 52 - 4);
+      ctx.fillText(`โทร ${phone}`, PAD, y + 80 + shopLines.length * 52 - 4);
       ctx.globalAlpha = 1;
     }
   });
@@ -133,7 +159,8 @@ export async function renderBillImage(
     ctx.font = font(32);
     const lines = wrap(ctx, p.name as string, inner);
     const total = p.total ?? (p.price || 0) * (p.quantity || 0);
-    const h = 24 + lines.length * 42 + 44;
+    const unit = show(opts.showUnit);
+    const h = 24 + lines.length * 42 + (unit ? 44 : 0);
     add(h, (y) => {
       ctx.strokeStyle = "#e4e4e7";
       ctx.lineWidth = 2;
@@ -144,10 +171,12 @@ export async function renderBillImage(
       ctx.fillStyle = "#18181b";
       ctx.font = font(32);
       lines.forEach((l, i) => ctx.fillText(l, PAD, y + 50 + i * 42));
-      const by = y + 50 + lines.length * 42;
-      ctx.fillStyle = "#52525b";
-      ctx.font = font(28);
-      ctx.fillText(`${num(p.quantity || 0)} × ${num(p.price || 0)}`, PAD, by);
+      const by = unit ? y + 50 + lines.length * 42 : y + 50 + (lines.length - 1) * 42;
+      if (unit) {
+        ctx.fillStyle = "#52525b";
+        ctx.font = font(28);
+        ctx.fillText(`${num(p.quantity || 0)} × ${num(p.price || 0)}`, PAD, by);
+      }
       ctx.textAlign = "right";
       ctx.fillStyle = "#18181b";
       ctx.font = font(32, true);
@@ -191,19 +220,42 @@ export async function renderBillImage(
     ctx.stroke();
     ctx.fillStyle = "#15803d";
     ctx.font = font(32, true);
-    ctx.fillText("รวมโอน", bx + 28, by + 64);
+    ctx.fillText(opts.totalLabel || "รวมโอน", bx + 28, by + 64);
     ctx.textAlign = "right";
     ctx.font = font(52, true);
     ctx.fillText(`${num(bill.total || 0)} บาท`, bx + bw - 28, by + 72);
     ctx.textAlign = "left";
   });
 
-  // บัญชีธนาคาร
+  // บัญชีธนาคาร (โลโก้ + ชื่อธนาคาร แถวแรก)
+  const bankName = show(opts.showBank) ? shop?.bank_name : undefined;
   const bank: [string, string, boolean][] = [];
-  if (shop?.bank_name) bank.push(["ธนาคาร", shop.bank_name, false]);
-  if (shop?.account_no) bank.push(["เลขบัญชี", shop.account_no, true]);
-  if (shop?.account_name) bank.push(["ชื่อบัญชี", shop.account_name, false]);
-  if (shop?.prompt_pay) bank.push(["พร้อมเพย์", shop.prompt_pay, true]);
+  if (show(opts.showAccountNo) && shop?.account_no) bank.push(["เลขบัญชี", shop.account_no, true]);
+  if (show(opts.showAccountName) && shop?.account_name) bank.push(["ชื่อบัญชี", shop.account_name, false]);
+  if (opts.showPromptPay && shop?.prompt_pay) bank.push(["พร้อมเพย์", shop.prompt_pay, true]);
+  if (bankName) {
+    add(64, (y) => {
+      const ly = y + 46;
+      let x = PAD;
+      if (logo) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(PAD, y + 12, 48, 48, 10);
+        ctx.clip();
+        ctx.drawImage(logo, PAD, y + 12, 48, 48);
+        ctx.restore();
+        x = PAD + 62;
+      } else {
+        ctx.fillStyle = "#71717a";
+        ctx.font = font(30);
+        ctx.fillText("ธนาคาร", PAD, ly);
+        x = PAD + 170;
+      }
+      ctx.fillStyle = "#18181b";
+      ctx.font = font(32, true);
+      ctx.fillText(bankName, x, ly);
+    });
+  }
   if (bank.length) {
     add(16 + bank.length * 50, (y) => {
       bank.forEach(([k, v, bold], i) => {
@@ -215,6 +267,20 @@ export async function renderBillImage(
         ctx.font = font(bold ? 32 : 30, bold);
         ctx.fillText(v, PAD + 170, ly);
       });
+    });
+  }
+
+  // QR พร้อมเพย์ (ยอดตรงบิล)
+  if (qr) {
+    add(330, (y) => {
+      const size = 260;
+      const x = (W - size) / 2;
+      ctx.drawImage(qr, x, y + 20, size, size);
+      ctx.fillStyle = "#52525b";
+      ctx.font = font(24);
+      ctx.textAlign = "center";
+      ctx.fillText("สแกนจ่ายด้วยพร้อมเพย์", W / 2, y + 312);
+      ctx.textAlign = "left";
     });
   }
 

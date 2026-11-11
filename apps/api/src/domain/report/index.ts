@@ -4,7 +4,17 @@ import { BaseResponse } from "../../utils/respone";
 import { reportService } from "./services";
 
 export const report = new Elysia({ prefix: "/report" })
-  .use(betterAuth).get(
+  .use(betterAuth)
+  .get(
+    "promptpay-qr/:id",
+    async ({ params }) => ({ data: await reportService.promptPayQr(params.id) }),
+    {
+      params: BaseResponse.ParamsId,
+      detail: { tags: ["Report"], summary: "PromptPay QR (data URL) for a bill's total" },
+      auth: true,
+    },
+  )
+  .get(
   "receipt/:id",
   async ({ set, params, query }) => {
     const bill = await reportService.receipt(params.id, set, query);

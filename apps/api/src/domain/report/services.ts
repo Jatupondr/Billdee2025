@@ -19,6 +19,21 @@ async function getImageBase64(imageUrl: string): Promise<string | null> {
 }
 
 export abstract class reportService {
+  /** QR พร้อมเพย์ของบิล (ยอดตรงบิล) เป็น data URL — null ถ้าร้านยังไม่ได้ใส่พร้อมเพย์ */
+  static async promptPayQr(id: string): Promise<string | null> {
+    const bill: any = await Bill.findOne({ _id: id, isDeleted: false }, { total: 1, organizationId: 1 })
+      .populate("organizationId", "prompt_pay")
+      .lean();
+    const promptPay = bill?.organizationId?.prompt_pay;
+    if (!promptPay) return null;
+    try {
+      const QRCode = require("qrcode");
+      return await QRCode.toDataURL(generatePayload(promptPay, { amount: bill.total || 0 }), { margin: 1, width: 360 });
+    } catch {
+      return null;
+    }
+  }
+
   static async receipt(id: string, set: any, query: any) {
     try {
       const billdata:any = await Bill.findOne({ _id: id, isDeleted: false })

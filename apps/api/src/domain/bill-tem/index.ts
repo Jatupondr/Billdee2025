@@ -41,6 +41,20 @@ export const billTemplate = new Elysia({ prefix: "/bill-template" })
     }
   )
   .patch(
+    "/chat",
+    async (c) => {
+      const { body, set } = c;
+      const data = await billTemplateService.updateChat(body);
+      set.status = 200;
+      return { data, message: "Chat bill settings saved" };
+    },
+    {
+      body: BillTemplateModel.chatSettingsDto,
+      detail: { tags: ["Bill Template"], summary: "save chat bill settings" },
+      auth: true,
+    }
+  )
+  .patch(
     "/:id",
     async (c) => {
       const { params, body, set } = c;

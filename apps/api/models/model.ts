@@ -486,6 +486,11 @@ const billTemplateSchema = new Schema(
       default: 35,
     },
 
+    // รูปแบบบิลส่งแชท (รูปบิล + ข้อความ) — ไม่มีค่า = ใช้ค่าเริ่มต้นในหน้าเว็บ
+    chat: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
     organizationId: {
       type: String,
       ref: "Organization",

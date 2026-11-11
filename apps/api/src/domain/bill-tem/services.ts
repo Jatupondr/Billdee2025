@@ -26,6 +26,18 @@ export abstract class billTemplateService {
     }
   }
 
+  /** บันทึกเฉพาะ "รูปแบบบิลส่งแชท" (ไม่แตะค่าใบเสร็จ PDF) */
+  static async updateChat(dto: BillTemplateModel.chatSettingsDto) {
+    if (!mongoose.Types.ObjectId.isValid(dto.organizationId)) {
+      throw status(400, "organizationId is invalid");
+    }
+    return BillTemplate.findOneAndUpdate(
+      { organizationId: dto.organizationId },
+      { $set: { chat: dto.chat }, $setOnInsert: { type: "basic", organizationId: dto.organizationId } },
+      { new: true, upsert: true }
+    ).lean();
+  }
+
   static async update(id: string, dto: BillTemplateModel.billTemplateUpdateDto) {
     try {
       //notfound upsert if not found create new use upsert

@@ -13,6 +13,7 @@ import UserInfo from "./user-info";
 import PasswordInfo from "./password-info";
 import SubscriptionInfo from "./subscription-info";
 import BillTem from "./bill-tem";
+import ChatBillSettingsForm from "./chat-bill-settings";
 import { authClient } from "@/lib/auth-client";
 
 const Setting = () => {
@@ -75,6 +76,9 @@ const Setting = () => {
             <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="bill-format">
               รูปแบบบิล
             </TabsTrigger>
+            <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="chat-bill">
+              รูปแบบบิลส่งแชท
+            </TabsTrigger>
             {/* <TabsTrigger
               className="cursor-pointer text-lg"
               value="bill-setting"
@@ -101,6 +105,9 @@ const Setting = () => {
             </TabsContent>
             <TabsContent value="bill-format">
               <BillTem />
+            </TabsContent>
+            <TabsContent value="chat-bill">
+              <ChatBillSettingsForm />
             </TabsContent>
           </div>
         </Tabs>

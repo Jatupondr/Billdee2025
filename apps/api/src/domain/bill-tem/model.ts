@@ -44,6 +44,29 @@ export namespace BillTemplateModel {
 
   });
 
+  /** รูปแบบบิลส่งแชท */
+  export const chatSettingsDto = t.Object({
+    organizationId: t.String({ minLength: 1 }),
+    chat: t.Object({
+      useThemeColor: t.Boolean(),
+      headerColor: t.String({ pattern: "^#[0-9a-fA-F]{6}$" }),
+      showPhone: t.Boolean(),
+      showUnit: t.Boolean(),
+      showBank: t.Boolean(),
+      showBankLogo: t.Boolean(),
+      showAccountNo: t.Boolean(),
+      showAccountName: t.Boolean(),
+      showPromptPay: t.Boolean(),
+      showQr: t.Boolean(),
+      useFooterFromPdf: t.Boolean(),
+      footerText: t.String({ maxLength: 500 }),
+      totalLabel: t.String({ minLength: 1, maxLength: 30 }),
+      starTotal: t.Boolean(),
+      footerInText: t.Boolean(),
+    }),
+  });
+  export type chatSettingsDto = typeof chatSettingsDto.static;
+
   export const billResponseDto = t.Object({
     _id: t.Any(),
     type: t.String(),
