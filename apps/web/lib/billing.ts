@@ -50,7 +50,8 @@ export const thaiDate = (d: string | Date | null | undefined) =>
   d ? new Date(d).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Bangkok" }) : "-";
 
 export const daysLeft = (d: string | null | undefined) =>
-  d ? Math.max(0, Math.ceil((new Date(d).getTime() - Date.now()) / 86_400_000)) : 0;
+  // 1 ชม. เผื่อเวลาเครื่องต่างกัน: ทดลอง 7 วันที่เพิ่งเริ่มโชว์ 7 ไม่ใช่ 8
+  d ? Math.max(0, Math.ceil((new Date(d).getTime() - Date.now() - 3_600_000) / 86_400_000)) : 0;
 
 export const baht = (n: number) => n.toLocaleString("th-TH");
 
