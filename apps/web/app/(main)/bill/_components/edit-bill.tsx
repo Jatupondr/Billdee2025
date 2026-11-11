@@ -50,7 +50,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/hooks/axios";
 import {
   SupplierChip,
-  SupplierDatalist,
   SupplierPayables,
   useSuppliers,
 } from "./supplier";
@@ -329,8 +328,7 @@ const EditBill = ({ id }: EditBillProps) => {
       name: item.name,
       price: item.price ?? 0,
       cost: item.cost ?? 0,
-      supplier: item.supplier ?? "",
-    })) ?? [];
+          })) ?? [];
   const suppliers = useSuppliers(activeOrg?.id);
 
   const ListTable = [
@@ -751,10 +749,6 @@ const EditBill = ({ id }: EditBillProps) => {
                                             `products[${index}].cost`,
                                             selectedProduct.cost,
                                           );
-                                          form.setFieldValue(
-                                            `products[${index}].supplier`,
-                                            selectedProduct.supplier || "",
-                                          );
                                           const qty =
                                             form.getFieldValue(
                                               `products[${index}].quantity`,
@@ -812,6 +806,7 @@ const EditBill = ({ id }: EditBillProps) => {
                                     >
                                       {(supplierField) => (
                                         <SupplierChip
+                                          suppliers={suppliers}
                                           value={supplierField.state.value}
                                           onChange={supplierField.handleChange}
                                           label={`แพของรายการ ${index + 1}`}
@@ -1046,10 +1041,6 @@ const EditBill = ({ id }: EditBillProps) => {
                               `products[${emptyIndex}].price`,
                               product.price || 0,
                             );
-                            form.setFieldValue(
-                              `products[${emptyIndex}].supplier`,
-                              product.supplier || "",
-                            );
                             const emptyQty =
                               currentProducts[emptyIndex]?.quantity || 1;
                             form.setFieldValue(
@@ -1087,7 +1078,7 @@ const EditBill = ({ id }: EditBillProps) => {
                               price: product.price || 0,
                               note: "",
                               total: product.price || 0,
-                              supplier: product.supplier || "",
+                              supplier: "",
                             },
                           ]);
                           toast.success(
@@ -1127,7 +1118,6 @@ const EditBill = ({ id }: EditBillProps) => {
 
                 return (
                   <>
-                  <SupplierDatalist suppliers={suppliers} />
                   <SupplierPayables
                     lines={products}
                     className="mt-4 md:ml-auto md:w-96"

@@ -83,28 +83,35 @@ export function SupplierDatalist({ suppliers }: { suppliers: string[] }) {
 }
 
 /**
- * ชิป "แพ: …" ของรายการบิล — แตะแล้วพิมพ์/เลือกแพ (เปลี่ยนเฉพาะบิลนี้)
- * ว่าง = "+ ระบุแพ"
+ * ชิป "แพ: …" ของรายการบิล — ว่างไว้ได้ (ไม่เติมแพให้เอง)
+ * แตะ "+ ระบุแพ" → มีรายชื่อแพที่เคยใช้ขึ้นให้เลือกทันที · พิมพ์เพื่อค้นหา หรือพิมพ์ชื่อใหม่แล้วกด Enter
  */
 export function SupplierChip({
   value,
   onChange,
   label,
+  suppliers = [],
   className,
 }: {
   value?: string;
   onChange: (value: string) => void;
   label: string;
+  suppliers?: string[];
   className?: string;
 }) {
   const [editing, setEditing] = useState(false);
+  const [text, setText] = useState("");
   const filled = !!value?.trim();
+
   if (!editing) {
     return (
       <button
         type="button"
         aria-label={label}
-        onClick={() => setEditing(true)}
+        onClick={() => {
+          setText(value ?? "");
+          setEditing(true);
+        }}
         className={cn(
           "inline-flex min-h-8 max-w-[11rem] items-center gap-1 truncate rounded-full border px-3 text-sm",
           filled
@@ -118,30 +125,89 @@ export function SupplierChip({
       </button>
     );
   }
+
+  const q = text.trim().toLowerCase();
+  const options = suppliers.filter((s) => !q || s.toLowerCase().includes(q)).slice(0, 8);
+  const exact = suppliers.some((s) => s.toLowerCase() === q);
+  const choose = (v: string) => {
+    onChange(v.trim());
+    setEditing(false);
+  };
+
   return (
-    <input
-      autoFocus
-      list="billdee-suppliers"
-      aria-label={label}
-      defaultValue={value ?? ""}
-      placeholder="ชื่อแพ"
-      maxLength={100}
-      onBlur={(e) => {
-        onChange(e.target.value.trim());
-        setEditing(false);
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          (e.target as HTMLInputElement).blur();
-        }
-        if (e.key === "Escape") setEditing(false);
-      }}
-      className={cn(
-        "h-8 w-40 rounded-full border border-blue-500/60 bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/40",
-        className,
-      )}
-    />
+    <div className={cn("relative", className)}>
+      <input
+        autoFocus
+        role="combobox"
+        aria-expanded="true"
+        aria-label={label}
+        value={text}
+        placeholder="พิมพ์หรือเลือกแพ"
+        maxLength={100}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => setEditing(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            choose(options.length === 1 && !exact && q ? (options[0] as string) : text);
+          }
+          if (e.key === "Escape") setEditing(false);
+        }}
+        className="h-9 w-48 rounded-full border border-blue-500/60 bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/40"
+      />
+      <ul
+        role="listbox"
+        aria-label="รายชื่อแพ"
+        className="absolute right-0 z-50 mt-1 max-h-64 w-56 overflow-auto rounded-xl border border-border bg-popover p-1 text-sm shadow-lg"
+      >
+        {options.map((s) => (
+          <li key={s} role="option" aria-selected={s === value}>
+            <button
+              type="button"
+              // mousedown ก่อน blur ของช่องพิมพ์ จะได้เลือกได้
+              onMouseDown={(e) => {
+                e.preventDefault();
+                choose(s);
+              }}
+              className="flex min-h-10 w-full items-center rounded-lg px-3 text-left hover:bg-accent"
+            >
+              {s}
+            </button>
+          </li>
+        ))}
+        {q && !exact && (
+          <li role="option" aria-selected="false">
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                choose(text);
+              }}
+              className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-blue-600 hover:bg-accent dark:text-blue-300"
+            >
+              + ใช้แพใหม่ “{text.trim()}”
+            </button>
+          </li>
+        )}
+        {filled && (
+          <li role="option" aria-selected="false">
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                choose("");
+              }}
+              className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-muted-foreground hover:bg-accent"
+            >
+              ไม่ระบุแพ
+            </button>
+          </li>
+        )}
+        {options.length === 0 && !q && (
+          <li className="px-3 py-2 text-muted-foreground">ยังไม่มีแพ — พิมพ์ชื่อแพใหม่</li>
+        )}
+      </ul>
+    </div>
   );
 }
 

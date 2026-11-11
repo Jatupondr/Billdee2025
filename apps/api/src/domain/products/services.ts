@@ -2,7 +2,7 @@ import { status } from "elysia";
 import mongoose from "mongoose";
 
 import { ProductModel } from "./model";
-import { Product } from "../../../models/model";
+import { Bill, Product } from "../../../models/model";
 
 export abstract class productService {
   static async create(dto: ProductModel.productCreateDto) {
@@ -102,12 +102,25 @@ export abstract class productService {
   /** ชื่อแพทั้งหมดที่ร้านนี้เคยใส่ในสินค้า (เรียงตามตัวอักษร) */
   static async suppliers(organizationId: string): Promise<string[]> {
     if (!mongoose.Types.ObjectId.isValid(organizationId)) return [];
-    const names: string[] = await Product.distinct("supplier", {
-      organizationId,
-      isDeleted: false,
-      supplier: { $nin: [null, ""] },
-    });
-    return names.map((n) => n.trim()).filter(Boolean).sort((a, b) => a.localeCompare(b, "th"));
+    // จากสินค้า + จากรายการในบิลที่เคยออก (แพที่พิมพ์ใหม่ในบิลก็ขึ้นเป็นตัวเลือกครั้งหน้า)
+    const [fromProducts, fromBills] = await Promise.all([
+      Product.distinct("supplier", {
+        organizationId,
+        isDeleted: false,
+        supplier: { $nin: [null, ""] },
+      }) as Promise<string[]>,
+      Bill.distinct("products.supplier", {
+        organizationId,
+        isDeleted: false,
+      }) as Promise<string[]>,
+    ]);
+    const names = new Set(
+      [...fromProducts, ...fromBills]
+        .filter((n): n is string => typeof n === "string")
+        .map((n) => n.trim())
+        .filter(Boolean)
+    );
+    return [...names].sort((a, b) => a.localeCompare(b, "th"));
   }
 
   static async update(id: string, dto: ProductModel.productUpdateDto) {
