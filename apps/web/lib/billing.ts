@@ -34,7 +34,7 @@ export type BillingStatus = {
   pending: PaymentInfo | null;
   lastDecided: PaymentInfo | null;
   prices: Record<Product, Record<Cycle, number>>;
-  payTo: { ready: boolean; accountName: string; promptPay: string };
+  payTo: { ready: boolean; accountName: string; promptPay: string; bankName: string; accountNo: string };
   telegramReady: boolean;
 };
 

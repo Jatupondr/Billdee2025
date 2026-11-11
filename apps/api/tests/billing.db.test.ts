@@ -63,7 +63,7 @@ d("billing with a database", () => {
     (cloudinary.uploader as any).upload = async () => ({ secure_url: "https://res.cloudinary.test/slip.jpg" });
     billing.deps.telegram = () => tg as any;
     billing.deps.posthub = () => ph as any;
-    billing.deps.payTo = () => ({ promptPay: "0931041289", accountName: "ทดสอบ" });
+    billing.deps.payTo = () => ({ promptPay: "0931041289", accountName: "ทดสอบ", bankName: "", accountNo: "" });
     billing.deps.now = () => now;
   });
   afterAll(async () => {

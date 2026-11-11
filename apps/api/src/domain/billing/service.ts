@@ -45,7 +45,9 @@ export const deps = {
   telegram: () => Telegram.fromEnv(),
   posthub: () => Posthub.fromEnv(),
   payTo: () => ({
-    promptPay: process.env.BILLING_PROMPTPAY_ID?.trim() || "",
+    promptPay: process.env.BILLING_PROMPTPAY_ID?.trim() || "", // ไม่มี = ไม่โชว์ QR ให้โอนเข้าบัญชีแทน
+    bankName: process.env.BILLING_BANK_NAME?.trim() || "",
+    accountNo: process.env.BILLING_ACCOUNT_NO?.trim() || "",
     accountName: process.env.BILLING_ACCOUNT_NAME?.trim() || "",
   }),
   now: () => new Date(),
@@ -144,7 +146,13 @@ export async function status(user: { id: string; email: string; role?: string | 
     lastDecided:
       lastDecided && now.getTime() - new Date(lastDecided.decidedAt ?? 0).getTime() < 7 * 86_400_000 ? pick(lastDecided) : null,
     prices: PRICES,
-    payTo: { ready: !!payTo.promptPay, accountName: payTo.accountName, promptPay: maskPromptPay(payTo.promptPay) },
+    payTo: {
+      ready: !!(payTo.promptPay || payTo.accountNo),
+      accountName: payTo.accountName,
+      promptPay: maskPromptPay(payTo.promptPay),
+      bankName: payTo.bankName,
+      accountNo: formatAccountNo(payTo.accountNo),
+    },
     telegramReady: !!deps.telegram(),
   };
 }
@@ -162,6 +170,12 @@ function pick(p: any) {
     billdeeExpDate: p.billdeeExpDate ?? null,
     posthubExpDate: p.posthubExpDate ?? null,
   };
+}
+
+/** 1301294278 → 130-1-29427-8 (รูปแบบเลขบัญชี 10 หลัก) */
+function formatAccountNo(no: string): string {
+  const d = no.replace(/\D/g, "");
+  return d.length === 10 ? `${d.slice(0, 3)}-${d[3]}-${d.slice(4, 9)}-${d[9]}` : no;
 }
 
 function maskPromptPay(id: string): string {

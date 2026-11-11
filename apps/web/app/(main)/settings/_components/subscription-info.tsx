@@ -18,6 +18,7 @@ import {
   thaiDate,
   useBillingStatus,
 } from "@/lib/billing";
+import { bankLogoUrl } from "@/lib/chat-bill";
 import { cn } from "@/lib/utils";
 
 const PACKS: { key: Product; name: string; desc: string }[] = [
@@ -120,7 +121,7 @@ export default function SubscriptionInfo() {
   const qr = useQuery<{ qr: string; amount: number }>({
     queryKey: ["billing-qr", pack, cycle],
     queryFn: async () => (await api.get(`/billing/qr?product=${pack}&cycle=${cycle}`)).data.data,
-    enabled: step === "pay" && !!s?.payTo.ready,
+    enabled: step === "pay" && !!s?.payTo.promptPay,
     staleTime: Infinity,
   });
 
@@ -260,27 +261,51 @@ export default function SubscriptionInfo() {
       {!s.pending && step === "pay" && (
         <section className="flex flex-col gap-3">
           <h3 className="text-lg font-normal tracking-widest">
-            สแกนจ่าย <b>{baht(price)} บาท</b> — {planLabel(chosen, cycle)}
+            {s.payTo.promptPay ? "สแกนจ่าย" : "โอนเงิน"} <b>{baht(price)} บาท</b> — {planLabel(chosen, cycle)}
           </h3>
           <div className="flex flex-wrap items-center gap-4">
-            {qr.data ? (
-              // biome-ignore lint/performance/noImgElement: QR เป็น data URL
-              <img src={qr.data.qr} alt="QR พร้อมเพย์" className="size-44 rounded-lg bg-white p-1" />
-            ) : (
-              <div className="grid size-44 place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
-                {qr.isError ? "สร้าง QR ไม่ได้" : "กำลังสร้าง QR…"}
-              </div>
-            )}
-            <div className="text-sm leading-7">
-              พร้อมเพย์ <b>{s.payTo.promptPay}</b>
-              {s.payTo.accountName && (
-                <>
-                  <br />
-                  ชื่อบัญชี {s.payTo.accountName}
-                </>
+            {s.payTo.promptPay &&
+              (qr.data ? (
+                // biome-ignore lint/performance/noImgElement: QR เป็น data URL
+                <img src={qr.data.qr} alt="QR พร้อมเพย์" className="size-44 rounded-lg bg-white p-1" />
+              ) : (
+                <div className="grid size-44 place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                  {qr.isError ? "สร้าง QR ไม่ได้" : "กำลังสร้าง QR…"}
+                </div>
+              ))}
+            <div className="flex flex-col gap-2 text-sm leading-7" data-testid="pay-to">
+              {s.payTo.promptPay && (
+                <span>
+                  พร้อมเพย์ <b>{s.payTo.promptPay}</b> · <span className="text-muted-foreground">QR ล็อกยอดไว้แล้ว</span>
+                </span>
               )}
-              <br />
-              <span className="text-muted-foreground">QR ล็อกยอด {baht(price)} บาทไว้แล้ว</span>
+              {s.payTo.accountNo && (
+                <div className="flex items-center gap-3 rounded-xl border border-border/60 p-3">
+                  {bankLogoUrl(s.payTo.bankName) && (
+                    // biome-ignore lint/performance/noImgElement: โลโก้ธนาคารในเว็บ
+                    <img src={bankLogoUrl(s.payTo.bankName) as string} alt="" className="size-10 rounded-full" />
+                  )}
+                  <div className="leading-6">
+                    <span className="text-muted-foreground">{s.payTo.bankName}</span>
+                    <br />
+                    <b className="text-lg tracking-wide">{s.payTo.accountNo}</b>{" "}
+                    <button
+                      type="button"
+                      className="ml-1 rounded-lg border px-2 text-xs"
+                      onClick={() =>
+                        navigator.clipboard
+                          .writeText(s.payTo.accountNo.replace(/\D/g, ""))
+                          .then(() => toast.success("คัดลอกเลขบัญชีแล้ว"))
+                          .catch(() => toast.error("คัดลอกไม่ได้"))
+                      }
+                    >
+                      คัดลอก
+                    </button>
+                  </div>
+                </div>
+              )}
+              {s.payTo.accountName && <span>ชื่อบัญชี {s.payTo.accountName}</span>}
+              <span className="font-semibold">ยอดโอน {baht(price)} บาท (โอนให้ตรงยอด)</span>
             </div>
           </div>
 
