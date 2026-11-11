@@ -11,9 +11,9 @@ export function proxy(req: NextRequest) {
 
 // ✅ ใช้ matcher เดียวจบ:
 // - กันทุกหน้า
-// - ยกเว้น: "/", "/login" (รวม subpath), ทุกไฟล์ที่มีจุด (static assets), ทั้ง _next/* และ api/*
+// - ยกเว้น: "/login" (รวม subpath), หน้าสาธารณะ "/privacy" และ "/posthub" (Google OAuth ต้องเปิดได้โดยไม่ล็อกอิน), ทุกไฟล์ที่มีจุด (static assets), ทั้ง _next/* และ api/*
 export const config = {
   matcher: [
-    "/((?!(?:api|_next|.*\\..*|login(?:/.*)?$|register(?:/.*)?$|forgot-password(?:/.*)?$|verified(?:/.*)?$|reset-password(?:/.*)?$)).*)",
+    "/((?!(?:api|_next|.*\\..*|login(?:/.*)?$|register(?:/.*)?$|forgot-password(?:/.*)?$|verified(?:/.*)?$|reset-password(?:/.*)?$|privacy(?:/.*)?$|posthub(?:/.*)?$)).*)",
   ],
 };
