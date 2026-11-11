@@ -59,7 +59,8 @@ export abstract class billService {
               organizationId: dto.organizationId,
               userId: dto.userId,
               price: product.price,
-              cost: product.cost || 0
+              cost: product.cost || 0,
+              supplier: product.supplier?.trim() ?? "",
             });
             productId = newProduct._id.toString();
           }
@@ -74,6 +75,7 @@ export abstract class billService {
             cost: product.cost || 0,
             total: product.total,
             note: product.note,
+            supplier: product.supplier?.trim() || undefined,
           });
         }
       }
@@ -211,7 +213,8 @@ export abstract class billService {
               organizationId: dto.organizationId,
               userId: dto.userId,
               price: product.price,
-              cost: product.cost || 0
+              cost: product.cost || 0,
+              supplier: product.supplier?.trim() ?? "",
             });
             productId = newProduct._id.toString();
           } else {
@@ -239,6 +242,7 @@ export abstract class billService {
             cost: product.cost || 0,
             total: product.total,
             note: product.note,
+            supplier: product.supplier?.trim() || undefined,
           });
         }
       }

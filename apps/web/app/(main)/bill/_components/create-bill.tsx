@@ -48,6 +48,12 @@ import {
 } from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/hooks/axios";
+import {
+  SupplierChip,
+  SupplierDatalist,
+  SupplierPayables,
+  useSuppliers,
+} from "./supplier";
 import { useDebounce } from "@/hooks/use-debounce";
 import { authClient } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
@@ -85,6 +91,7 @@ export const billSchema = v.object({
         price: v.number(),
         note: v.optional(v.string()),
         total: v.optional(v.number()),
+        supplier: v.optional(v.string()),
       }),
     ),
     [],
@@ -349,6 +356,7 @@ const CreateBill = () => {
             price: product.price,
             total: product.total,
             note: product.note || "",
+            supplier: product.supplier?.trim() || undefined,
           })),
           discountPercent: value.discountPercent || 0,
           taxPercent: value.taxPercent || 7,
@@ -383,7 +391,9 @@ const CreateBill = () => {
       name: item.name,
       price: item.price ?? 0,
       cost: item.cost ?? 0,
+      supplier: item.supplier ?? "",
     })) ?? [];
+  const suppliers = useSuppliers(activeOrg?.id);
 
   const ListTable = [
     "ลำดับ",
@@ -457,6 +467,10 @@ const CreateBill = () => {
     );
     form.setFieldValue(`products[${index}].price`, selectedProduct.price);
     form.setFieldValue(`products[${index}].cost`, selectedProduct.cost);
+    form.setFieldValue(
+      `products[${index}].supplier`,
+      selectedProduct.supplier || "",
+    );
     const qty = form.getFieldValue(`products[${index}].quantity`) || 1;
     form.setFieldValue(`products[${index}].quantity`, qty);
     recalcTotal(index);
@@ -482,6 +496,10 @@ const CreateBill = () => {
       form.setFieldValue(`products[${emptyIndex}].name`, product.name);
       form.setFieldValue(`products[${emptyIndex}].cost`, product.cost || 0);
       form.setFieldValue(`products[${emptyIndex}].price`, product.price || 0);
+      form.setFieldValue(
+        `products[${emptyIndex}].supplier`,
+        product.supplier || "",
+      );
       const emptyQty = currentProducts[emptyIndex]?.quantity || 1;
       form.setFieldValue(`products[${emptyIndex}].quantity`, emptyQty);
       form.setFieldValue(
@@ -506,6 +524,7 @@ const CreateBill = () => {
         price: product.price || 0,
         note: "",
         total: product.price || 0,
+        supplier: product.supplier || "",
       },
     ]);
     notifyAdded(product.name);
@@ -1163,6 +1182,10 @@ const CreateBill = () => {
                                                 `products[${index}].cost`,
                                                 selectedProduct.cost,
                                               );
+                                              form.setFieldValue(
+                                                `products[${index}].supplier`,
+                                                selectedProduct.supplier || "",
+                                              );
                                               const qty =
                                                 form.getFieldValue(
                                                   `products[${index}].quantity`,
@@ -1214,6 +1237,20 @@ const CreateBill = () => {
                                             </ComboboxList>
                                           </ComboboxContent>
                                         </Combobox>
+                                        <form.Field
+                                          name={`products[${index}].supplier`}
+                                        >
+                                          {(supplierField) => (
+                                            <SupplierChip
+                                              value={supplierField.state.value}
+                                              onChange={
+                                                supplierField.handleChange
+                                              }
+                                              label={`แพของรายการ ${index + 1}`}
+                                              className="mt-1.5 min-h-7 self-start"
+                                            />
+                                          )}
+                                        </form.Field>
                                       </div>
                                     </TableCell>
                                   )}
@@ -1419,6 +1456,17 @@ const CreateBill = () => {
                               <TrashSimpleIcon size={20} weight="duotone" />
                             </Button>
                           </div>
+                          <form.Field name={`products[${index}].supplier`}>
+                            {(supplierField) => (
+                              <div className="-mt-1 flex justify-end">
+                                <SupplierChip
+                                  value={supplierField.state.value}
+                                  onChange={supplierField.handleChange}
+                                  label={`แพของรายการ ${index + 1}`}
+                                />
+                              </div>
+                            )}
+                          </form.Field>
                           <div className="grid grid-cols-3 gap-2">
                             <form.Field name={`products[${index}].quantity`}>
                               {(qtyField) => (
@@ -1673,6 +1721,8 @@ const CreateBill = () => {
 
                 return (
                   <>
+                    <SupplierDatalist suppliers={suppliers} />
+                    <SupplierPayables lines={products} className="md:ml-auto md:w-96" />
                     <button
                       type="button"
                       onClick={() => setShowExtras((x) => !x)}

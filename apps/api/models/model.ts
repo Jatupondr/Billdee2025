@@ -206,6 +206,12 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // แพ (ผู้ขายส่ง) ที่รับสินค้านี้มา — ใช้รวมยอด "ต้องโอนให้แพ"
+    supplier: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     isRecommended: {
       type: Boolean,
       default: false,
@@ -320,6 +326,11 @@ const billSchemaq = new Schema(
         },
         note: {
           type: String,
+        },
+        // แพของรายการนี้ (คัดลอกจากสินค้า แก้เฉพาะบิลนี้ได้)
+        supplier: {
+          type: String,
+          trim: true,
         },
 
         total: {

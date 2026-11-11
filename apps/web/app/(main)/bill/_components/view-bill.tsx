@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BackspaceIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/hooks/axios";
+import { SupplierPayables } from "./supplier";
 import { useRouter } from "next/navigation";
 
 interface ViewBillProps {
@@ -186,6 +187,11 @@ const ViewBill = ({ id }: ViewBillProps) => {
                   </TableCell>
                   <TableCell className="font-normal tracking-widest text-base">
                     {product.name}
+                    {product.supplier && (
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        · {product.supplier}
+                      </span>
+                    )}
                     {product.note && (
                       <div className="text-sm font-normal tracking-widest text-muted-foreground mt-1">
                         {product.note}
@@ -221,6 +227,14 @@ const ViewBill = ({ id }: ViewBillProps) => {
             )}
           </TableBody>
         </Table>
+
+        {/* ต้องโอนให้แพ (B2) */}
+        <SupplierPayables
+          lines={bill.products}
+          bill={{ billNumber: bill.billNumber, customer: bill.name_customer }}
+          copyable
+          className="mt-4 md:ml-auto md:w-96"
+        />
 
         {/* หมายเหตุและสรุปยอด */}
         <div className="flex justify-between mt-4">

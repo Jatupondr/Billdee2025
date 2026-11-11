@@ -26,6 +26,7 @@ export namespace BillModel {
         cost: t.Optional(t.Number()),
         total: t.Number(),
         note: t.Optional(t.String()),
+        supplier: t.Optional(t.String({ maxLength: 100 })),
       })
     ),
     customerId: t.String(),
@@ -76,6 +77,7 @@ export namespace BillModel {
         cost: t.Optional(t.Number()),
         total: t.Number(),
         note: t.Optional(t.String()),
+        supplier: t.Optional(t.String({ maxLength: 100 })),
       })
     ),
     customerId: t.String(),

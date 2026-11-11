@@ -19,6 +19,7 @@ export abstract class productService {
         description: dto.description,
         price: dto.price,
         cost: dto.cost,
+        supplier: dto.supplier?.trim() ?? "",
         organizationId: dto.organizationId,
         userId: dto.userId,
         isRecommended: dto.isRecommended,
@@ -96,6 +97,17 @@ export abstract class productService {
     } catch (error) {
       throw error;
     }
+  }
+
+  /** ชื่อแพทั้งหมดที่ร้านนี้เคยใส่ในสินค้า (เรียงตามตัวอักษร) */
+  static async suppliers(organizationId: string): Promise<string[]> {
+    if (!mongoose.Types.ObjectId.isValid(organizationId)) return [];
+    const names: string[] = await Product.distinct("supplier", {
+      organizationId,
+      isDeleted: false,
+      supplier: { $nin: [null, ""] },
+    });
+    return names.map((n) => n.trim()).filter(Boolean).sort((a, b) => a.localeCompare(b, "th"));
   }
 
   static async update(id: string, dto: ProductModel.productUpdateDto) {

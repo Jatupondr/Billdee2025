@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import api from "@/hooks/axios";
+import { SupplierDatalist, useSuppliers } from "../../bill/_components/supplier";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -46,6 +47,7 @@ export const productSchema = v.object({
     v.number("กรุณากรอกราคาต้นทุน"),
     v.minValue(0, "ราคาต้องไม่น้อยกว่า 0")
   ),
+  supplier: v.optional(v.pipe(v.string(), v.maxLength(100, "ชื่อแพยาวเกินไป"))),
   description: v.optional(v.string("")),
   isRecommended: v.optional(v.boolean()),
   updatedBy: v.string("กรุณากรอกชื่อผู้แก้ไข"),
@@ -75,6 +77,8 @@ const EditProductModal = ({
 }: EditProductModalProps) => {
   const queryClient = useQueryClient();
   const { data: session, isPending: sessionPending } = authClient.useSession();
+  const { data: activeOrg } = authClient.useActiveOrganization();
+  const suppliers = useSuppliers(activeOrg?.id);
   const updateProductMutation = useMutation({
     mutationFn: async (data: ProductData & { id: string }) => {
       const response = await api.patch(`/products/${data.id}`, data);
@@ -82,6 +86,7 @@ const EditProductModal = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product-suppliers"] });
       toast.success("แก้ไขสินค้าสำเร็จ", {
         position: "bottom-right",
       });
@@ -101,6 +106,7 @@ const EditProductModal = ({
       name: "",
       price: 0,
       cost: 0,
+      supplier: "",
       description: "",
       isRecommended: false,
     },
@@ -124,6 +130,7 @@ const EditProductModal = ({
       formProducts.setFieldValue("name", product.name);
       formProducts.setFieldValue("price", Number(product.price));
       formProducts.setFieldValue("cost", Number(product.cost));
+      formProducts.setFieldValue("supplier", product.supplier || "");
       formProducts.setFieldValue("description", product.description || "");
       formProducts.setFieldValue(
         "isRecommended",
@@ -190,6 +197,31 @@ const EditProductModal = ({
                     </Field>
                   );
                 }}
+              />
+              <formProducts.Field
+                name="supplier"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor="product-supplier" className="font-normal tracking-widest">
+                      แพ (ผู้ขายส่ง)
+                    </FieldLabel>
+                    <InputGroup className="h-12">
+                      <InputGroupInput
+                        id="product-supplier"
+                        name={field.name}
+                        list="billdee-suppliers"
+                        autoComplete="off"
+                        maxLength={100}
+                        value={field.state.value ?? ""}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="เช่น กันย์ (ไม่ใส่ก็ได้)"
+                        className="font-normal tracking-widest"
+                      />
+                    </InputGroup>
+                    <SupplierDatalist suppliers={suppliers} />
+                  </Field>
+                )}
               />
               <div className="grid grid-cols-2 gap-4">
                 <formProducts.Field

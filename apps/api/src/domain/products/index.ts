@@ -76,6 +76,24 @@ export const product = new Elysia({ prefix: "/products" })
     }
   )
   .get(
+    "/suppliers",
+    async (c) => {
+      const { query, set } = c;
+      set.status = 200;
+      const rows = await productService.suppliers(query.organizationId);
+      return { rows, message: "Suppliers retrieved successfully" };
+    },
+    {
+      query: ProductModel.supplierQuery,
+      detail: {
+        tags: ["Product"],
+        summary: "list of แพ (suppliers)",
+        description: "Distinct supplier names used on this organization's products",
+      },
+      auth: true,
+    }
+  )
+  .get(
     "/:id",
     async (c) => {
       const { params, set } = c;

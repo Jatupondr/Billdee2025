@@ -7,6 +7,7 @@ export namespace ProductModel {
     description: t.Optional(t.String()),
     price: t.Number({ minimum: 0, error: "Price product is required" }),
     cost: t.Number({ minimum: 0, error: "Cost product is required" }),
+    supplier: t.Optional(t.String({ maxLength: 100 })),
     isRecommended: t.Optional(t.Boolean()),
     organizationId: t.String({
       minLength: 1,
@@ -19,6 +20,7 @@ export namespace ProductModel {
     description: t.Optional(t.String()),
     price: t.Optional(t.Number({ minimum: 0 })),
     cost: t.Optional(t.Number({ minimum: 0 })),
+    supplier: t.Optional(t.String({ maxLength: 100 })),
     isRecommended: t.Optional(t.Boolean()),
     updatedBy: t.String({ minLength: 1 }),
   });
@@ -29,6 +31,7 @@ export namespace ProductModel {
     description: t.Nullable(t.String()),
     price: t.Number(),
     cost: t.Number(),
+    supplier: t.Optional(t.String()),
     userId: t.Any(),
     status: t.Boolean(),
     organizationId: t.Any(),
@@ -36,6 +39,10 @@ export namespace ProductModel {
     updatedAt: t.Date(),
     isRecommended: t.Boolean(),
     __v: t.Number(),
+  });
+
+  export const supplierQuery = t.Object({
+    organizationId: t.String({ minLength: 1 }),
   });
 
   export const productQuery = t.Object({
@@ -49,6 +56,7 @@ export namespace ProductModel {
     paginationBase,
   ]);
 
+  export type supplierQuery = typeof supplierQuery.static;
   export type productCreateDto = typeof productCreateDto.static;
   export type productUpdateDto = typeof productUpdateDto.static;
   export type productResponseDto = typeof productResponseDto.static;

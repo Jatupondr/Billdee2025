@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import api from "@/hooks/axios";
+import { SupplierDatalist, useSuppliers } from "../../bill/_components/supplier";
 import { authClient } from "@/lib/auth-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -45,6 +46,7 @@ export const productSchema = v.object({
     v.number("กรุณากรอกราคาต้นทุน"),
     v.minValue(0, "ราคาต้องไม่น้อยกว่า 0")
   ),
+  supplier: v.optional(v.pipe(v.string(), v.maxLength(100, "ชื่อแพยาวเกินไป"))),
   description: v.optional(v.string()),
   isRecommended: v.optional(v.boolean()),
 });
@@ -55,6 +57,7 @@ const defaultValues: ProductData = {
   name: "",
   price: 0,
   cost: 0,
+  supplier: "",
   description: "",
   isRecommended: false,
 };
@@ -69,6 +72,7 @@ const CreateProductModal = ({
   onOpenChange,
 }: CreateProductModalProps) => {
   const { data: activeOrg } = authClient.useActiveOrganization();
+  const suppliers = useSuppliers(activeOrg?.id);
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const queryClient = useQueryClient();
 
@@ -84,6 +88,7 @@ const CreateProductModal = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product-suppliers"] });
       toast.success("สร้างสินค้าสำเร็จ", {
         position: "bottom-right",
       });
@@ -169,6 +174,31 @@ const CreateProductModal = ({
                     </Field>
                   );
                 }}
+              />
+              <formProducts.Field
+                name="supplier"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor="product-supplier" className="font-normal tracking-widest">
+                      แพ (ผู้ขายส่ง)
+                    </FieldLabel>
+                    <InputGroup className="h-12">
+                      <InputGroupInput
+                        id="product-supplier"
+                        name={field.name}
+                        list="billdee-suppliers"
+                        autoComplete="off"
+                        maxLength={100}
+                        value={field.state.value ?? ""}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="เช่น กันย์ (ไม่ใส่ก็ได้)"
+                        className="font-normal tracking-widest"
+                      />
+                    </InputGroup>
+                    <SupplierDatalist suppliers={suppliers} />
+                  </Field>
+                )}
               />
               <div className="grid grid-cols-2 gap-4">
                 <formProducts.Field
