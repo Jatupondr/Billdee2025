@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/hooks/axios";
 import { SupplierPayables } from "./supplier";
 import { BillStatusActions, BillStatusBadge } from "./status";
+import { CopyForCustomerButton } from "./customer-copy";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
@@ -126,6 +127,7 @@ const ViewBill = ({ id }: ViewBillProps) => {
             สถานะการโอน
           </span>
           <BillStatusActions bill={bill} organizationId={activeOrg?.id} />
+          <CopyForCustomerButton bill={bill} org={activeOrg as any} className="mt-1" />
         </div>
 
         {/* ข้อมูลทั่วไป */}
@@ -247,8 +249,6 @@ const ViewBill = ({ id }: ViewBillProps) => {
         {/* ต้องโอนให้แพ (B2) */}
         <SupplierPayables
           lines={bill.products}
-          bill={{ billNumber: bill.billNumber, customer: bill.name_customer }}
-          copyable
           className="mt-4 md:ml-auto md:w-96"
         />
 

@@ -6,7 +6,6 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { toast } from "sonner";
 import api from "@/hooks/axios";
 import { cn } from "@/lib/utils";
 
@@ -43,21 +42,6 @@ export function supplierTotals(lines: SupplierLine[] | undefined): SupplierTotal
 
 const num = (n: number) =>
   n.toLocaleString("th-TH", { maximumFractionDigits: 2 });
-
-/** ข้อความส่งให้แพ: รายการ จำนวน × ทุน และยอดรวมโอน */
-export function supplierCopyText(
-  row: SupplierTotal,
-  bill: { billNumber?: string; customer?: string },
-): string {
-  const head = [bill.billNumber ? `บิล ${bill.billNumber}` : "", bill.customer ?? ""]
-    .filter(Boolean)
-    .join(" · ");
-  const items = row.lines.map(
-    (l) =>
-      `${l.name} ${num(l.quantity || 0)} × ${num(l.cost || 0)} = ${num(round2((l.cost || 0) * (l.quantity || 0)))}`,
-  );
-  return [head, ...items, `รวมโอน ${num(row.total)} บาท`].filter(Boolean).join("\n");
-}
 
 /** ชื่อแพทั้งหมดของร้าน (จากสินค้า) สำหรับให้เลือก */
 export function useSuppliers(organizationId?: string) {
@@ -214,26 +198,14 @@ export function SupplierChip({
 /** กล่อง "ต้องโอนให้แพ" (ซ่อนเมื่อไม่มีรายการไหนระบุแพ) */
 export function SupplierPayables({
   lines,
-  bill,
-  copyable = false,
   className,
 }: {
   lines: SupplierLine[] | undefined;
-  bill?: { billNumber?: string; customer?: string };
-  copyable?: boolean;
   className?: string;
 }) {
   const rows = supplierTotals(lines);
   if (rows.length === 0) return null;
   const sum = round2(rows.reduce((s, r) => s + r.total, 0));
-  const copy = async (row: SupplierTotal) => {
-    try {
-      await navigator.clipboard.writeText(supplierCopyText(row, bill ?? {}));
-      toast.success(`คัดลอกยอดของแพ ${row.supplier} แล้ว`);
-    } catch {
-      toast.error("คัดลอกไม่ได้");
-    }
-  };
   return (
     <div
       className={cn(
@@ -256,18 +228,7 @@ export function SupplierPayables({
               ({row.count} รายการ)
             </span>
           </span>
-          <span className="flex shrink-0 items-center gap-2">
-            <b className="font-semibold">{num(row.total)}</b>
-            {copyable && (
-              <button
-                type="button"
-                onClick={() => copy(row)}
-                className="min-h-8 rounded-lg border border-border bg-background px-2.5 text-xs hover:bg-accent"
-              >
-                คัดลอก
-              </button>
-            )}
-          </span>
+          <b className="shrink-0 font-semibold">{num(row.total)}</b>
         </div>
       ))}
     </div>

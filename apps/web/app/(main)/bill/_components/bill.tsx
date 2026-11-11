@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  CopyIcon,
   EyeIcon,
   PencilIcon,
   PlusCircleIcon,
@@ -39,6 +40,7 @@ import api from "@/hooks/axios";
 import { useRouter } from "next/navigation";
 import DeleteBillDialog from "./delete-bill-dialog";
 import { BillStatusBadge } from "./status";
+import { copyBillForCustomer } from "./customer-copy";
 import ShowSubproDialog from "./show-subpro-dialog";
 import { downloadReceiptImage } from "@/lib/receipt-image";
 import { toast } from "sonner";
@@ -286,6 +288,15 @@ const Bill = () => {
                 >
                   <ImageIcon size={20} weight="bold" />
                   บันทึกเป็นรูป
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    copyBillForCustomer(row.original as any, activeOrg as any)
+                  }
+                  className="text-zinc-900 dark:text-zinc-300 cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-widest"
+                >
+                  <CopyIcon size={20} weight="bold" />
+                  คัดลอกบิลส่งลูกค้า
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
