@@ -54,6 +54,7 @@ import {
   useSuppliers,
 } from "./supplier";
 import { useDebounce } from "@/hooks/use-debounce";
+import { MAX_BILL_ITEMS } from "./status";
 import { authClient } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
@@ -343,8 +344,8 @@ const EditBill = ({ id }: EditBillProps) => {
   const addProduct = () => {
     const currentProducts = form.getFieldValue("products") || [];
 
-    if (currentProducts.length >= 12) {
-      toast.error("ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ");
+    if (currentProducts.length >= MAX_BILL_ITEMS) {
+      toast.error(`ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน ${MAX_BILL_ITEMS} รายการ`);
       return;
     }
 
@@ -1060,9 +1061,9 @@ const EditBill = ({ id }: EditBillProps) => {
                           }
 
                           // ถ้าไม่มีรายการว่าง ตรวจสอบจำนวน
-                          if (currentProducts.length >= 12) {
+                          if (currentProducts.length >= MAX_BILL_ITEMS) {
                             toast.error(
-                              "ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน 12 รายการ",
+                              `ไม่สามารถเพิ่มได้ ต้องมีไม่เกิน ${MAX_BILL_ITEMS} รายการ`,
                             );
                             return;
                           }

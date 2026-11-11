@@ -21,6 +21,20 @@ async function syncProductPrices(
   }
 }
 
+/** $set/$unset สำหรับสถานะใหม่ (เครดิตต้องมีวันครบกำหนด · โอนแล้วบันทึกเวลา) */
+function statusUpdate(next: string, dueDate?: string) {
+  if (next === "credit" && !dueDate) {
+    throw status(400, "กรุณาเลือกวันครบกำหนดของเครดิต");
+  }
+  const set: Record<string, unknown> = { status: next };
+  const unset: Record<string, ""> = {};
+  if (next === "credit") set.dueDate = new Date(`${dueDate}T00:00:00+07:00`);
+  else unset.dueDate = "";
+  if (next === "paid") set.paidAt = new Date();
+  else unset.paidAt = "";
+  return { $set: set, ...(Object.keys(unset).length ? { $unset: unset } : {}) };
+}
+
 /** ตัวกรองสถานะของรายการบิล ("overdue" = เครดิตที่เลยวันครบกำหนด) */
 function statusFilter(value?: string): Record<string, unknown> {
   if (!value) return {};
@@ -310,22 +324,40 @@ export abstract class billService {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw status(400, "id is invalid not ObjectId");
     }
-    if (dto.status === "credit" && !dto.dueDate) {
-      throw status(400, "กรุณาเลือกวันครบกำหนดของเครดิต");
-    }
-    const set: Record<string, unknown> = { status: dto.status };
-    const unset: Record<string, ""> = {};
-    if (dto.status === "credit") set.dueDate = new Date(`${dto.dueDate}T00:00:00+07:00`);
-    else unset.dueDate = "";
-    if (dto.status === "paid") set.paidAt = new Date();
-    else unset.paidAt = "";
     const bill = await Bill.findOneAndUpdate(
       { _id: id, organizationId: dto.organizationId, isDeleted: false },
-      { $set: set, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
+      statusUpdate(dto.status, dto.dueDate),
       { new: true }
     ).lean();
     if (!bill) throw status(404, "Bill not found");
     return bill;
+  }
+
+  /** เปลี่ยนสถานะหลายบิลพร้อมกัน (เฉพาะบิลของร้านนี้) */
+  static async setStatusMany(dto: BillModel.billBulkStatusDto) {
+    const ids = [...new Set(dto.ids)].filter((id) => mongoose.Types.ObjectId.isValid(id));
+    if (ids.length === 0) throw status(400, "ไม่มีบิลที่เลือก");
+    const res = await Bill.updateMany(
+      { _id: { $in: ids }, organizationId: dto.organizationId, isDeleted: false },
+      statusUpdate(dto.status, dto.dueDate)
+    );
+    return { matched: res.matchedCount, modified: res.modifiedCount };
+  }
+
+  /** จำนวนบิลตามสถานะ (แถบกรองหน้ารายการบิล) */
+  static async statusCounts(query: BillModel.billCountsQuery) {
+    if (!mongoose.Types.ObjectId.isValid(query.organizationId)) return {};
+    const org = new mongoose.Types.ObjectId(query.organizationId);
+    const [rows, overdue] = await Promise.all([
+      Bill.aggregate([
+        { $match: { organizationId: org, isDeleted: false } },
+        { $group: { _id: { $ifNull: ["$status", "pending"] }, count: { $sum: 1 } } },
+      ]),
+      Bill.countDocuments({ organizationId: org, isDeleted: false, status: "credit", dueDate: { $lt: new Date() } }),
+    ]);
+    const out: Record<string, number> = { pending: 0, paid: 0, credit: 0, canceled: 0, overdue };
+    for (const r of rows) out[String(r._id)] = r.count;
+    return out;
   }
 
   /** สรุปรายเดือน (B4) ตามวันที่ออกบิล เวลาไทย — บิลยกเลิกไม่นับในยอดขาย/ต้นทุน */

@@ -83,6 +83,8 @@ const SiteHeader = () => {
         return "บิลค่าใช้จ่าย";
       case "Summary":
         return "สรุปรายเดือน";
+      case "Done":
+        return "บิลเสร็จแล้ว";
       default:
         return t;
     }

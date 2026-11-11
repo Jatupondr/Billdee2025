@@ -127,7 +127,16 @@ const ViewBill = ({ id }: ViewBillProps) => {
             สถานะการโอน
           </span>
           <BillStatusActions bill={bill} organizationId={activeOrg?.id} />
-          <CopyForCustomerButton bill={bill} org={activeOrg as any} className="mt-1" />
+          <div className="mt-1 flex flex-wrap gap-2">
+            <CopyForCustomerButton bill={bill} org={activeOrg as any} />
+            <button
+              type="button"
+              onClick={() => router.push(`/bill/${id}/done` as any)}
+              className="min-h-10 rounded-xl border border-border px-4 text-sm hover:bg-accent active:scale-95"
+            >
+              รูปบิล / ส่งต่อ
+            </button>
+          </div>
         </div>
 
         {/* ข้อมูลทั่วไป */}

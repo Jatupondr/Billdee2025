@@ -166,3 +166,167 @@ export function BillStatusActions({
     </div>
   );
 }
+
+/** รายการสินค้าสูงสุดต่อบิล — ใบเสร็จ PDF ขึ้นหน้าใหม่ให้เอง (A4 ≈ 14 รายการ/หน้าแรก) */
+export const MAX_BILL_ITEMS = 50;
+
+/** เปลี่ยนสถานะบิลเดียว หรือหลายบิล (ids) */
+export function useSetStatus(organizationId?: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { ids: string[]; status: BillStatus; dueDate?: string }) =>
+      v.ids.length === 1
+        ? (await api.patch(`/bills/${v.ids[0]}/status`, { organizationId, status: v.status, dueDate: v.dueDate })).data
+        : (await api.patch(`/bills/status`, { organizationId, ...v })).data,
+    onSuccess: (_d, v) => {
+      toast.success(
+        v.ids.length === 1
+          ? `เปลี่ยนเป็น "${STATUS_LABEL[v.status]}" แล้ว`
+          : `เปลี่ยน ${v.ids.length} บิลเป็น "${STATUS_LABEL[v.status]}" แล้ว`,
+      );
+      for (const id of v.ids) queryClient.invalidateQueries({ queryKey: ["bill", id] });
+      queryClient.invalidateQueries({ queryKey: ["bills"] });
+      queryClient.invalidateQueries({ queryKey: ["bill-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["bill-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message || "เปลี่ยนสถานะไม่สำเร็จ"),
+  });
+}
+
+const defaultDue = (dueDate?: string | Date | null) => {
+  if (dueDate) return bangkokDay(new Date(dueDate));
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  return bangkokDay(d);
+};
+
+/** ตัวเลือกสถานะ + ช่องวันครบกำหนดเมื่อเลือกเครดิต (ใช้ทั้งเมนูทีละบิลและแถบหลายบิล) */
+export function StatusChoices({
+  current,
+  dueDate,
+  disabled,
+  onPick,
+  layout = "list",
+}: {
+  current?: string;
+  dueDate?: string | Date | null;
+  disabled?: boolean;
+  onPick: (status: BillStatus, dueDate?: string) => void;
+  layout?: "list" | "row";
+}) {
+  const [askDue, setAskDue] = useState(false);
+  const [due, setDue] = useState(() => defaultDue(dueDate));
+  const cur = current ? normalizeStatus(current) : undefined;
+  if (askDue) {
+    return (
+      <div className="flex flex-wrap items-center gap-2 p-1">
+        <label className="text-sm" htmlFor="due-pick">
+          ครบกำหนดโอน
+        </label>
+        <input
+          id="due-pick"
+          type="date"
+          value={due}
+          min={bangkokDay(new Date())}
+          onChange={(e) => setDue(e.target.value)}
+          className="h-10 rounded-lg border border-border bg-background px-2 text-sm"
+        />
+        <button
+          type="button"
+          disabled={!due || disabled}
+          onClick={() => onPick("credit", due)}
+          className="min-h-10 rounded-lg bg-blue-600 px-3 text-sm text-white disabled:opacity-50"
+        >
+          บันทึกเครดิต
+        </button>
+        <button type="button" onClick={() => setAskDue(false)} className="min-h-10 px-2 text-sm text-muted-foreground">
+          กลับ
+        </button>
+      </div>
+    );
+  }
+  const order: BillStatus[] = layout === "row" ? ["paid", "pending", "credit", "canceled"] : ["pending", "paid", "credit", "canceled"];
+  return (
+    <div className={layout === "row" ? "flex flex-wrap gap-2" : "flex flex-col"}>
+      {order.map((s) => (
+        <button
+          key={s}
+          type="button"
+          disabled={disabled}
+          aria-pressed={cur === s}
+          onClick={() => (s === "credit" ? setAskDue(true) : onPick(s))}
+          className={cn(
+            layout === "row"
+              ? cn("min-h-10 rounded-xl border px-4 text-sm disabled:opacity-50", s === "paid" ? "border-green-600 bg-green-600 text-white" : "border-border bg-background hover:bg-accent", s === "canceled" && "text-red-600 dark:text-red-300")
+              : cn("flex min-h-10 items-center gap-2 rounded-lg px-3 text-left text-sm hover:bg-accent disabled:opacity-50", cur === s && "bg-accent", s === "canceled" && "text-red-600 dark:text-red-300"),
+          )}
+        >
+          {layout === "list" && <span className="w-3">{cur === s ? "●" : ""}</span>}
+          {s === "credit" ? (cur === "credit" && layout === "list" ? "เครดิต — แก้วันครบกำหนด" : "เครดิต…") : STATUS_LABEL[s]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** ป้ายสถานะที่กดแล้วมีเมนูเปลี่ยนสถานะ (หน้ารายการบิล / หน้าบิลเสร็จแล้ว) */
+export function StatusMenu({
+  bill,
+  organizationId,
+  className,
+}: {
+  bill: { _id: string; status?: string; dueDate?: string | null; billNumber?: string };
+  organizationId?: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const mutation = useSetStatus(organizationId);
+  return (
+    <span className={cn("relative inline-block", className)}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`เปลี่ยนสถานะบิล ${bill.billNumber ?? ""}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
+        className="inline-flex items-center gap-1"
+      >
+        <BillStatusBadge status={bill.status} dueDate={bill.dueDate} className="text-[13px]" />
+        <span aria-hidden="true" className="text-xs text-muted-foreground">▾</span>
+      </button>
+      {open && (
+        <>
+          <span
+            className="fixed inset-0 z-40"
+            aria-hidden="true"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}
+          />
+          <div
+            role="menu"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-0 z-50 mt-1 w-64 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-lg"
+          >
+            <div className="px-3 py-1.5 text-xs text-muted-foreground">
+              เปลี่ยนสถานะ {bill.billNumber}
+            </div>
+            <StatusChoices
+              current={bill.status}
+              dueDate={bill.dueDate}
+              disabled={!organizationId || mutation.isPending}
+              onPick={(status, dueDate) =>
+                mutation.mutate({ ids: [bill._id], status, dueDate }, { onSuccess: () => setOpen(false) })
+              }
+            />
+          </div>
+        </>
+      )}
+    </span>
+  );
+}

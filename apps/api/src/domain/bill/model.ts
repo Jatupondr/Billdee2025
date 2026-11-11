@@ -153,6 +153,22 @@ export namespace BillModel {
     dueDate: t.Optional(t.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
   });
 
+  export const billBulkStatusDto = t.Object({
+    organizationId: t.String({ minLength: 1 }),
+    ids: t.Array(t.String({ minLength: 1 }), { minItems: 1, maxItems: 200 }),
+    status: t.Union([
+      t.Literal("pending"),
+      t.Literal("paid"),
+      t.Literal("credit"),
+      t.Literal("canceled"),
+    ]),
+    dueDate: t.Optional(t.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  });
+
+  export const billCountsQuery = t.Object({
+    organizationId: t.String({ minLength: 1 }),
+  });
+
   export const billSummaryQuery = t.Object({
     organizationId: t.String({ minLength: 1 }),
     // YYYY-MM (เวลาไทย)
@@ -177,5 +193,7 @@ export namespace BillModel {
 
   export type billQueryWithPagination = typeof billQueryWithPagination.static;
   export type billStatusDto = typeof billStatusDto.static;
+  export type billBulkStatusDto = typeof billBulkStatusDto.static;
+  export type billCountsQuery = typeof billCountsQuery.static;
   export type billSummaryQuery = typeof billSummaryQuery.static;
 }

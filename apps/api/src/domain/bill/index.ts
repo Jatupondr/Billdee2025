@@ -95,6 +95,33 @@ export const bill = new Elysia({ prefix: "/bills" })
       auth: true,
     }
   )
+  .get(
+    "/status-counts",
+    async (c) => {
+      const { query, set } = c;
+      set.status = 200;
+      return { data: await billService.statusCounts(query), message: "ok" };
+    },
+    {
+      query: BillModel.billCountsQuery,
+      detail: { tags: ["Bill"], summary: "bill counts per status" },
+      auth: true,
+    }
+  )
+  .patch(
+    "/status",
+    async (c) => {
+      const { body, set } = c;
+      const data = await billService.setStatusMany(body);
+      set.status = 200;
+      return { data, message: "Bill statuses updated" };
+    },
+    {
+      body: BillModel.billBulkStatusDto,
+      detail: { tags: ["Bill"], summary: "set the status of several bills" },
+      auth: true,
+    }
+  )
   .patch(
     "/:id/status",
     async (c) => {
