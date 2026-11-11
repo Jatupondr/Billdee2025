@@ -5,15 +5,25 @@ import { BaseResponse } from "../../utils/respone";
 
 import { BillModel } from "./model";
 import { billService } from "./services";
+import { billQuota } from "../billing/quota";
 
 export const bill = new Elysia({ prefix: "/bills" })
   .use(betterAuth)
   .post(
     "/",
     async (c) => {
-      const { body, set } = c;
+      const { body, set, user } = c as any;
       try {
-        const response = await billService.create(body);
+        // แพ็กเกจฟรี: 10 บิล/เดือน (นับตามเดือนไทย) · Pro / แอดมิน ไม่จำกัด
+        const quota = await billQuota(user);
+        if (!quota.ok) {
+          set.status = 403;
+          return {
+            code: "FREE_LIMIT",
+            message: `แพ็กเกจฟรีออกบิลได้ ${quota.limit} บิลต่อเดือน — เดือนนี้ใช้ครบแล้ว อัปเกรดเป็น Pro เพื่อออกบิลไม่จำกัด`,
+          } as any;
+        }
+        const response = await billService.create({ ...body, userId: user.id });
         set.status = 201;
         return {
           data: response,

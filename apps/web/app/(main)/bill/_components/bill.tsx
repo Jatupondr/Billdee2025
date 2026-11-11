@@ -37,6 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce";
 import { authClient } from "@/lib/auth-client";
 import api from "@/hooks/axios";
+import { useBillingStatus } from "@/lib/billing";
 import { useRouter } from "next/navigation";
 import DeleteBillDialog from "./delete-bill-dialog";
 import { StatusChoices, StatusMenu, useSetStatus } from "./status";
@@ -420,8 +421,11 @@ const Bill = () => {
     subscriptionData?.data?.plan === "pro" &&
     subscriptionData?.data?.status === "paid";
 
+  // แพ็กเกจฟรี 10 บิล/เดือน (เซิร์ฟเวอร์ตรวจซ้ำตอนบันทึกบิลอีกชั้น)
+  const { data: billing } = useBillingStatus(!!session?.user?.id);
   const handleCreateBill = () => {
-    if (isProPlan || billsData?.rows?.length <= 10) {
+    const b = billing?.billdee;
+    if (isProPlan || !b || b.unlimited || b.usedThisMonth < b.freeLimit) {
       router.push("/bill/create");
     } else {
       setShowSubproDialogOpen(true);

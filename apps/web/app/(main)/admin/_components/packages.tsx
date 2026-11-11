@@ -104,7 +104,7 @@ const Packages = () => {
       accessorKey: "price",
       cell: ({ row }) => (
         <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
-          {row.original.plan === "pro" ? "299" : "0"} ฿
+          {row.original.plan === "pro" ? "200 ฿/เดือน · 2,000 ฿/ปี" : "0 ฿"}
         </span>
       ),
     },

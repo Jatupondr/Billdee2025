@@ -1,199 +1,321 @@
 "use client";
-import { Button } from "@/components/ui/button";
 
-
-import { Separator } from "@/components/ui/separator";
+/**
+ * ตั้งค่า > แพ็กเกจและการชำระเงิน
+ * สถานะ Billdee + PostHub → เลือกแพ็กเกจ → สแกน QR (ล็อกยอด) → แนบสลิป → รออนุมัติ (เจ้าของกดในเทเลแกรม) → ใช้ได้ทันที
+ */
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import api from "@/hooks/axios";
-import { authClient } from "@/lib/auth-client";
-import { useQuery } from "@tanstack/react-query";
+import {
+  type BillingStatus,
+  type Cycle,
+  type Product,
+  baht,
+  daysLeft,
+  planLabel,
+  thaiDate,
+  useBillingStatus,
+} from "@/lib/billing";
+import { cn } from "@/lib/utils";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import CancelSubscriptionDialog from "./cancel-sub-dialog";
+const PACKS: { key: Product; name: string; desc: string }[] = [
+  { key: "billdee", name: "Billdee Pro", desc: "ออกบิลไม่จำกัด · สรุปรายเดือน · Excel" },
+  { key: "posthub", name: "Billdee PostHub", desc: "ส่วนขยายโพสต์สินค้าเข้ากลุ่มแชท · 2 เครื่อง" },
+  { key: "bundle", name: "รวมชุด Pro + PostHub", desc: "ได้ทั้งสองอย่างในราคาพิเศษ" },
+];
 
+const card = "rounded-2xl border border-border/60 bg-background/40 p-4";
+const btn = "min-h-11 rounded-xl border px-4 text-base transition active:scale-95 disabled:opacity-50 disabled:active:scale-100";
+const primary = cn(btn, "border-blue-600 bg-blue-600 font-semibold text-white hover:bg-blue-700");
+const plain = cn(btn, "border-border bg-background hover:bg-accent");
+
+function BilldeeCard({ s }: { s: BillingStatus }) {
+  const b = s.billdee;
+  return (
+    <div className={card}>
+      <p className="text-sm text-muted-foreground">Billdee (ออกบิล)</p>
+      {b.plan === "pro" ? (
+        <>
+          <p className="mt-1 text-xl font-semibold text-green-600 dark:text-green-400">Pro</p>
+          <p className="text-sm text-muted-foreground">
+            ถึง {thaiDate(b.expDate)} · เหลือ {daysLeft(b.expDate)} วัน
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="mt-1 text-xl font-semibold">Free</p>
+          <p className={cn("text-sm", b.usedThisMonth >= b.freeLimit ? "text-red-500" : "text-amber-600 dark:text-amber-400")}>
+            {b.unlimited ? "แอดมิน — ไม่จำกัด" : `ใช้ไป ${b.usedThisMonth}/${b.freeLimit} บิลเดือนนี้`}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function PosthubCard({ s, onTrial, trialing }: { s: BillingStatus; onTrial: () => void; trialing: boolean }) {
+  const p = s.posthub;
+  const line: Record<string, React.ReactNode> = {
+    none: <span className="text-muted-foreground">ยังไม่ได้ใช้</span>,
+    trial: <span className="text-amber-600 dark:text-amber-400">ทดลองใช้ เหลือ {daysLeft(p.expiresAt)} วัน</span>,
+    active: <span className="text-green-600 dark:text-green-400">ใช้งาน ถึง {thaiDate(p.expiresAt)}</span>,
+    expired: <span className="text-red-500">หมดอายุ {thaiDate(p.expiresAt)}</span>,
+    forever: <span className="text-green-600 dark:text-green-400">ตลอดชีพ</span>,
+    revoked: <span className="text-red-500">ถูกระงับ — ติดต่อผู้ขาย</span>,
+    waiting: <span className="text-muted-foreground">ซื้อแล้ว — เริ่มนับเมื่อล็อกอินครั้งแรก</span>,
+    unknown: <span className="text-muted-foreground">เช็กสถานะไม่ได้ตอนนี้</span>,
+  };
+  return (
+    <div className={card}>
+      <p className="text-sm text-muted-foreground">Billdee PostHub (ส่วนขยาย Chrome)</p>
+      <p className="mt-1 text-xl font-semibold">{line[p.state]}</p>
+      {["trial", "active", "forever"].includes(p.state) && (
+        <p className="text-sm text-muted-foreground">
+          {p.devices} / {p.maxDevices} เครื่อง
+        </p>
+      )}
+      {p.trialAvailable && (
+        <button type="button" className={cn(plain, "mt-2 min-h-10 text-sm")} disabled={trialing} onClick={onTrial}>
+          {trialing ? "กำลังเปิด…" : "🎁 ทดลองฟรี 7 วัน"}
+        </button>
+      )}
+      <p className="mt-2 text-xs text-muted-foreground">ล็อกอินส่วนขยายด้วย Google บัญชี {s.email}</p>
+    </div>
+  );
+}
 
 export default function SubscriptionInfo() {
-  const { data: session, isPending: sessionPending } = authClient.useSession();
-  const [openCancelSubscriptionDialog, setOpenCancelSubscriptionDialog] = useState(false);
+  const qc = useQueryClient();
+  const { data: s, isLoading, isError } = useBillingStatus();
+  const [cycle, setCycle] = useState<Cycle>("year");
+  const [pack, setPack] = useState<Product>("bundle");
+  const [step, setStep] = useState<"choose" | "pay">("choose");
+  const [slip, setSlip] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const prevPending = useRef<string | null>(null);
 
+  // อนุมัติ/ปฏิเสธในเทเลแกรม → หน้านี้รู้เอง
+  useEffect(() => {
+    if (!s) return;
+    const was = prevPending.current;
+    prevPending.current = s.pending?.id ?? null;
+    if (was && !s.pending && s.lastDecided?.id === was) {
+      if (s.lastDecided.status === "approved") {
+        toast.success("เปิดใช้งานแล้ว 🎉");
+        qc.invalidateQueries({ queryKey: ["subscription"] });
+      } else toast.error(`ไม่ผ่าน: ${s.lastDecided.rejectReason ?? ""}`);
+    }
+  }, [s, qc]);
 
-  const getSubscriptionById = async (subscriptionId: string) => {
-    const response = await api.get(`/subscriptions/${subscriptionId}`);
-    return response.data;
-  };
+  useEffect(() => {
+    if (!slip) return setPreview("");
+    const u = URL.createObjectURL(slip);
+    setPreview(u);
+    return () => URL.revokeObjectURL(u);
+  }, [slip]);
 
-  const { data: subscriptionData, isLoading } = useQuery<any>({
-    queryKey: ["subscription"],
-    queryFn: () => getSubscriptionById(session?.user?.id || ""),
-    enabled: !!session?.user?.id,
+  const qr = useQuery<{ qr: string; amount: number }>({
+    queryKey: ["billing-qr", pack, cycle],
+    queryFn: async () => (await api.get(`/billing/qr?product=${pack}&cycle=${cycle}`)).data.data,
+    enabled: step === "pay" && !!s?.payTo.ready,
+    staleTime: Infinity,
   });
 
+  const trial = useMutation({
+    mutationFn: async () => (await api.post("/billing/posthub/trial")).data,
+    onSuccess: () => {
+      toast.success("เปิดทดลอง PostHub 7 วันแล้ว — ล็อกอินส่วนขยายด้วย Google ได้เลย");
+      qc.invalidateQueries({ queryKey: ["billing-status"] });
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message ?? "เปิดทดลองไม่สำเร็จ"),
+  });
 
+  const pay = useMutation({
+    mutationFn: async () => {
+      const f = new FormData();
+      f.set("product", pack);
+      f.set("cycle", cycle);
+      f.set("slip", slip as File);
+      return (await api.post("/billing/payments", f, { headers: { "Content-Type": "multipart/form-data" }, timeout: 60_000 })).data;
+    },
+    onSuccess: () => {
+      toast.success("ส่งสลิปแล้ว — รออนุมัติ");
+      setSlip(null);
+      setStep("choose");
+      qc.invalidateQueries({ queryKey: ["billing-status"] });
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message ?? "ส่งสลิปไม่สำเร็จ"),
+  });
 
-  const dateTotal = new Date(subscriptionData?.data?.endDate).getTime() - new Date().getTime();
-  const dateTotalDays = Math.ceil(dateTotal / (1000 * 60 * 60 * 24));
-  const isExpired = dateTotalDays <= 0;
+  if (isLoading) return <p className="p-6 text-muted-foreground">กำลังโหลด…</p>;
+  if (isError || !s) return <p className="p-6 text-red-500">โหลดข้อมูลแพ็กเกจไม่สำเร็จ ลองรีเฟรช</p>;
 
+  const posthubForever = s.posthub.state === "forever";
+  const packs = posthubForever ? PACKS.filter((p) => p.key === "billdee") : PACKS;
+  const chosen = posthubForever ? "billdee" : pack;
+  const price = s.prices[chosen][cycle];
+  const canPay = s.payTo.ready && s.telegramReady;
+  const decided = !s.pending ? s.lastDecided : null;
 
-
-
-
-
-  const router = useRouter();
   return (
-    <div className="flex py-8 px-6 w-full bg-white mt-4 dark:bg-zinc-900 flex-col rounded-2xl shadow-xl border border-border/50 ">
+    <div className="mt-4 flex w-full flex-col gap-5 rounded-2xl border border-border/50 bg-white px-5 py-6 shadow-xl dark:bg-zinc-900 md:px-7">
+      <div>
+        <h2 className="text-xl font-normal tracking-widest">แพ็กเกจและการชำระเงิน</h2>
+        <p className="text-sm text-muted-foreground">บัญชี {s.email}</p>
+      </div>
 
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-        <div>
-          <h2 className="font-normal tracking-widest text-zinc-900 dark:text-zinc-200 text-xl">
-            ข้อมูลเเพ็คเกจ
-          </h2>
-          <p className="mt-1 text-base leading-6 text-zinc-900 dark:text-zinc-200 font-normal tracking-widest">
-            รายละเอียดเกี่ยวกับข้อมูลเเพ็คเกจผู้ใช้
-          </p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <BilldeeCard s={s} />
+        <PosthubCard s={s} onTrial={() => trial.mutate()} trialing={trial.isPending} />
+      </div>
+
+      {s.pending && (
+        <div className="rounded-2xl border border-amber-500/50 bg-amber-500/10 p-4 leading-relaxed" data-testid="pending">
+          ⏳ <b>ได้รับสลิปแล้ว — รออนุมัติ</b>
+          <br />
+          {planLabel(s.pending.product, s.pending.cycle)} · {baht(s.pending.amount)} บาท
+          <br />
+          <span className="text-sm text-muted-foreground">อนุมัติแล้วใช้งานได้ทันที หน้านี้จะเปลี่ยนเอง ไม่ต้องรีเฟรช</span>
         </div>
-        <div className="sm:max-w-3xl md:col-span-2">
-          <div className="grid grid-cols-1 gap-6">
-            {/* Plan Card */}
-            {subscriptionData?.data?.plan === "pro" && subscriptionData?.data?.status === "paid" && subscriptionData?.data !== null ? (
-              <>
-                <div className="flex flex-col items-start gap-2">
-                  <p className="text-2xl font-normal tracking-widest text-zinc-900 dark:text-zinc-200"> เเพ็คเกจ: PRO</p>
-                  <p
-                    className={`text-lg font-normal tracking-widest ${isExpired
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-green-600 dark:text-green-400"
-                      }`}
-                  >
-                    เหลืออีก: {isExpired ? "หมดอายุ กรุณาชำระเงิน" : `${dateTotalDays} วัน`}
-                  </p>
-                  <p className="text-base font-normal tracking-widest text-zinc-900 dark:text-zinc-200"> รอรับบิลที่: {new Date(subscriptionData?.data?.startDate).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                    {" - "} {new Date(subscriptionData?.data?.endDate).toLocaleDateString("th-TH", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
+      )}
 
-                  </p>
-                  {/* บวกไป 1 วัน */}
-                  <p className="text-base font-normal tracking-widest text-zinc-900 dark:text-zinc-200"> รอบบิลต่อไป: {new Date(new Date(subscriptionData?.data?.expDate).getTime() + 1000 * 60 * 60 * 24).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                  </p>
-
-                  <Button onClick={() => setOpenCancelSubscriptionDialog(true)} variant="destructive" size="sm" className="cursor-pointer tracking-widest font-normal">ยกเลิกการสมัคร</Button>
-
-                </div>
-              </>
-            )
-              : (
-                <>
-                  <p className="text-2xl font-normal tracking-widest text-muted-foreground dark:text-zinc-200"> เเพ็คเกจ: ฟรี</p>
-                </>
-              )
-            }
-          </div>
-
+      {decided?.status === "approved" && (
+        <div className="rounded-2xl border border-green-600/50 bg-green-600/10 p-4 leading-relaxed" data-testid="approved">
+          ✅ <b>เปิดใช้งานแล้ว</b> — {planLabel(decided.product, decided.cycle)}
+          {decided.billdeeExpDate && <> · Billdee ถึง {thaiDate(decided.billdeeExpDate)}</>}
+          {decided.posthubExpDate && <> · PostHub ถึง {thaiDate(decided.posthubExpDate)}</>}
         </div>
-      </div >
-      <Separator className="my-4" />
-      {/* <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-          <div>
-            <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
-              ประวัติการชำระเงิน
-            </h2>
-            <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest">
-              รายละเอียดการชำระเงินและรอบบิลทั้งหมด
-            </p>
-          </div>
-          <div className="sm:max-w-7xl md:col-span-2">
-            <div className="grid grid-cols-1 gap-6">
-              <div className="relative overflow-hidden rounded-xl border border-border bg-background p-6 shadow-lg">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        การชำระเงินล่าสุด
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        แสดงประวัติการชำระเงิน 3 ครั้งล่าสุด
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer"
-                    >
-                      ดูทั้งหมด
-                    </Button>
-                  </div>
-                  <DataTable columns={columns} data={billingData} />
-                </div>
-              </div>
+      )}
+      {decided?.status === "rejected" && (
+        <div className="rounded-2xl border border-red-500/50 bg-red-500/10 p-4 leading-relaxed" data-testid="rejected">
+          ❌ <b>สลิปล่าสุดไม่ผ่าน</b> — {decided.rejectReason}
+          <br />
+          <span className="text-sm text-muted-foreground">ตรวจสอบแล้วแนบสลิปใหม่ได้ด้านล่าง</span>
+        </div>
+      )}
+
+      {!s.pending && step === "choose" && (
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-lg font-normal tracking-widest">เลือกแพ็กเกจ</h3>
+            <div className="inline-flex rounded-xl border p-1" role="tablist">
+              {(["month", "year"] as Cycle[]).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  role="tab"
+                  aria-selected={cycle === c}
+                  className={cn("rounded-lg px-4 py-1.5 text-sm", cycle === c ? "bg-accent font-semibold" : "text-muted-foreground")}
+                  onClick={() => setCycle(c)}
+                >
+                  {c === "month" ? "รายเดือน" : "รายปี (ประหยัดกว่า)"}
+                </button>
+              ))}
             </div>
           </div>
-        </div> */}
-
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-        <div>
-          <h2 className="font-normal tracking-widest text-foreground dark:text-foreground text-xl">
-            วิธีการชำระเงิน
-          </h2>
-          <p className="mt-1 text-base leading-6 text-muted-foreground dark:text-muted-foreground font-normal tracking-widest   ">
-            รายละเอียดขั้นตอนการขำระเงินของคุณ
-          </p>
-        </div>
-        <div className="sm:max-w-7xl md:col-span-2">
-          <div className="grid grid-cols-1 gap-1">
-
-            <p className="text-lg t font-normal tracking-wide leading-6">
-              สำหรับวิธีการชำระเงินผ่านการโอนเงินผ่านธนาคาร{" "}
-              <span className="text-red-500">พร้อมเพย์ </span>
-              ให้ทำตามขั้นตอนดังนี้:
-            </p>
-            <p className="text-base tracking-wide  font-normal ">
-              1. เลือกวิธีการชำระเงินที่คุณต้องการใช้
-            </p>
-            <p className="text-base tracking-wide  font-normal ">
-              2. แจ้งหลักฐานการชำระเงินผ่านทางผู้ให้บริการของเรา{" "}
-              <a
-                href="https://www.facebook.com/jatuponseafoods#"
-                target="_blank"
-                className="text-blue-600 underline font-normal tracking-wide"
-              >
-                Click here
-              </a>
-            </p>
-            <p className="text-base tracking-wide font-normal">
-              สำหรับเเพ็คเกจ PRO ราคาจะอยู่ที่ 199 บาทต่อเดือน
-              (ราคาเดียวเท่านั้น)
-            </p>
+          <div className={cn("grid gap-3", packs.length > 1 && "md:grid-cols-3")}>
+            {packs.map((p) => {
+              const on = chosen === p.key;
+              const save = s.prices.billdee[cycle] + s.prices.posthub[cycle] - s.prices.bundle[cycle];
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  data-pack={p.key}
+                  onClick={() => setPack(p.key)}
+                  className={cn(
+                    "relative rounded-2xl border p-4 text-left transition",
+                    on ? "border-blue-600 bg-blue-600/10 ring-1 ring-blue-600" : "border-border hover:bg-accent/50",
+                  )}
+                >
+                  {p.key === "bundle" && (
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-green-600 px-2 py-0.5 text-xs text-white">คุ้มสุด</span>
+                  )}
+                  <span className="block font-semibold">{p.name}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {p.desc}
+                    {p.key === "bundle" && save > 0 && ` · ประหยัด ${baht(save)} บาท/${cycle === "month" ? "เดือน" : "ปี"}`}
+                  </span>
+                  <span className="mt-2 block text-2xl font-bold">
+                    {baht(s.prices[p.key][cycle])} <span className="text-sm font-normal text-muted-foreground">บาท/{cycle === "month" ? "เดือน" : "ปี"}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </div>
-      </div>
+          <p className="text-sm text-muted-foreground">ต่ออายุก่อนหมด = นับต่อจากวันหมดเดิม ไม่เสียวัน</p>
+          {canPay ? (
+            <button type="button" className={cn(primary, "self-start")} onClick={() => setStep("pay")}>
+              ไปชำระเงิน →
+            </button>
+          ) : (
+            <p className="rounded-xl bg-muted p-3 text-sm">ระบบชำระเงินออนไลน์ยังไม่เปิด — ติดต่อผู้ขายเพื่อสมัคร</p>
+          )}
+        </section>
+      )}
 
-      <Separator className="my-4" />
-      <div className="flex items-center justify-start space-x-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="lg"
-          className="whitespace-nowrap cursor-pointer active:scale-95 duration-200 ease-in-out font-normal tracking-wide  "
-          onClick={() => router.back()}
-        >
-          ย้อนกลับ
-        </Button>
+      {!s.pending && step === "pay" && (
+        <section className="flex flex-col gap-3">
+          <h3 className="text-lg font-normal tracking-widest">
+            สแกนจ่าย <b>{baht(price)} บาท</b> — {planLabel(chosen, cycle)}
+          </h3>
+          <div className="flex flex-wrap items-center gap-4">
+            {qr.data ? (
+              // biome-ignore lint/performance/noImgElement: QR เป็น data URL
+              <img src={qr.data.qr} alt="QR พร้อมเพย์" className="size-44 rounded-lg bg-white p-1" />
+            ) : (
+              <div className="grid size-44 place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                {qr.isError ? "สร้าง QR ไม่ได้" : "กำลังสร้าง QR…"}
+              </div>
+            )}
+            <div className="text-sm leading-7">
+              พร้อมเพย์ <b>{s.payTo.promptPay}</b>
+              {s.payTo.accountName && (
+                <>
+                  <br />
+                  ชื่อบัญชี {s.payTo.accountName}
+                </>
+              )}
+              <br />
+              <span className="text-muted-foreground">QR ล็อกยอด {baht(price)} บาทไว้แล้ว</span>
+            </div>
+          </div>
 
-      </div>
-      <CancelSubscriptionDialog open={openCancelSubscriptionDialog} onOpenChange={setOpenCancelSubscriptionDialog} subscriptionId={subscriptionData?.data?._id} />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            data-testid="slip-input"
+            onChange={(e) => setSlip(e.target.files?.[0] ?? null)}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-4 text-sm text-muted-foreground hover:bg-accent/40"
+          >
+            {preview ? (
+              // biome-ignore lint/performance/noImgElement: ตัวอย่างรูปในเครื่อง
+              <img src={preview} alt="สลิปที่เลือก" className="max-h-56 rounded-lg" />
+            ) : (
+              "📎 แตะเพื่อแนบรูปสลิป"
+            )}
+            {slip && <span>{slip.name} · แตะเพื่อเปลี่ยน</span>}
+          </button>
 
-    </div >
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className={plain} onClick={() => setStep("choose")}>
+              ← เปลี่ยนแพ็กเกจ
+            </button>
+            <button type="button" className={primary} disabled={!slip || pay.isPending} onClick={() => pay.mutate()}>
+              {pay.isPending ? "กำลังส่ง…" : "ส่งสลิป"}
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
   );
 }

@@ -59,6 +59,8 @@ const SiteHeader = () => {
         return "รายชื่อผู้ใช้งาน";
       case "Packages":
         return "เเพ็กเกจผู้ใช้งาน";
+      case "Payments":
+        return "แจ้งชำระเงิน";
       case "Admin":
         return "ผู้ดูแลระบบ";
       case "Bill":

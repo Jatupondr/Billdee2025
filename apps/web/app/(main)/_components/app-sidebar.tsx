@@ -111,6 +111,12 @@ const data = {
       icon: PackageIcon,
       isActive: false,
     },
+    {
+      title: "แจ้งชำระเงิน",
+      url: "/admin/payments",
+      icon: ReceiptIcon,
+      isActive: false,
+    },
   ],
 };
 

@@ -55,6 +55,7 @@ import {
 } from "./supplier";
 import { useDebounce } from "@/hooks/use-debounce";
 import { MAX_BILL_ITEMS } from "./status";
+import ShowSubproDialog from "./show-subpro-dialog";
 import { authClient } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
@@ -155,6 +156,7 @@ const defaultValues: billData = {
 const CreateBill = () => {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
   const [createCustomer, setCreateCustomer] = useState<boolean>(false);
   const [openDate, setOpenDate] = useState<boolean>(false);
   // มือถือ: ส่วนลด · VAT · หมายเหตุ พับเก็บไว้ (จอใหญ่แสดงตลอด)
@@ -291,6 +293,11 @@ const CreateBill = () => {
       router.push(`/bill/${response.data._id as string}/done` as any);
     },
     onError: (error: any) => {
+      if (error?.response?.status === 403) {
+        // แพ็กเกจฟรีครบ 10 บิลเดือนนี้
+        setShowLimitDialog(true);
+        return;
+      }
       toast.error("เกิดข้อผิดพลาด", {
         description: error?.response?.data?.message || "ไม่สามารถสร้างบิลได้",
         position: "bottom-right",
@@ -1858,6 +1865,7 @@ const CreateBill = () => {
           </form>
         </CardContent>
       </Card>
+      <ShowSubproDialog open={showLimitDialog} onOpenChange={setShowLimitDialog} />
     </>
   );
 };

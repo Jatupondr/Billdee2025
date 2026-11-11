@@ -33,7 +33,7 @@ const Setting = () => {
       const accounts = await authClient.listAccounts();
 
       if (accounts.data) {
-        setAccounts(accounts.data[0]);
+        setAccounts(accounts.data[0] ?? {});
       } else {
         setAccounts([]);
       }
@@ -47,7 +47,7 @@ const Setting = () => {
     <>
       <div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList variant="line" className="cursor-pointer">
+          <TabsList variant="line" className="max-w-full cursor-pointer justify-start overflow-x-auto">
             <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="shop-info">
               <StorefrontIcon size={120} weight="duotone" />
               ข้อมูลร้านค้า
@@ -70,7 +70,7 @@ const Setting = () => {
               value="subscription-info"
             >
               <MoneyWavyIcon size={120} weight="duotone" />
-              เเพ็กเก็จเเละการชำระเงิน
+              แพ็กเกจและการชำระเงิน
             </TabsTrigger>
 
             <TabsTrigger className="cursor-pointer text-lg font-normal tracking-widest" value="bill-format">

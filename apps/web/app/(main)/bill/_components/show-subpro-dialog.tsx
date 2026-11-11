@@ -38,10 +38,10 @@ const ShowSubproDialog = ({
       <AlertDialogContent className="max-w-md dark:bg-zinc-900">
         <AlertDialogHeader className="space-y-1">
           <AlertDialogTitle className="font-normal tracking-widest">
-            สนใจเเพ็คเกจ PRO
+            ครบ 10 บิลของเดือนนี้แล้ว
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm font-normal ">
-            สนใจเป็นสมาชิก PRO เพื่อใช้งานระบบบิลที่ดีกว่า เเพ็กฟรีจะสร้างบิลได้ไม่เกิน 10 บิลต่อเดือน
+            แพ็กเกจฟรีออกบิลได้ 10 บิลต่อเดือน — เดือนนี้ใช้ครบแล้ว อัปเกรดเป็น Pro (200 บาท/เดือน หรือ 2,000 บาท/ปี) เพื่อออกบิลไม่จำกัด หรือรอเริ่มเดือนใหม่
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -55,9 +55,9 @@ const ShowSubproDialog = ({
           <AlertDialogAction
             onClick={() => router.push("/settings?tab=subscription-info")}
 
-            className="bg-destructive text-white hover:bg-destructive/90 cursor-pointer disabled:cursor-not-allowed font-normal tracking-widest"
+            className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer disabled:cursor-not-allowed font-normal tracking-widest"
           >
-            สมัครเป็นสมาชิก PRO
+            ดูแพ็กเกจ Pro
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

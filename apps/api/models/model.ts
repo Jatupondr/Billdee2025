@@ -648,6 +648,36 @@ const expSchema = new Schema(
   }
 );
 
+// แจ้งชำระเงินแพ็กเกจ (ลูกค้าแนบสลิป → แจ้งเจ้าของทางเทเลแกรม → อนุมัติ/ปฏิเสธ)
+const paymentSchema = new Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    email: { type: String, required: true },
+    product: { type: String, enum: ["billdee", "posthub", "bundle"], required: true },
+    cycle: { type: String, enum: ["month", "year"], required: true },
+    amount: { type: Number, required: true },
+    slipUrl: { type: String, required: true },
+    status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    rejectReason: { type: String },
+    decidedAt: { type: Date },
+    decidedBy: { type: String }, // "telegram" | admin userId
+    // วันหมดอายุใหม่หลังอนุมัติ
+    billdeeExpDate: { type: Date },
+    posthubExpDate: { type: Date },
+    posthubError: { type: String }, // ต่ออายุ PostHub ไม่สำเร็จ (เจ้าของกดลองใหม่ได้)
+    telegramMessageId: { type: Number },
+  },
+  { collection: "payment", timestamps: true }
+);
+paymentSchema.index({ userId: 1, createdAt: -1 });
+paymentSchema.index({ status: 1, createdAt: -1 });
+
+// ค่าระบบเล็กๆ (เช่น วันที่ส่งสรุปเช้าล่าสุด)
+const billingMetaSchema = new Schema(
+  { key: { type: String, required: true, unique: true }, value: { type: Schema.Types.Mixed } },
+  { collection: "billing_meta", timestamps: true }
+);
+
 const User = model("User", userSchema);
 const Session = model("Session", sessionSchema);
 const Account = model("Account", accountSchema);
@@ -661,6 +691,8 @@ const BillTemplate = model("BillTemplate", billTemplateSchema);
 const Affiliate = model("Affiliate", affiliateSchema);
 const Subscription = model("Subscription", subscriptionSchema);
 const Exp = model("Exp", expSchema);
+const Payment = model("Payment", paymentSchema);
+const BillingMeta = model("BillingMeta", billingMetaSchema);
 export {
   User,
   Session,
@@ -675,4 +707,6 @@ export {
   Affiliate,
   Subscription,
   Exp,
+  Payment,
+  BillingMeta,
 };

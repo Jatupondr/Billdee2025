@@ -14,6 +14,7 @@ import { subscription } from "./domain/subscription";
 import { report } from "./domain/report";
 import { exp } from "./domain/exp";
 import { cloudinary } from "./domain/cloudinary";
+import { billingRoutes, startBillingJobs } from "./domain/billing";
 
 const app = new Elysia({
   prefix: "/api",
@@ -82,7 +83,10 @@ const app = new Elysia({
   .use(report)
   .use(exp)
   .use(cloudinary)
+  .use(billingRoutes)
   .listen(3001);
+
+startBillingJobs();
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
