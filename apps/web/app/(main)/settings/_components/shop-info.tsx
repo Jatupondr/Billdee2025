@@ -243,7 +243,8 @@ export default function ShopInfo() {
           {
             data: {
               name: value.name,
-              slug: value.slug,
+              // ร้านเก่าบางร้านไม่มี slug — สร้างให้ใหม่ (API ไม่รับค่าว่าง)
+              slug: value.slug.trim() || `store-${Math.random().toString(36).substring(2, 8)}-${Date.now().toString(36)}`,
               phone: value.phone,
               taxId: value.taxId,
               email: value.email,
@@ -284,7 +285,7 @@ export default function ShopInfo() {
   useEffect(() => {
     if (activeOrg) {
       form.setFieldValue("name", activeOrg.name);
-      form.setFieldValue("slug", activeOrg.slug);
+      form.setFieldValue("slug", activeOrg.slug || "");
       form.setFieldValue("phone", activeOrg.phone || "");
       form.setFieldValue("taxId", activeOrg.taxId || "");
       form.setFieldValue("email", activeOrg.email || "");
