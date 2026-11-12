@@ -216,6 +216,11 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    /** ลำดับในแถบ "เพิ่มด่วน" (น้อย = ก่อน) */
+    pinOrder: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     collection: "product",

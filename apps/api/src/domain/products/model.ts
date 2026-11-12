@@ -22,8 +22,16 @@ export namespace ProductModel {
     cost: t.Optional(t.Number({ minimum: 0 })),
     supplier: t.Optional(t.String({ maxLength: 100 })),
     isRecommended: t.Optional(t.Boolean()),
+    pinOrder: t.Optional(t.Number()),
     updatedBy: t.String({ minLength: 1 }),
   });
+
+  /** เรียงลำดับสินค้าปักหมุด: ids ตามลำดับที่ต้องการ */
+  export const pinOrderDto = t.Object({
+    organizationId: t.String({ minLength: 1 }),
+    ids: t.Array(t.String({ minLength: 1 }), { maxItems: 300 }),
+  });
+  export type pinOrderDto = typeof pinOrderDto.static;
 
   export const productResponseDto = t.Object({
     _id: t.Any(),

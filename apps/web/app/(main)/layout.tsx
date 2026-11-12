@@ -3,12 +3,22 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./_components/app-sidebar";
 import SiteHeader from "./_components/site-header";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // ยังไม่มีร้าน = ไปหน้าต้อนรับ/ตั้งค่าร้านก่อน (ไม่ให้กดเมนูอื่น)
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const { data: orgs, isPending } = authClient.useListOrganizations();
+  useEffect(() => {
+    if (session?.user && !isPending && orgs && orgs.length === 0) router.replace("/organization");
+  }, [session?.user, isPending, orgs, router]);
   return (
     <div>
       <SidebarProvider>

@@ -42,12 +42,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BackspaceIcon,
   CaretDownIcon,
+  CaretUpIcon,
+  DotsSixVerticalIcon,
   FloppyDiskBackIcon,
   PlusCircleIcon,
   TrashSimpleIcon,
 } from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/hooks/axios";
+import { cn } from "@/lib/utils";
 import {
   SupplierChip,
   SupplierPayables,
@@ -56,6 +59,7 @@ import {
 import { useDebounce } from "@/hooks/use-debounce";
 import { MAX_BILL_ITEMS } from "./status";
 import ShowSubproDialog from "./show-subpro-dialog";
+import { PinManagerDialog, QuickAddBar } from "./quick-add";
 import { authClient } from "@/lib/auth-client";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
@@ -429,6 +433,32 @@ const CreateBill = () => {
     );
   };
 
+  // จัดลำดับรายการ (ลำดับในบิลเรียงตามนี้)
+  const [dragRow, setDragRow] = useState<number | null>(null);
+  const moveRow = (from: number, to: number) => {
+    const cur = [...(form.getFieldValue("products") || [])];
+    if (to < 0 || to >= cur.length || from === to) return;
+    const [it] = cur.splice(from, 1);
+    cur.splice(to, 0, it);
+    form.setFieldValue(
+      "products",
+      cur.map((p: any, i: number) => ({ ...p, no: i + 1 })),
+    );
+  };
+  const stepQty = (index: number, d: number) => {
+    const q = Math.max(
+      0,
+      (Number(form.getFieldValue(`products[${index}].quantity`)) || 0) + d,
+    );
+    form.setFieldValue(`products[${index}].quantity`, q);
+    const price = Number(form.getFieldValue(`products[${index}].price`)) || 0;
+    form.setFieldValue(
+      `products[${index}].total`,
+      parseFloat((price * q).toFixed(2)),
+    );
+  };
+  const [pinOpen, setPinOpen] = useState(false);
+
   // ค้นหาสินค้าได้หลายคำ เช่น "กุ้ง 30" เจอ "กุ้งขาวฟรีโฟม 30/35"
   const multiWordFilter = (item: unknown, query: string) => {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -471,6 +501,24 @@ const CreateBill = () => {
 
   const addRecommended = (product: any) => {
     const currentProducts = form.getFieldValue("products") || [];
+    // มีในบิลแล้ว = บวกจำนวนแถวเดิม (ไม่เพิ่มแถวซ้ำ)
+    const existing = currentProducts.findIndex(
+      (p: any) =>
+        (product._id && p.productId === product._id) ||
+        (!!p.name && p.name === product.name),
+    );
+    if (existing !== -1) {
+      const q = (Number(currentProducts[existing].quantity) || 0) + 1;
+      form.setFieldValue(`products[${existing}].quantity`, q);
+      form.setFieldValue(
+        `products[${existing}].total`,
+        parseFloat(
+          ((Number(currentProducts[existing].price) || 0) * q).toFixed(2),
+        ),
+      );
+      notifyAdded(product.name);
+      return;
+    }
     // หารายการว่างแรก ถ้ามีให้แทนที่รายการนั้น
     const emptyIndex = currentProducts.findIndex(
       (p: any) => !p.name || p.name === "",
@@ -1106,6 +1154,17 @@ const CreateBill = () => {
               }}
             </form.Subscribe>
 
+            <form.Subscribe selector={(state) => ({ rows: state.values.products || [] })}>
+              {({ rows }) => (
+                <QuickAddBar
+                  pinned={recommendedProducts || []}
+                  rows={rows}
+                  onAdd={addRecommended}
+                  onManage={() => setPinOpen(true)}
+                />
+              )}
+            </form.Subscribe>
+
             <div className="hidden md:block">
               <Table>
                 <TableHeader className="bg-accent">
@@ -1129,9 +1188,46 @@ const CreateBill = () => {
                             (product: any, index: number) => (
                               <TableRow
                                 key={product.productId || `row-${index}`}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={() => {
+                                  if (dragRow !== null) moveRow(dragRow, index);
+                                  setDragRow(null);
+                                }}
+                                className={cn(dragRow === index && "opacity-50")}
                               >
-                                <TableCell className="font-normal tracking-widest w-20 text-center text-base">
-                                  {index + 1}
+                                <TableCell className="font-normal tracking-widest w-24 text-base">
+                                  <div className="flex items-center justify-center gap-1">
+                                    <span
+                                      draggable
+                                      onDragStart={() => setDragRow(index)}
+                                      onDragEnd={() => setDragRow(null)}
+                                      title="ลากเพื่อย้าย"
+                                      className="cursor-grab text-muted-foreground"
+                                    >
+                                      <DotsSixVerticalIcon size={18} />
+                                    </span>
+                                    <span className="w-5 text-center">{index + 1}</span>
+                                    <span className="flex flex-col">
+                                      <button
+                                        type="button"
+                                        aria-label={`ย้ายรายการ ${index + 1} ขึ้น`}
+                                        disabled={index === 0}
+                                        onClick={() => moveRow(index, index - 1)}
+                                        className="grid h-4 w-6 place-items-center rounded text-muted-foreground hover:bg-accent disabled:opacity-20"
+                                      >
+                                        <CaretUpIcon size={12} weight="bold" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        aria-label={`ย้ายรายการ ${index + 1} ลง`}
+                                        disabled={index === field.state.value.length - 1}
+                                        onClick={() => moveRow(index, index + 1)}
+                                        className="grid h-4 w-6 place-items-center rounded text-muted-foreground hover:bg-accent disabled:opacity-20"
+                                      >
+                                        <CaretDownIcon size={12} weight="bold" />
+                                      </button>
+                                    </span>
+                                  </div>
                                 </TableCell>
                                 <form.Field name={`products[${index}].name`}>
                                   {(nameField) => (
@@ -1239,7 +1335,16 @@ const CreateBill = () => {
                                   name={`products[${index}].quantity`}
                                 >
                                   {(qtyField) => (
-                                    <TableCell className="w-28 font-normal tracking-widest">
+                                    <TableCell className="w-36 font-normal tracking-widest">
+                                      <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        aria-label="ลดจำนวน"
+                                        onClick={() => stepQty(index, -1)}
+                                        className="grid size-7 shrink-0 place-items-center rounded-full bg-accent text-base hover:bg-accent/70"
+                                      >
+                                        −
+                                      </button>
                                       <Input
                                         type="number"
                                         value={qtyField.state.value ?? 0}
@@ -1261,10 +1366,19 @@ const CreateBill = () => {
                                           );
                                           //
                                         }}
-                                        className="h-10 w-20 font-normal tracking-widest"
+                                        className="h-10 w-16 px-2 text-center font-normal tracking-widest"
                                         min="0"
                                         step="any"
                                       />
+                                      <button
+                                        type="button"
+                                        aria-label="เพิ่มจำนวน"
+                                        onClick={() => stepQty(index, 1)}
+                                        className="grid size-7 shrink-0 place-items-center rounded-full bg-accent text-base hover:bg-accent/70"
+                                      >
+                                        +
+                                      </button>
+                                      </div>
                                     </TableCell>
                                   )}
                                 </form.Field>
@@ -1380,8 +1494,26 @@ const CreateBill = () => {
                           className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-background/40 p-3"
                         >
                           <div className="flex items-start gap-2">
-                            <span className="mt-2.5 grid size-7 shrink-0 place-items-center rounded-lg bg-accent text-sm">
-                              {index + 1}
+                            <span className="flex shrink-0 flex-col items-center gap-1">
+                              <button
+                                type="button"
+                                aria-label={`ย้ายรายการ ${index + 1} ขึ้น`}
+                                disabled={index === 0}
+                                onClick={() => moveRow(index, index - 1)}
+                                className="grid h-7 w-9 place-items-center rounded-lg bg-accent disabled:opacity-25"
+                              >
+                                <CaretUpIcon size={14} weight="bold" />
+                              </button>
+                              <span className="text-sm">{index + 1}</span>
+                              <button
+                                type="button"
+                                aria-label={`ย้ายรายการ ${index + 1} ลง`}
+                                disabled={index === (field.state.value || []).length - 1}
+                                onClick={() => moveRow(index, index + 1)}
+                                className="grid h-7 w-9 place-items-center rounded-lg bg-accent disabled:opacity-25"
+                              >
+                                <CaretDownIcon size={14} weight="bold" />
+                              </button>
                             </span>
                             <form.Field name={`products[${index}].name`}>
                               {(nameField) => (
@@ -1587,82 +1719,20 @@ const CreateBill = () => {
                 );
               }}
             </form.Subscribe>
-            {/* card recommended products */}
-            {isLoadingProducts ? (
-              <>
-                <div className="flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[...Array(6)].map((_, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
-                    >
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : recommendedProducts?.length > 0 ? (
-              <>
-                <div className="flex flex-wrap gap-2 md:hidden">
-                  {recommendedProducts.map((product: any) => (
-                    <button
-                      key={`chip-${product._id}`}
-                      type="button"
-                      onClick={() => addRecommended(product)}
-                      className="min-h-10 rounded-full border border-border/60 bg-background/50 px-4 text-sm active:scale-95 transition-transform"
-                    >
-                      {product.name}{" "}
-                      <span className="text-muted-foreground">
-                        {product.price ?? 0}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <div className="hidden md:flex items-center gap-2 mb-1 border-b border-border/50 pb-2">
-                  <span className="text-base font-normal tracking-widest text-foreground">
-                    สินค้าแนะนำ
-                  </span>
-                  <span className="text-xs font-normal tracking-widest text-muted-foreground bg-accent px-2 py-1 rounded-full">
-                    {recommendedProducts.length} รายการ
-                  </span>
-                </div>
-                <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {recommendedProducts.map((product: any) => (
-                    <div
-                      key={product._id}
-                      className="group relative flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-200"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-normal tracking-widest text-foreground truncate">
-                          {product.name}
-                        </p>
-                        <p className="text-xs font-normal tracking-widest text-muted-foreground mt-1">
-                          ราคา: {product.price?.toFixed(2) || "0.00"} บาท
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addRecommended(product)}
-                        aria-label={`เพิ่ม ${product.name}`}
-                        className="shrink-0 cursor-pointer active:scale-95  ease-in-out h-8 w-8 p-0 hover:bg-primary hover:text-primary-foreground group-hover:scale-110 transition-transform duration-200 font-normal tracking-widest"
-                      >
-                        <PlusCircleIcon size={18} weight="duotone" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : null}
+            <form.Subscribe selector={(state) => ({ rows: state.values.products || [] })}>
+              {({ rows }) => (
+                <PinManagerDialog
+                  open={pinOpen}
+                  onOpenChange={setPinOpen}
+                  pinned={recommendedProducts || []}
+                  allProducts={comboboxProductsData?.rows || []}
+                  rows={rows}
+                  organizationId={activeOrg?.id}
+                  userId={session?.user?.id}
+                  onAdd={addRecommended}
+                />
+              )}
+            </form.Subscribe>
 
             {/* หมายเหตุ */}
 

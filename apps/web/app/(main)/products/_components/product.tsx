@@ -12,8 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  CheckCircleIcon,
   EyeIcon,
+  InfoIcon,
+  PushPinIcon,
   PencilIcon,
   PlusCircleIcon,
   TrashIcon,
@@ -22,7 +23,8 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { useDebounce } from "@/hooks/use-debounce";
 import api from "@/hooks/axios";
@@ -72,6 +74,18 @@ const ListProduct = () => {
     const response = await api.get(`/products?${params.toString()}`);
     return response.data;
   };
+  const queryClient = useQueryClient();
+  const { data: session } = authClient.useSession();
+  const togglePin = useMutation({
+    mutationFn: async ({ id, on }: { id: string; on: boolean }) =>
+      api.patch(`/products/${id}`, { isRecommended: on, updatedBy: session?.user?.id }),
+    onSuccess: (_d, { on }) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-recommended"] });
+      toast.success(on ? "ปักหมุดแล้ว · ขึ้นในแถบเพิ่มด่วน" : "เลิกปักหมุดแล้ว");
+    },
+    onError: () => toast.error("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง"),
+  });
   const columns: ColumnDef<Product>[] = [
     {
       header: "ชื่อสินค้า",
@@ -109,20 +123,30 @@ const ListProduct = () => {
       ),
     },
     {
-      header: "สินค้าแนะนำ",
+      header: "ปักหมุด",
       accessorKey: "isRecommended",
-      size: 120,
-      cell: ({ row }) => (
-        <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
-          {row.original.isRecommended ? (
-            <CheckCircleIcon size={32} weight="duotone" color="#235822" />
-          ) : (
-            <span className="text-sm font-normal tracking-widest text-left line-clamp-1">
-              -
-            </span>
-          )}
-        </span>
-      ),
+      size: 90,
+      cell: ({ row }) => {
+        const on = !!row.original.isRecommended;
+        return (
+          <button
+            type="button"
+            aria-pressed={on}
+            aria-label={on ? `เลิกปักหมุด ${row.original.name}` : `ปักหมุด ${row.original.name}`}
+            title={on ? "ขึ้นในแถบเพิ่มด่วน · กดเพื่อเลิกปัก" : "กดเพื่อให้ขึ้นในแถบเพิ่มด่วนตอนสร้างบิล"}
+            disabled={togglePin.isPending}
+            onClick={() => togglePin.mutate({ id: row.original._id, on: !on })}
+            className={
+              "grid size-10 place-items-center rounded-full border transition-transform active:scale-95 " +
+              (on
+                ? "border-indigo-500 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200"
+                : "border-border text-muted-foreground hover:text-foreground")
+            }
+          >
+            <PushPinIcon size={18} weight={on ? "fill" : "regular"} />
+          </button>
+        );
+      },
     },
     {
       header: "วันที่สร้าง",
@@ -197,6 +221,21 @@ const ListProduct = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col  gap-4  w-full">
+            <div
+              role="note"
+              className="flex items-start gap-3 rounded-2xl border border-indigo-300/60 bg-indigo-50/70 p-4 dark:border-indigo-500/30 dark:bg-indigo-950/40"
+            >
+              <InfoIcon size={22} weight="duotone" className="mt-0.5 shrink-0 text-indigo-600 dark:text-indigo-300" />
+              <div className="flex flex-col gap-1 text-sm leading-relaxed">
+                <span className="font-medium text-foreground">ไม่ต้องเพิ่มสินค้าเองล่วงหน้า ระบบจำให้อัตโนมัติ</span>
+                <span className="text-muted-foreground">
+                  สินค้าที่พิมพ์ลงบิล จะถูกบันทึกในหน้านี้ให้เอง พร้อมราคาที่ใช้ครั้งล่าสุด บิลถัดไปเลือกชื่อเดิม ราคาขึ้นให้ทันที
+                </span>
+                <span className="text-muted-foreground">
+                  กด <PushPinIcon size={14} weight="fill" className="inline align-[-2px] text-indigo-600 dark:text-indigo-300" /> หน้าสินค้าที่ขายบ่อย เพื่อให้ขึ้นในแถบ "เพิ่มด่วน" ตอนสร้างบิล
+                </span>
+              </div>
+            </div>
             <div className="flex justify-between items-center">
               <Button
                 size="lg"

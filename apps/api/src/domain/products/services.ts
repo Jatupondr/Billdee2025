@@ -23,6 +23,7 @@ export abstract class productService {
         organizationId: dto.organizationId,
         userId: dto.userId,
         isRecommended: dto.isRecommended,
+        ...(dto.isRecommended && { pinOrder: Date.now() }),
       });
 
       return product;
@@ -61,7 +62,7 @@ export abstract class productService {
         Product.find(filter)
           .skip(skip)
           .limit(limit)
-          .sort({ createdAt: -1 })
+          .sort(query.isRecommended === "true" ? { pinOrder: 1, createdAt: -1 } : { createdAt: -1 })
           .lean(),
         Product.countDocuments(filter),
       ]);
@@ -129,10 +130,13 @@ export abstract class productService {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw status(400, "id is invalid not ObjectId");
       }
+      // ปักหมุดใหม่ = ต่อท้ายแถบเพิ่มด่วน
+      const pin = dto.isRecommended === true && dto.pinOrder === undefined ? { pinOrder: Date.now() } : {};
       const updatedProduct = await Product.findByIdAndUpdate(
         id,
         {
           ...dto,
+          ...pin,
         },
         { new: true }
       ).lean();
@@ -144,6 +148,24 @@ export abstract class productService {
       throw error;
     }
   }
+  /** เรียงสินค้าปักหมุดตาม ids (เฉพาะของร้านนี้) */
+  static async setPinOrder(dto: ProductModel.pinOrderDto) {
+    if (!mongoose.Types.ObjectId.isValid(dto.organizationId)) {
+      throw status(400, "organizationId is invalid");
+    }
+    const ids = dto.ids.filter((id) => mongoose.Types.ObjectId.isValid(id));
+    if (!ids.length) return { updated: 0 };
+    const r = await Product.bulkWrite(
+      ids.map((id, i) => ({
+        updateOne: {
+          filter: { _id: new mongoose.Types.ObjectId(id), organizationId: dto.organizationId },
+          update: { $set: { pinOrder: i + 1 } },
+        },
+      }))
+    );
+    return { updated: r.modifiedCount };
+  }
+
   static async delete(id: string) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {

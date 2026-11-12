@@ -125,6 +125,15 @@ export const product = new Elysia({ prefix: "/products" })
     }
   )
   .patch(
+    "/pin-order",
+    async ({ body }) => ({ data: await productService.setPinOrder(body), message: "Pin order saved" }),
+    {
+      body: ProductModel.pinOrderDto,
+      detail: { tags: ["Product"], summary: "reorder pinned (quick-add) products" },
+      auth: true,
+    }
+  )
+  .patch(
     "/:id",
     async (c) => {
       const { params, body, set } = c;
