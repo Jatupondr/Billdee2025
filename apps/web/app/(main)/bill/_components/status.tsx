@@ -1,11 +1,12 @@
 "use client";
+import { createPortal } from "react-dom";
 
 /**
  * สถานะบิล (B3): รอโอน / โอนแล้ว / เครดิต (มีวันครบกำหนด) / ยกเลิก
  * บิลยกเลิกไม่นับในยอดขายของ Dashboard และสรุปรายเดือน (แทนการลบบิลทิ้ง)
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import api from "@/hooks/axios";
 import { cn } from "@/lib/utils";
@@ -281,7 +282,33 @@ export function StatusMenu({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  // เมนูลอยอยู่บนสุดของหน้า (ไม่จมในกล่องตารางที่เลื่อนได้) · ที่ว่างด้านล่างไม่พอ = เปิดขึ้นด้านบน
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; right: number } | null>(null);
   const mutation = useSetStatus(organizationId);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const place = () => {
+    const el = btnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const right = Math.max(8, window.innerWidth - r.right);
+    const below = window.innerHeight - r.bottom;
+    setPos(below < 300 && r.top > below ? { bottom: window.innerHeight - r.top + 4, right } : { top: r.bottom + 4, right });
+  };
+  const toggle = () => {
+    if (open) return setOpen(false);
+    place();
+    setOpen(true);
+  };
+  useEffect(() => {
+    if (!open) return;
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
   return (
     <span className={cn("relative inline-block", className)}>
       <button
@@ -289,44 +316,49 @@ export function StatusMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`เปลี่ยนสถานะบิล ${bill.billNumber ?? ""}`}
+        ref={btnRef}
         onClick={(e) => {
           e.stopPropagation();
-          setOpen((o) => !o);
+          toggle();
         }}
         className="inline-flex items-center gap-1"
       >
         <BillStatusBadge status={bill.status} dueDate={bill.dueDate} className="text-[13px]" />
         <span aria-hidden="true" className="text-xs text-muted-foreground">▾</span>
       </button>
-      {open && (
-        <>
-          <span
-            className="fixed inset-0 z-40"
-            aria-hidden="true"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-            }}
-          />
-          <div
-            role="menu"
-            onClick={(e) => e.stopPropagation()}
-            className="absolute right-0 z-50 mt-1 w-64 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-lg"
-          >
-            <div className="px-3 py-1.5 text-xs text-muted-foreground">
-              เปลี่ยนสถานะ {bill.billNumber}
-            </div>
-            <StatusChoices
-              current={bill.status}
-              dueDate={bill.dueDate}
-              disabled={!organizationId || mutation.isPending}
-              onPick={(status, dueDate) =>
-                mutation.mutate({ ids: [bill._id], status, dueDate }, { onSuccess: () => setOpen(false) })
-              }
+      {open &&
+        pos &&
+        createPortal(
+          <>
+            <span
+              className="fixed inset-0 z-[60]"
+              aria-hidden="true"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+              }}
             />
-          </div>
-        </>
-      )}
+            <div
+              role="menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{ position: "fixed", top: pos.top, bottom: pos.bottom, right: pos.right }}
+              className="z-[61] w-64 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-lg"
+            >
+              <div className="px-3 py-1.5 text-xs text-muted-foreground">
+                เปลี่ยนสถานะ {bill.billNumber}
+              </div>
+              <StatusChoices
+                current={bill.status}
+                dueDate={bill.dueDate}
+                disabled={!organizationId || mutation.isPending}
+                onPick={(status, dueDate) =>
+                  mutation.mutate({ ids: [bill._id], status, dueDate }, { onSuccess: () => setOpen(false) })
+                }
+              />
+            </div>
+          </>,
+          document.body,
+        )}
     </span>
   );
 }
