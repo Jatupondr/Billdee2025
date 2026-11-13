@@ -15,6 +15,8 @@ import {
   baht,
   daysLeft,
   planLabel,
+  POSTHUB_DOWNLOAD,
+  POSTHUB_VERSION,
   thaiDate,
   useBillingStatus,
 } from "@/lib/billing";
@@ -82,6 +84,30 @@ function PosthubCard({ s, onTrial, trialing }: { s: BillingStatus; onTrial: () =
           {trialing ? "กำลังเปิด…" : "🎁 ทดลองฟรี 7 วัน"}
         </button>
       )}
+      <a
+        href={POSTHUB_DOWNLOAD}
+        download
+        className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
+      >
+        ⬇️ ดาวน์โหลด PostHub v{POSTHUB_VERSION}
+      </a>
+      <details className="mt-2 rounded-xl border border-border px-3 py-2 text-sm">
+        <summary className="min-h-9 cursor-pointer py-1 font-medium">วิธีติดตั้ง (ใช้บนคอม ผ่าน Google Chrome)</summary>
+        <ol className="mt-1 list-decimal space-y-1.5 pl-5 text-muted-foreground">
+          <li>ดาวน์โหลดไฟล์ แล้วคลิกขวา › <b className="text-foreground">แตกไฟล์ทั้งหมด</b> (เก็บโฟลเดอร์ไว้ที่เดิม ห้ามลบ)</li>
+          <li>
+            เปิด Chrome พิมพ์ <code className="rounded bg-muted px-1 text-foreground">chrome://extensions</code> แล้วเปิด{" "}
+            <b className="text-foreground">โหมดนักพัฒนาซอฟต์แวร์</b> มุมขวาบน
+          </li>
+          <li>
+            กด <b className="text-foreground">โหลดส่วนขยายที่คลายการแพ็ก</b> แล้วเลือกโฟลเดอร์ที่แตกไว้
+          </li>
+          <li>กดไอคอน PostHub › เข้าสู่ระบบด้วย Google บัญชีเดียวกับเว็บนี้ ครั้งแรกทดลองฟรี 7 วัน</li>
+        </ol>
+        <p className="mt-2 text-xs text-muted-foreground">
+          อัปเดตเวอร์ชันใหม่: แตกไฟล์ทับโฟลเดอร์เดิม แล้วกดปุ่มรีโหลด ↻ ที่การ์ด PostHub ในหน้า chrome://extensions
+        </p>
+      </details>
       <p className="mt-2 text-xs text-muted-foreground">ล็อกอินส่วนขยายด้วย Google บัญชี {s.email}</p>
     </div>
   );
@@ -128,7 +154,7 @@ export default function SubscriptionInfo() {
   const trial = useMutation({
     mutationFn: async () => (await api.post("/billing/posthub/trial")).data,
     onSuccess: () => {
-      toast.success("เปิดทดลอง PostHub 7 วันแล้ว — ล็อกอินส่วนขยายด้วย Google ได้เลย");
+      toast.success("เปิดทดลอง PostHub 7 วันแล้ว — กดดาวน์โหลดด้านล่าง ติดตั้งแล้วล็อกอินด้วย Google ได้เลย");
       qc.invalidateQueries({ queryKey: ["billing-status"] });
     },
     onError: (e: any) => toast.error(e?.response?.data?.message ?? "เปิดทดลองไม่สำเร็จ"),
