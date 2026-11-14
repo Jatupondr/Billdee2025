@@ -5,7 +5,8 @@
  * ยอดโอนของแพ = ทุน × จำนวน ของทุกรายการที่ระบุแพนั้น · รายการที่ไม่ระบุแพไม่นับ
  */
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import api from "@/hooks/axios";
 import { cn } from "@/lib/utils";
 
@@ -86,6 +87,29 @@ export function SupplierChip({
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState("");
   const filled = !!value?.trim();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [pos, setPos] = useState<{ left: number; top?: number; bottom?: number } | null>(null);
+  useEffect(() => {
+    if (!editing) {
+      setPos(null);
+      return;
+    }
+    const place = () => {
+      const el = inputRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const left = Math.max(8, Math.min(r.left, window.innerWidth - 232));
+      const below = window.innerHeight - r.bottom;
+      setPos(below < 270 && r.top > below ? { left, bottom: window.innerHeight - r.top + 4 } : { left, top: r.bottom + 4 });
+    };
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [editing]);
 
   if (!editing) {
     return (
@@ -121,6 +145,7 @@ export function SupplierChip({
   return (
     <div className={cn("relative", className)}>
       <input
+        ref={inputRef}
         autoFocus
         role="combobox"
         aria-expanded="true"
@@ -139,10 +164,14 @@ export function SupplierChip({
         }}
         className="h-9 w-48 rounded-full border border-blue-500/60 bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/40"
       />
+      {pos &&
+        createPortal(
       <ul
         role="listbox"
         aria-label="รายชื่อแพ"
-        className="absolute right-0 z-50 mt-1 max-h-64 w-56 overflow-auto rounded-xl border border-border bg-popover p-1 text-sm shadow-lg"
+        // ลอยอยู่บนสุดของหน้า ไม่จมในกล่องตารางที่เลื่อนได้ · ที่ว่างล่างไม่พอ = เปิดขึ้นบน
+        style={{ position: "fixed", left: pos.left, top: pos.top, bottom: pos.bottom }}
+        className="z-[70] max-h-64 w-56 overflow-auto rounded-xl border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg"
       >
         {options.map((s) => (
           <li key={s} role="option" aria-selected={s === value}>
@@ -190,7 +219,9 @@ export function SupplierChip({
         {options.length === 0 && !q && (
           <li className="px-3 py-2 text-muted-foreground">ยังไม่มีแพ — พิมพ์ชื่อแพใหม่</li>
         )}
-      </ul>
+      </ul>,
+          document.body,
+        )}
     </div>
   );
 }
