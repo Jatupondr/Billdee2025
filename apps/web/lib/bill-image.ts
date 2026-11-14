@@ -60,13 +60,32 @@ function fontFamily(): string {
   return f || "sans-serif";
 }
 
+/**
+ * ความกว้างข้อความ — วัดด้วย DOM (Safari/iPhone วัดภาษาไทยใน canvas สั้นกว่าจริง ทำให้ชิดขวา/กึ่งกลางเพี้ยนจนตกขอบ)
+ * ใช้ค่าที่กว้างกว่าระหว่าง DOM กับ canvas เพื่อไม่ให้ล้นขอบ
+ */
+let measurer: HTMLSpanElement | null = null;
+function textWidth(ctx: CanvasRenderingContext2D, text: string): number {
+  const c = ctx.measureText(text).width;
+  if (typeof document === "undefined") return c;
+  if (!measurer) {
+    measurer = document.createElement("span");
+    measurer.setAttribute("aria-hidden", "true");
+    Object.assign(measurer.style, { position: "fixed", left: "-99999px", top: "0", whiteSpace: "pre", visibility: "hidden", letterSpacing: "0", wordSpacing: "0", fontKerning: "normal" });
+    document.body.appendChild(measurer);
+  }
+  measurer.style.font = ctx.font;
+  measurer.textContent = text;
+  return Math.max(c, measurer.getBoundingClientRect().width);
+}
+
 /** ตัดบรรทัดตามความกว้าง (ภาษาไทยไม่มีช่องว่าง ตัดทีละตัวอักษรเมื่อจำเป็น) */
 function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const out: string[] = [];
   let line = "";
   for (const ch of Array.from(text)) {
     const next = line + ch;
-    if (ctx.measureText(next).width > maxWidth && line) {
+    if (textWidth(ctx, next) > maxWidth && line) {
       // ถ้ามีช่องว่างในบรรทัด ตัดที่ช่องว่างสุดท้าย
       const sp = line.lastIndexOf(" ");
       if (sp > 0) {
@@ -103,6 +122,9 @@ export async function renderBillImage(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("ไม่สามารถสร้างรูปบิลได้");
   const font = (size: number, bold = false) => `${bold ? "700" : "400"} ${size}px ${family}`;
+  // ชิดขวา / กึ่งกลาง คำนวณเอง (ไม่ใช้ textAlign ที่ Safari วางผิดตำแหน่งกับภาษาไทย)
+  const fillRight = (t: string, x: number, y: number) => ctx.fillText(t, x - textWidth(ctx, t), y);
+  const fillCenter = (t: string, x: number, y: number) => ctx.fillText(t, x - textWidth(ctx, t) / 2, y);
   const inner = W - PAD * 2;
 
   // ---------- วัดความสูงก่อน ----------
@@ -146,9 +168,7 @@ export async function renderBillImage(
     ctx.fillStyle = "#52525b";
     ctx.textAlign = "left";
     ctx.fillText(bill.billNumber ? `บิล ${bill.billNumber}` : "", PAD, y + 56);
-    ctx.textAlign = "right";
-    ctx.fillText(dateText, W - PAD, y + 56);
-    ctx.textAlign = "left";
+    fillRight(dateText, W - PAD, y + 56);
     ctx.fillStyle = "#18181b";
     ctx.font = font(36, true);
     custLines.forEach((l, i) => ctx.fillText(l, PAD, y + 108 + i * 46));
@@ -177,11 +197,9 @@ export async function renderBillImage(
         ctx.font = font(28);
         ctx.fillText(`${num(p.quantity || 0)} × ${num(p.price || 0)}`, PAD, by);
       }
-      ctx.textAlign = "right";
       ctx.fillStyle = "#18181b";
       ctx.font = font(32, true);
-      ctx.fillText(num(total), W - PAD, by);
-      ctx.textAlign = "left";
+      fillRight(num(total), W - PAD, by);
     });
   }
 
@@ -199,9 +217,7 @@ export async function renderBillImage(
       ctx.fillStyle = "#52525b";
       ctx.font = font(28);
       ctx.fillText(k, PAD, y + 40);
-      ctx.textAlign = "right";
-      ctx.fillText(v, W - PAD, y + 40);
-      ctx.textAlign = "left";
+      fillRight(v, W - PAD, y + 40);
     });
   }
 
@@ -221,10 +237,8 @@ export async function renderBillImage(
     ctx.fillStyle = "#15803d";
     ctx.font = font(32, true);
     ctx.fillText(opts.totalLabel || "รวมโอน", bx + 28, by + 64);
-    ctx.textAlign = "right";
     ctx.font = font(52, true);
-    ctx.fillText(`${num(bill.total || 0)} บาท`, bx + bw - 28, by + 72);
-    ctx.textAlign = "left";
+    fillRight(`${num(bill.total || 0)} บาท`, bx + bw - 28, by + 72);
   });
 
   // บัญชีธนาคาร (โลโก้ + ชื่อธนาคาร แถวแรก)
@@ -278,9 +292,7 @@ export async function renderBillImage(
       ctx.drawImage(qr, x, y + 20, size, size);
       ctx.fillStyle = "#52525b";
       ctx.font = font(24);
-      ctx.textAlign = "center";
-      ctx.fillText("สแกนจ่ายด้วยพร้อมเพย์", W / 2, y + 312);
-      ctx.textAlign = "left";
+      fillCenter("สแกนจ่ายด้วยพร้อมเพย์", W / 2, y + 312);
     });
   }
 
@@ -291,9 +303,7 @@ export async function renderBillImage(
     add(30 + lines.length * 36 + 30, (y) => {
       ctx.fillStyle = "#a1a1aa";
       ctx.font = font(26);
-      ctx.textAlign = "center";
-      lines.forEach((l, i) => ctx.fillText(l, W / 2, y + 54 + i * 36));
-      ctx.textAlign = "left";
+      lines.forEach((l, i) => fillCenter(l, W / 2, y + 54 + i * 36));
     });
   } else {
     add(30, () => {});
@@ -305,6 +315,7 @@ export async function renderBillImage(
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, W, canvas.height);
   ctx.textBaseline = "alphabetic";
+  ctx.textAlign = "left";
   let y = 0;
   for (const op of ops) y = op(y);
 
