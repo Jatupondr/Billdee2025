@@ -67,5 +67,5 @@ export function useBillingStatus(enabled = true) {
 }
 
 /** ไฟล์ส่วนขยาย PostHub ล่าสุด (อยู่ใน public/downloads) — ออกเวอร์ชันใหม่: วางไฟล์ใหม่แล้วแก้ 2 บรรทัดนี้ */
-export const POSTHUB_VERSION = "1.8.0";
+export const POSTHUB_VERSION = "1.8.1";
 export const POSTHUB_DOWNLOAD = `/downloads/billdee-posthub-v${POSTHUB_VERSION}.zip`;
